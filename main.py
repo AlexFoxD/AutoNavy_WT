@@ -13,7 +13,7 @@ from pilot import pathfinder
 from firesystem import fire_control
 
 D = scn.D
-# step1: 开始游戏
+# Step 1: start the game.
 M = MnK.Mouse()
 K = MnK.Keyboard()
 once = th_pool.thread_control.once
@@ -50,9 +50,9 @@ def start():
         if p != -1:
             break
         K.press('esc')
-        print('waiting for join game')
+        print('Ожидание входа в бой...')
         continue
-    print('join game')
+    print('Вход в бой.')
     while True:
         img = D.now_img
         # p, v = scn.match_img(img, img_map.join_game, 0.8)
@@ -77,32 +77,32 @@ def start():
         p, v = scn.match_img(img, img_map.fire, 0.8)
         if p != -1:
             break
-        print('waiting for deploy')
+        print('Ожидание появления техники...')
 
 
 def main_running():
     global thread_pathfinding, thread_firecontrol
-    # TODO: 等待进入战局
-    thread_pathfinding = submit(pathfinder, 'pathfinder', True, auto=True, )  # TODO: 填写路径参数
-    # TODO: 初始化炮塔转向
+    # TODO: Wait until the match has started.
+    thread_pathfinding = submit(pathfinder, 'pathfinder', True, auto=True, )  # TODO: Supply path parameters.
+    # TODO: Initialize turret rotation.
     FCS = fire_control()
     thread_firecontrol = submit(FCS.lock_and_fire, 'fire_control', True)
     while True:
         end_pos = scn.match_img(D.now_img, img_map.back, 0.8)[0]
         if end_pos != -1:
-            print('back to base')
+            print('Возврат в ангар.')
             M.moveto(end_pos[0], end_pos[1])
             M.click()
             break
         elif scn.match_img(D.now_img, img_map.base, 0.8)[0] != -1:
-            print('in base')
+            print('Техника в ангаре.')
             break
         elif scn.match_img(D.now_img, img_map.start, 0.8)[0] != -1:
             if scn.match_img(D.now_img, img_map.cart, 0.8)[0] != -1:
-                print('cart')
+                print('Обнаружено окно покупки.')
                 break
         elif scn.match_img(D.now_img, img_map.data, 0.7)[0] != -1:
-            print('data')
+            print('Обнаружено окно статистики боя.')
             K.press("esc")
             time.sleep(0.5)
             K.press("down")

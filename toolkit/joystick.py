@@ -1,42 +1,30 @@
 import time
 import pyvjoy as js
 
-# 轴1 = 滚转
-# 轴2 = 俯仰
-# 轴3 = 偏航
-# 轴4 =
-# 轴5 = 油门
+# Axis 1: roll.
+# Axis 2: pitch.
+# Axis 3: yaw.
+# Axis 4: unused.
+# Axis 5: throttle.
 
 
-# b1 = 襟翼
-# b2 = 减速板
-# b3 = 起落架
-# b4 = 刹车
-# b5 = 阻尼器
+# Button 1: flaps.
+# Button 2: airbrake.
+# Button 3: landing gear.
+# Button 4: wheel brake.
+# Button 5: damper.
 
 _max = 32768
 
 
 class JSK:
-    """
-    模拟遥杆控制
+    """Simulate joystick controls through the first configured vJoy device.
 
-    操作方法：
-    1. 实例化一个Joystick对象
-    2. 调用Joystick对象的方法，模拟遥杆控制：
-        axis_x(num)：模拟x轴
-        axis_y(num)：模拟y轴
-        axis_qe(num)：模拟q/e轴
-        axis_throttle(num)：模拟油门轴
-        button(num, state)：模拟按钮
-        button_list：1——襟翼，2——减速板，3——起落架，4——刹车，5——阻尼器
-    3. 调用Joystick对象的属性，获取遥杆状态：
-        x_axis：x轴状态
-        y_axis：y轴状态
-        qe_axis：q/e轴状态
-        throttle_axis：油门轴状态
-        button_list：按钮状态
-    4. reset()：重置遥杆状态
+    Instantiate ``JSK`` and use ``axis_x``, ``axis_y``, ``axis_qe``, and
+    ``axis_throttle`` to set axes. Button methods operate on button numbers;
+    buttons 1–5 represent flaps, airbrake, landing gear, wheel brake, and
+    damper. The axis and button attributes expose the last requested state.
+    Call ``reset()`` to restore all controls to their neutral state.
     """
 
     def __init__(self):
@@ -55,7 +43,7 @@ class JSK:
         self.qe_axis = 0
         self.throttle_axis = 0
 
-    # 模拟xbox手柄控制
+    # Simulate an Xbox-style controller through vJoy.
     def axis_x(self, num):
         if abs(num) > 100:
             if num > 0:

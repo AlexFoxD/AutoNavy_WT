@@ -16,7 +16,7 @@ class info:
             self.map_object = requests.get(url_map_object, timeout=300).json()
             self.map_info = requests.get(url_map_info, timeout=300).json()
             self.connected = self.map_info["valid"]
-            print(f'debug  connect {self.connected}')
+            print(f'Отладка: соединение с локальным API: {self.connected}')
         except Exception:
             self.connected = False
         self.analyse()

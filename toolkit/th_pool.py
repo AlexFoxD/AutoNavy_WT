@@ -8,15 +8,11 @@ class thread_control:
         pass
 
     class submit:
-        """
-        例   如:
-            def print_():
-                print(time.time())
-            thread = pool(func=print_,name='print',*args,**kwargs)
-        暂停线程:thread.pause()
-        恢复线程:thread.resume()
-        停止线程:thread.stop()
-        线程内函数已经为循环，不要将死循环函数放入线程中，否则线程可能会死掉
+        """Run a callable repeatedly in a controllable background thread.
+
+        Use ``pause()``, ``resume()``, and ``stop()`` to control execution.
+        The wrapper already supplies the loop, so the submitted callable must
+        not contain its own infinite loop.
         """
 
         def __init__(self, func, name, state=False, *args, **kwargs):
@@ -25,17 +21,17 @@ class thread_control:
             self.args = args
             self.kwargs = kwargs
             self.result = None
-            self.__flag = threading.Event()  # 用于暂停线程的标识
-            self.__flag.set()  # 设置为True
-            self.__running = threading.Event()  # 用于停止线程的标识
-            self.__running.set()  # 将running设置为True
+            self.__flag = threading.Event()  # Controls whether the worker is paused.
+            self.__flag.set()  # Start in the resumed state.
+            self.__running = threading.Event()  # Controls worker termination.
+            self.__running.set()  # Mark the worker as running.
             self.thread = threading.Thread(target=self.run, name=self.name)
             self.thread.setDaemon(state)
             self.thread.start()
 
         def run(self):
             while self.__running.is_set():
-                self.__flag.wait()  # 为True时立即返回, 为False时阻塞直到内部的标识位为True后返回
+                self.__flag.wait()  # Block here while the worker is paused.
                 try:
                     ret = self.func(*self.args, **self.kwargs)
                     self.result = ret
@@ -47,14 +43,14 @@ class thread_control:
                 #     break
 
         def pause(self):
-            self.__flag.clear()  # 设置为False, 让线程阻塞
+            self.__flag.clear()  # Pause the worker at its next wait.
 
         def resume(self):
-            self.__flag.set()  # 设置为True, 让线程停止阻塞
+            self.__flag.set()  # Resume the worker.
 
         def stop(self):
-            self.__flag.set()  # 将线程从暂停状态恢复, 如何已经暂停的话
-            self.__running.clear()  # 设置为False
+            self.__flag.set()  # Wake a paused worker before stopping it.
+            self.__running.clear()  # Mark the worker as stopped.
             self.shutdown(self.thread)
 
         def get_result(self):

@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from pathlib import Path
 import cv2
 from toolkit.way_search import Jps, MapGrid, Point
 import numpy as np
@@ -11,8 +12,11 @@ import matplotlib.pyplot as plt
 from scipy.spatial import KDTree
 
 
+PATH_FILE = Path(__file__).resolve().parents[1] / 'path.json'
+
+
 def get_next_point(path, point):
-    # 生成树
+    # Build the nearest-neighbor tree.
     if path is None:
         return None
     if point not in path:
@@ -43,10 +47,10 @@ def process_img(img):
     scale = 128 / size
     binary = cv2.resize(binary, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_NEAREST)
 
-    # 膨胀
+    # Dilate obstacles to add a safety margin.
     kernel = np.ones((5, 5), np.uint8)
     binary = cv2.dilate(binary, kernel)
-    # 保存图片
+    # Invert the processed image before returning it.
     binary = cv2.bitwise_not(binary)
     return binary
 
@@ -57,7 +61,7 @@ def pathfinding(original_img, show_img=False, start_point=None, end_point=None, 
     size = np.shape(img)
     height = size[0]
     width = size[1]
-    print("height: %d, width: %d" % (height, width))
+    print("Высота: %d, ширина: %d" % (height, width))
     show_image = cv2.resize(original_img, (height, width))
 
     map = MapGrid(height, width)
@@ -69,18 +73,18 @@ def pathfinding(original_img, show_img=False, start_point=None, end_point=None, 
         start_point = Point(random.randint(0, width - 1), random.randint(0, height - 1))
         end_point = Point(random.randint(0, width - 1), random.randint(0, height - 1))
     elif human:
-        # plt选地点
+        # Let the user select points in the Matplotlib window.
         plt.imshow(show_image)
         plt.axis('off')
         if start_point:
             start_point = Point(int(start_point[0]), int(start_point[1]))
         else:
-            print("Please click the start point")
-            # 点击获取坐标
+            print("Укажите начальную точку щелчком мыши.")
+            # Read the selected coordinates.
             start_point = plt.ginput(1)
             print(start_point)
             start_point = Point(int(start_point[0][0]), int(start_point[0][1]))
-        print("Please click the end point")
+        print("Укажите конечную точку щелчком мыши.")
         end_point = plt.ginput(1)
         print(end_point)
         end_point = Point(int(end_point[0][0]), int(end_point[0][1]))
@@ -92,10 +96,10 @@ def pathfinding(original_img, show_img=False, start_point=None, end_point=None, 
     map.set_grid(end_point.x, end_point.y, "goal")
     t1 = time.time()
     solver = Jps(start_point, end_point, map)
-    # 求解路径
+    # Solve the route.
     explored, path, jump = solver.Process()
     if not path:
-        print('No path found')
+        print('Маршрут не найден.')
         return None
     path = [(int(p[0]), int(p[1])) for p in path]
     jump = [(int(j[0]), int(j[1])) for j in jump]
@@ -108,7 +112,7 @@ def pathfinding(original_img, show_img=False, start_point=None, end_point=None, 
 
     t2 = time.time()
     time_ms = int((t2 - t1) * 1000)
-    print("Time: %d ms" % time_ms)
+    print("Время поиска маршрута: %d мс" % time_ms)
     if show_img:
         for i in range(len(all_path)):
             show_image[all_path[i][1], all_path[i][0]] = [0, 0, 255]
@@ -117,7 +121,7 @@ def pathfinding(original_img, show_img=False, start_point=None, end_point=None, 
         show_image = cv2.resize(show_image, (512, 512), interpolation=cv2.INTER_NEAREST)
         cv2.imshow("show_image", show_image)
         cv2.waitKey(1)
-    with open('../path.json', 'w') as f:
+    with PATH_FILE.open('w', encoding='utf-8') as f:
         data = {
             'start_point': [start_point.x, start_point.y],
             'end_point': [end_point.x, end_point.y],
@@ -132,7 +136,7 @@ if __name__ == '__main__':
 
     pos, deg = map.get_point(onlyplayer=True)
     pos = (int(pos[0] * 128), int(pos[1] * 128))
-    img = cv2.imread('temp/origin_map/origin_map.png')
+    img = cv2.imread('src/origin_map.png')
     a = pathfinding(img, show_img=True, human=True, start_point=pos)
     b = get_next_point(a, pos)
     print(b)

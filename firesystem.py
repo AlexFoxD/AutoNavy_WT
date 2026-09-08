@@ -16,11 +16,6 @@ from toolkit import deg_cal
 from toolkit import MnK
 from toolkit import img_map
 
-from debug import TimeDebug
-
-debug = TimeDebug()
-mark = debug.mark
-
 PID_mouse_x = PID(0.6, 0, 0.02, setpoint=0)
 PID_mouse_x.output_limits = (-30, 30)
 PID_mouse_y = PID(0.6, 0, 0.02, setpoint=0)
@@ -112,7 +107,7 @@ class fire_control:
         else:
             lt = 0, 0
             rb = 0, 0
-            # TODO: 找识别不到目标时的处理方法
+            # TODO: Define recovery behavior when target recognition fails.
             background = img[380:420, 890:960]
             lower_black = np.array([0, 0, 0])
             upper_black = np.array([180, 255, 46])
@@ -126,9 +121,9 @@ class fire_control:
                 result = self.serach()
                 if result is None:
                     time.sleep(0.01)
-                    self.lock_and_fire()
                     keyboard.press('x')
-                self.lock_and_fire()
+                # The worker thread invokes this method again on its next cycle.
+                return
         tcenter = (lt[0] + rb[0]) // 2, (lt[1] + rb[1]) // 2
         if tcenter[0] == 0 and tcenter[1] == 0:
             pass
@@ -179,7 +174,7 @@ class fire_control:
         #     tdeg -= 360
         # delta = now_deg - tdeg
         #
-        # TODO: 临时修改
+        # TODO: Replace this temporary adjustment.
         ############################
         # diff = (tdeg - now_deg) % 360
         # print(diff)
@@ -191,7 +186,7 @@ class fire_control:
         # #     keyboard.press('capslock')
         # #     keyboard.press('x')
         # # keyboard.press('x')
-        # # ctypes 按下x
+        # # Press X through ctypes.
         # ctypes.windll.user32.keybd_event(0x58, 0, 0, 0)
         # # else:
         # try:

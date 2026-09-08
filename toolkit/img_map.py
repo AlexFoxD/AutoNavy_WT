@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-print("Loading image to map...")
+print("Загрузка шаблонов изображений...")
 
 start = cv2.imread('src/game_image/start.png')
 join_game = cv2.imread('src/game_image/joingame4.png')
@@ -54,4 +54,4 @@ lock = cv2.inRange(hsv, lower_black, upper_black)
 crash_warning = cv2.imread('src/crash_warning.png')
 crashed = cv2.imread('src/crashed.png')
 
-print("Image loaded successfully")
+print("Шаблоны изображений успешно загружены.")

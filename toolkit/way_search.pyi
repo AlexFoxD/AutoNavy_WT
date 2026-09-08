@@ -2,30 +2,30 @@ from typing import List, Tuple, Optional
 import numpy as np
 
 class vec:
-    """二维向量类"""
+    """Two-dimensional vector."""
 
     def __init__(self, x: int, y: int) -> None: ...
     def __eq__(self, other: 'vec') -> bool: ...
 
 class Point:
-    """坐标点类"""
+    """Coordinate point."""
 
     def __init__(self, x: int, y: int) -> None: ...
     def __eq__(self, other: 'Point') -> bool: ...
 
 class MapGrid:
-    """地图数据类"""
+    """Grid map data."""
 
     def __init__(self, height: int, width: int) -> None: ...
     def set_grid(self, x: int, y: int, type: str) -> None: ...
 
 class Jps:
-    """JPS算法类"""
+    """Jump Point Search solver."""
 
     def __init__(self, start_point: Point, end_point: Point, map: MapGrid) -> None: ...
 
     class Vertex:
-        """图中顶点类"""
+        """Vertex in the search graph."""
 
         def __init__(self, point: Point, endpoint: Point, g: float) -> None: ...
         def neibor(self, horizontal: int, vertical: int) -> 'Jps.Vertex': ...

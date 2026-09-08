@@ -10,7 +10,8 @@ import keyboard
 
 pdi.FAILSAFE = False
 
-# -左+右 -上+下 +滚轮上 -滚轮下
+# Horizontal: negative is left, positive is right. Vertical: negative is up, positive is down.
+# Mouse wheel: positive scrolls up, negative scrolls down.
 KEYBOARD_MAPPING = {
     'f3': 0x3D,
     'f4': 0x3E,

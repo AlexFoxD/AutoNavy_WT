@@ -20,7 +20,7 @@ def rgb_check(group: c_group) -> str:
         return 'blue'
 
 
-# 下载http://127.0.0.1:8111/map.img?gen=2
+# Download the tactical map from http://127.0.0.1:8111/map.img?gen=2.
 # ip = "192.168.31.100"
 ip = "127.0.0.1"
 
@@ -31,7 +31,7 @@ def download_map():
     name = 'src/origin_map.png'
     with open(name, 'wb') as f:
         f.write(r.content)
-    print('下载完成')
+    print('Тактическая карта загружена.')
     return_name = 'origin_map.png'
     return return_name
 
@@ -57,7 +57,7 @@ def get_point(onlyplayer=False):
                     d -= 360
                 # d = math.atan2(dy, dx)
                 # d = math.degrees(d)
-                # print('人物角度{}'.format(d))
+                # print('Player angle: {}'.format(d))
         return player, d
     else:
         url = f"http://{ip}:8111/map_obj.json"

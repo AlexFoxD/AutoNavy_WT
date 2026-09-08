@@ -1,3 +1,11 @@
+/.idea
+/.output
+.venv/
+*.build/
+*.dist/
+*.onefile-build/
+__pycache__/
+*.py[cod]
 /fire.bak
 /draw_ocr.jpg
 /debug.py
@@ -12,7 +20,5 @@
 /tt.py
 /tt.spec
 /way_search.py
-/.idea
-/.output
 /pp_onnx
 new_start.py

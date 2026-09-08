@@ -6,7 +6,7 @@ import time
 import cv2
 
 from toolkit.map import get_point, download_map
-from toolkit.process_path import pathfinding, get_next_point
+from toolkit.process_path import PATH_FILE, pathfinding, get_next_point
 from toolkit.joystick import JSK
 from toolkit.MnK import Mouse, Keyboard
 
@@ -23,7 +23,8 @@ PID_mouse = simple_pid.PID(3, 1, 1, setpoint=0)
 PID_mouse.output_limits = (-50, 50)
 
 
-# TODO: 考虑根据速度输入pid，获取输出的预测距离点，速度计算采用初始位置和当前位置的距离差，以及时间差
+# TODO: Feed speed into the PID controller to predict a look-ahead point. Calculate
+# speed from the distance and time differences between the initial and current positions.
 TRY_TIMES = 0
 
 j = JSK()
@@ -50,7 +51,7 @@ def pathfinder(auto=False):
             time.sleep(1)
             if TRY_TIMES > 15:
                 # print('Cannot find the path')
-                # TODO: 重新获取路径，或任意选择一个可以行进的目标点
+                # TODO: Recalculate the route or choose another reachable destination.
                 return None
             pathfinder(auto=True)
     else:
@@ -65,7 +66,7 @@ def pathfinder(auto=False):
         pos = (int(pos[0] * 128), int(pos[1] * 128))
         if i % 300 == 0:
             # print('Getting new path')
-            with open('path.json', 'r') as f:
+            with PATH_FILE.open('r', encoding='utf-8') as f:
                 data = json.load(f)
                 end_point = data['end_point']
             path = pathfinding(img, show_img=True, start_point=pos, end_point=end_point)
@@ -99,7 +100,7 @@ def pathfinder(auto=False):
         #         j.axis_qe(output)
         #         print(f"Output: {output}")
 
-        #TODO: better change
+        # TODO: Improve this steering adjustment.
         PID_X.setpoint = tdeg
         output = -PID_X(deg)
         j.axis_qe(output)

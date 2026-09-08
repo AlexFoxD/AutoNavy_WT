@@ -16,7 +16,7 @@ from firesystem import fire_control
 from info import info as inf
 
 D = scn.D
-# step1: 开始游戏
+# Step 1: start the game.
 M = MnK.Mouse()
 K = MnK.Keyboard()
 once = th_pool.thread_control.once
@@ -72,7 +72,7 @@ def end():
         K.press("left")
         time.sleep(0.05)
         K.press("enter")
-    print('end')
+    print('Завершение текущего цикла.')
 
 
 def quit():
@@ -81,8 +81,8 @@ def quit():
     while scn.match_img(D.now_img, img_map.start, 0.9)[0] == -1:
         activate()
         if time.time() - t1 >= 120:
-            print("如此提示持续出现，建议检查战雷设置是否正确(1280*720，窗口化，放缩倍率100%)。")
-            raise Exception("LoopException")
+            print("Не удается вернуться в ангар. Проверьте настройки War Thunder: 1280×720, оконный режим, масштаб интерфейса 100 %.")
+            raise RuntimeError("Не удалось вернуться в ангар за 120 секунд.")
         p, v = scn.match_img(D.now_img, img_map.confirm, 0.95)
         if p != -1:
             M.moveto(p[0], p[1])
@@ -125,7 +125,7 @@ def quit():
                 M.moveto(p[0], p[1])
                 M.click()
         K.press("esc")
-        print('quit')
+        print('Возврат в ангар...')
 
 
 def start():
@@ -142,7 +142,7 @@ def start():
         else:
             break
         if time.time() - t1 >= 540:
-            raise Exception("LoopException")
+            raise RuntimeError("Не удалось начать поиск боя за 540 секунд.")
         p, v = scn.match_img(D.now_img, img_map.start, 0.9)
         if p != -1:
             M.moveto(p[0], p[1])
@@ -173,7 +173,7 @@ def start():
             K.press('esc')
         info.update()
         time.sleep(0.2)
-        print('start')
+        print('Запуск боя...')
 
 
 def join():
@@ -183,7 +183,7 @@ def join():
     info.update()
     while scn.match_img(D.now_img, img_map.join_game, 0.9)[0] == -1:
         if time.time() - t1 >= 540:
-            raise Exception("LoopException")
+            raise RuntimeError("Не удалось дождаться входа в бой за 540 секунд.")
         p, v = scn.match_img(D.now_img, img_map.confirm1, 0.6)
         if p != -1:
             M.moveto(p[0], p[1])
@@ -205,14 +205,14 @@ def join():
     if p != -1:
         M.moveto(p[0], p[1])
         M.click()
-    print('join')
+    print('Вход в бой.')
 
 
 def init():
     t1 = time.time()
     while info.player is None:
         if time.time() - t1 >= 30:
-            raise Exception("LoopException")
+            raise RuntimeError("Локальный API не сообщил данные игрока за 30 секунд.")
         info.update()
         time.sleep(1)
     time.sleep(15)
@@ -226,8 +226,8 @@ def crash():
     bg = bg[0: bg.shape[0], bg.shape[1] // 3: bg.shape[1] // 3 * 2]
     hsv = cv2.cvtColor(bg, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower_red, upper_red)
-    a, b = scn.match_img(img_map.crash_warning, mask, 0.2)
-    c, d = scn.match_img_ltrb(img_map.crashed, mask, 0.3)
+    a, b = scn.match_img(mask, img_map.crash_warning, 0.2)
+    c, d = scn.match_img_ltrb(mask, img_map.crashed, 0.3)
     if a != -1 or c != -1:
         K.keydown('s')
         time.sleep(3)
@@ -244,28 +244,28 @@ def crash():
 
 def main_running():
     global thread_pathfinding, thread_firecontrol, thread_carsh
-    # TODO: 等待进入战局
-    thread_pathfinding = submit(pathfinder, 'pathfinder', True, auto=True, )  # TODO: 填写路径参数
-    # TODO: 初始化炮塔转向
+    # TODO: Wait until the match has started.
+    thread_pathfinding = submit(pathfinder, 'pathfinder', True, auto=True, )  # TODO: Supply path parameters.
+    # TODO: Initialize turret rotation.
     FCS = fire_control()
     thread_firecontrol = submit(FCS.lock_and_fire, 'fire_control', True)
     thread_carsh = submit(crash, 'crash', True)
     while True:
         end_pos = scn.match_img(D.now_img, img_map.back, 0.8)[0]
         if end_pos != -1:
-            print('back to base')
+            print('Возврат в ангар.')
             M.moveto(end_pos[0], end_pos[1])
             M.click()
             break
         elif scn.match_img(D.now_img, img_map.base, 0.8)[0] != -1:
-            print('in base')
+            print('Техника в ангаре.')
             break
         elif scn.match_img(D.now_img, img_map.start, 0.8)[0] != -1:
             if scn.match_img(D.now_img, img_map.cart, 0.8)[0] != -1:
-                print('cart')
+                print('Обнаружено окно покупки.')
                 break
         elif scn.match_img(D.now_img, img_map.data, 0.7)[0] != -1:
-            print('data')
+            print('Обнаружено окно статистики боя.')
             K.press("esc")
             time.sleep(0.5)
             K.press("down")
