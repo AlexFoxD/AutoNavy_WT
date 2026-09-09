@@ -346,3 +346,41 @@ def test_truncated_image_is_not_cached_after_header_verification(running):
     # The next object poll proves the serial image refresh has finished decoding.
     until(lambda: len([c for c in session.calls if 'map_obj' in c[0]]) >= 3)
     assert service.map_image() is None
+
+
+@pytest.mark.parametrize('metadata', [dict(META, valid=False), Response({}, 503), TimeoutError('metadata timeout')])
+def test_invalid_metadata_immediately_invalidates_snapshot_while_objects_block(running, metadata):
+    service, session, now = running()
+    before = service.snapshot()
+    entered, resume = threading.Event(), threading.Event()
+    next_entered, next_resume = threading.Event(), threading.Event()
+    def slow_objects():
+        entered.set()
+        assert resume.wait(2)
+        return [dict(PLAYER), SHIP]
+    def blocked_objects():
+        next_entered.set()
+        assert next_resume.wait(2)
+        return [dict(PLAYER)]
+    session.objects.put(slow_objects)
+    try:
+        assert entered.wait(2)
+        now[0] += 2_000_000_000
+        session.metadata = metadata
+        session.objects.put(blocked_objects)
+        resume.set()
+        assert next_entered.wait(2)
+        failed = service.snapshot()
+        assert not failed.valid and failed.player is None and failed.enemies == () and failed.zones == ()
+        assert failed.metadata is None and failed.error.startswith('metadata:')
+        assert failed.received_at_ns == now[0] and failed.generation == before.generation + 1
+        assert service.map_image() is None
+        session.metadata = META.copy()
+        now[0] += 1
+        next_resume.set()
+        session.objects.put([dict(PLAYER)])
+        recovered = until(lambda: (s := service.snapshot()).valid and s)
+        assert recovered.generation > failed.generation and recovered.received_at_ns == now[0]
+    finally:
+        resume.set()
+        next_resume.set()

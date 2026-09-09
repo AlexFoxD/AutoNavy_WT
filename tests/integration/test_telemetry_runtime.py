@@ -160,3 +160,68 @@ def test_stop_at_telemetry_start_boundary_never_constructs_session(monkeypatch):
         resume.set()
         app.stop()
         runner.join(3)
+
+
+def test_application_consumes_metadata_invalidation_before_blocked_object_poll_finishes(monkeypatch):
+    from autonavy.telemetry import TelemetryService
+    from autonavy.capture.replay import ReplayCapture
+    from tests.unit.test_telemetry import FakeSession, META, PLAYER, until
+    session = FakeSession()
+    session.objects.put([PLAYER])
+    now = [1_000_000_000]
+    service = TelemetryService(load_settings().telemetry, session_factory=lambda: session,
+                               clock_ns=lambda: now[0], join_timeout_s=.3)
+    entered, resume = threading.Event(), threading.Event()
+    next_entered, next_resume = threading.Event(), threading.Event()
+    snapshots = []
+    replay = ReplayCapture('tests/fixtures/smoke')
+    def slow_objects():
+        entered.set()
+        assert resume.wait(2)
+        return [PLAYER]
+    def blocked_objects():
+        next_entered.set()
+        assert next_resume.wait(2)
+        return [PLAYER]
+    class Capture:
+        count = 0
+        def start(self): replay.start()
+        def read(self):
+            self.count += 1
+            if self.count == 1:
+                until(lambda: service.snapshot().valid)
+                session.objects.put(slow_objects)
+                assert entered.wait(2)
+                now[0] += 2_000_000_000
+                session.metadata = dict(META, valid=False)
+                session.objects.put(blocked_objects)
+                resume.set()
+                assert next_entered.wait(2)
+            else:
+                snapshots.append(app.last_snapshot)
+                assert service.map_image() is None
+                session.metadata = META.copy()
+                now[0] += 1
+                next_resume.set()
+                session.objects.put([PLAYER])
+                snapshots.append(until(lambda: (s := service.snapshot()).valid and s))
+            return replay.read()
+        def close(self):
+            resume.set()
+            next_resume.set()
+            session.objects.put([PLAYER])
+            replay.close()
+    monkeypatch.setattr('autonavy.capture.factory.create_capture', lambda settings: Capture())
+    app = Application(load_settings(overrides={'capture':{'max_frames':2}}), telemetry=service, clock_ns=lambda: now[0])
+    try:
+        assert app.run() == 0
+        failed, recovered = snapshots
+        assert not failed.valid and failed.player is None and failed.metadata is None
+        assert failed.received_at_ns == 3_000_000_000 and failed.error.startswith('metadata:')
+        assert recovered.valid and recovered.generation > failed.generation
+        assert recovered.received_at_ns == 3_000_000_001
+    finally:
+        resume.set()
+        next_resume.set()
+        session.objects.put([PLAYER])
+        service.close()

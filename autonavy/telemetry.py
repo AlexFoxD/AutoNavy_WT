@@ -276,6 +276,8 @@ class TelemetryService:
                 with self._lock:
                     self._metadata = None
                     self._image = None
+                    self._snapshot = replace(self._snapshot, valid=False, player=None,
+                                             enemies=(), zones=(), metadata=None, error=metadata_error)
                 self._next_metadata_ns = 0
                 self._fault('metadata', exc)
         try:
