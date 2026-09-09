@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0-M7 independently reviewed; M8 tooling next. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M7 and M8a independently reviewed; M8b launcher/build work next. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -51,9 +51,9 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A30 / CAP-02/03 | PASS | M7 factory/import and exact selected-index/API tests; no discovery or alternate-device fallback. OpenCV core import does not open VideoCapture; source construction/start ownership explicit. Device friendly-name identity remains operator trust and is labeled false in diagnostics. evidence/M7.md. |
 | A31 / CFG-01 | PASS | autonavy/config.py + configs/default.toml; tests/unit/test_foundations.py::test_config_precedence_and_default_resource_resolution, ::test_invalid_config_is_rejected_before_startup, ::test_cli_input_requires_explicit_flag_and_replay_rejects_it; evidence/M1.md commands/results; final schema recheck at M9 |
 | A32 / CLI-01 | PASS | autonavy/cli.py + capture/replay.py; tests/integration/test_replay.py::test_entrypoints_use_safe_cli_from_unrelated_cwd, ::test_finite_replay_budget_restart_and_packet_identity; tests/unit/test_foundations.py::test_preflight_conflicts_are_rejected_before_diagnostic_dispatch; evidence/M1.md commands/results and coordinator smoke below |
-| A33 / OBSERVE-01 | NOT RUN | Implementation/validation pending |
-| A34 / PERF-01 | NOT RUN | Implementation/validation pending |
-| A35 / PERF-01 | NOT RUN | Implementation/validation pending |
+| A33 / OBSERVE-01 | PASS | M8a metrics.py/diagnostics.py integrated into actual Application, InputController, ProcessCapture and planner/telemetry faults; test_metrics.py and test_diagnostics_runtime.py cover bounds, throttle, explicit preview and startup logging. 440 full tests passed, 1 launcher exclusion. Independent review PASS; evidence/M8a.md. |
+| A34 / PERF-01 | PASS | M8a benchmark_pipeline.py executes correctness-gated paired cold/warm arithmetic and separate fresh menu/battle ticks. Repeated measured JSON/CSV and raw samples in evidence/benchmarks; reviewer independently recomputed summaries. BENCHMARKS.md records exact scope and the decision-rate shortfall. |
+| A35 / PERF-01 | PASS | M8a benchmark_capture.py has real backend-selectable non-actuating capture and bounded duration/frame budget. Executed replay only: 600 publications, 290.76/s, receive p50 0/p95 16ms with 15.625ms clock resolution, upstream/child scope explicitly unknown. Retain DXcam default and 0.0.5 pin without a live ranking; BENCHMARKS.md and evidence/DXcam-upgrade-assessment.md. Live comparison NOT RUN. |
 | A36 / BUILD-01 | NOT RUN | Implementation/validation pending |
 | A37 / BUILD-01 | NOT RUN | Implementation/validation pending |
 | A38 / HANDOFF | NOT RUN | Implementation/validation pending |
@@ -98,3 +98,5 @@ The following checks are instructions for an operator after delivery, not comman
 5. **Performance and latency.** Run the implemented capture benchmark separately for equal content resolution/profile/preview settings. Report delivered publications and receive-age as such. OBS buffering, game render time, GPU/game impact and full render-to-input latency remain unknown unless measured with a trustworthy clock relationship or external visual-counter method. Offline arithmetic measurements cannot rank live backends.
 
 Exact installer, packaged executable, benchmark arguments and operation examples are finalized by M8b in README/MIGRATION. Hardware acceptance results remain NOT RUN until an operator actually performs and records them.
+
+M8a-review preservation check at a7584d3: both worktrees have empty status output; original HEAD/master, origin/master and upstream/master match the recorded baseline. Target src tree and native blob match the original identifiers; native SHA256 matches ABE3EF91491C5C53EDA3BC16C63843545942079DEA80E80C8A139671FBEDF721. The target working diff for src, path.json and the native extension is empty. This is a current preservation check; final M9 check remains required.
