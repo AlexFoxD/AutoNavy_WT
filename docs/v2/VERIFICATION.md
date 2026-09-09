@@ -78,3 +78,5 @@ Coordinator executed at that commit: `.venv\Scripts\python.exe -m autonavy --che
 
 
 Environment package snapshot after the legacy baseline repair and M1: evidence/environment-after-M1.txt (`.venv\Scripts\python.exe -m pip freeze`). It records the actual local venv; it is not a new dependency requirement or a claim that hardware was tested.
+
+M2-close/M3-active preservation recheck at987dc61: source status --porcelain=v1 -uall empty; source HEAD/master/origin/master/upstream/master unchanged at recorded identifiers. Target HEAD:src and native blob match baseline; native file SHA256 matches ABE3EF91491C5C53EDA3BC16C63843545942079DEA80E80C8A139671FBEDF721. No asset/native/source changes. Final M9 recheck still required.

@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-M0 and M1 independent reviews passed. M2 review found two lifecycle issues; fixes and re-review are pending. Final A01-A39 caller/evidence review remains pending.
+M0-M2 independent reviews passed, including M2 lifecycle and cleanup corrections. M3 implementation is active. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
