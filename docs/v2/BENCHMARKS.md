@@ -93,3 +93,14 @@ The final permitted regression command was:
 Result: **440 passed, 1 deselected in 62.34 seconds**. The exclusion is the known launcher policy issue owned by M8b. Full output is `logs/v2/benchmarks/m8a-full-tests.txt`. Focused tests cover bounded samples/cardinality/tracebacks, log rotation/cleanup, constructor failure logging, default-off and injected preview, actual dispatch timing, capture generation interleaving, publication gaps/idle, finite report schema/output protection, correctness-first measurements and the separate real battle workload without native submission. Existing M3 structural tests still check single-channel matching, cached unchanged templates, per-packet derivative work and ROI boundary equivalence. Narrow Ruff and whitespace checks passed; protected source asset/route/native bytes have no diff against `45fc36c`.
 
 This is M8a evidence only. M8b launcher/dependency/CI/build work and independent M8a review remain separate gates. No actual camera, game, input driver, network telemetry, native preview, hardware benchmark, build, push or release was run as part of M8a.
+
+
+## Durable evidence
+
+Executed outputs are preserved byte-for-byte in the tracked [benchmark evidence directory](evidence/benchmarks/): [final pipeline JSON](evidence/benchmarks/pipeline-menu-battle.json), [pipeline CSV](evidence/benchmarks/pipeline-menu-battle.csv), [final capture JSON](evidence/benchmarks/capture-reviewed.json), [capture CSV](evidence/benchmarks/capture-reviewed.csv), [full regression output](evidence/benchmarks/m8a-full-tests.txt) and [synthetic replay manifest](evidence/benchmarks/replay-600/manifest.json). Earlier pipeline/capture JSON/CSV runs are retained there too, so sample counts, complete samples, source provenance, environment and slower cases survive checkout transfer. SHA-256 equality with the original ignored artifacts was checked during copying. Historical report paths remain the actual paths used when measured.
+
+To reproduce the final capture workload from a fresh checkout, use the tracked fixture:
+
+```powershell
+.venv/Scripts/python.exe scripts/benchmark_capture.py --backend replay --fixture docs/v2/evidence/benchmarks/replay-600 --duration 5 --max-frames 600 --output logs/v2/benchmarks/capture-reproduced
+```

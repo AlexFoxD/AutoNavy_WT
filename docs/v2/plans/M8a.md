@@ -86,3 +86,5 @@ assert report['correctness']['aim_channels'] == 4
 - Coordinator requested a distinct real battle workload after observing slow menu decisions. Both use fresh supported-profile packets, real vision/policy/recording input; battle injects valid telemetry without maps/native planning. Actual states and selected detector names are asserted/reported.
 - Final focused diagnostic/benchmark tests and narrow Ruff checks passed. One full permitted regression:440 passed,1 deselected in62.34s. Exact commands, measurements, commit SHAs and limitations are in the task report and BENCHMARKS.md.
 - No repeated comparable median regression over10% was observed across executed runs. Heading's smaller slowdown remains documented. Menu and battle decision times exceed the configured30Hz period; no whole-project speedup/FPS claim is made.
+
+- Coordinator requested durable raw measurement evidence; all executed JSON/CSV variants, the synthetic600-frame manifest and full regression text are copied byte-for-byte into tracked docs/v2/evidence/benchmarks, with SHA-256 equality checks. Generated runtime outputs still default to ignored logs/v2.

@@ -1,0 +1,31 @@
+stage,variant,repetition,n,warmups,p50_ns,p95_ns,mean_ns,throughput_per_s,scope
+preprocess,legacy,1,20,3,5245550.0,6152620.000000001,5410125.0,184.83861278621103,full-frame color Canny + start template; cached static template in v2
+preprocess,v2,1,20,3,4914600.0,6420020.0,5041010.0,198.3729451042549,full-frame color Canny + start template; cached static template in v2
+match,legacy,1,20,3,10337350.0,11981255.0,10469775.0,95.51303633554684,prepared fire ROI/aim edges; legacy BGRA vs validated v2 single-channel match
+match,v2,1,20,3,2267400.0,2529255.0,2271945.0,440.1515001463504,prepared fire ROI/aim edges; legacy BGRA vs validated v2 single-channel match
+hsv_mask,legacy,1,20,3,1029650.0,1218540.0,1043250.0,958.543014617781,identical fire ROI output; legacy full-frame HSV/mask vs v2 crop first
+hsv_mask,v2,1,20,3,205100.0,289760.0,216765.0,4613.290891057136,identical fire ROI output; legacy full-frame HSV/mask vs v2 crop first
+heading_mask,legacy,1,20,3,21600.0,24610.000000000007,22570.0,44306.601683650864,identical 60x70 heading mask; legacy identity morphology vs bounded v2 context
+heading_mask,v2,1,20,3,23250.0,32235.00000000003,26375.0,37914.69194312796,identical 60x70 heading mask; legacy identity morphology vs bounded v2 context
+cold_registry,v2,1,20,3,14553950.0,17189110.0,14741025.0,67.83788779952548,"all selected assets: file read/decode, owned copies and edge preparation; warm OS filesystem cache possible"
+preprocess,legacy,2,20,3,4790000.0,6977095.0,5077460.0,196.94886813485482,full-frame color Canny + start template; cached static template in v2
+preprocess,v2,2,20,3,4448050.0,5075195.0,4325885.0,231.16657053990107,full-frame color Canny + start template; cached static template in v2
+match,legacy,2,20,3,10181900.0,11904515.0,10326705.0,96.83630935521059,prepared fire ROI/aim edges; legacy BGRA vs validated v2 single-channel match
+match,v2,2,20,3,2235950.0,2535485.0,2282125.0,438.1880922385934,prepared fire ROI/aim edges; legacy BGRA vs validated v2 single-channel match
+hsv_mask,legacy,2,20,3,1068250.0,1642025.0,1110555.0,900.4506755631194,identical fire ROI output; legacy full-frame HSV/mask vs v2 crop first
+hsv_mask,v2,2,20,3,206750.0,355995.00000000006,223555.0,4473.172150030194,identical fire ROI output; legacy full-frame HSV/mask vs v2 crop first
+heading_mask,legacy,2,20,3,21450.0,23075.000000000004,21895.0,45672.527974423385,identical 60x70 heading mask; legacy identity morphology vs bounded v2 context
+heading_mask,v2,2,20,3,23250.0,25415.0,23420.0,42698.54824935952,identical 60x70 heading mask; legacy identity morphology vs bounded v2 context
+cold_registry,v2,2,20,3,14232050.0,16414595.0,14015230.0,71.35095178602135,"all selected assets: file read/decode, owned copies and edge preparation; warm OS filesystem cache possible"
+preprocess,legacy,3,20,3,4205700.0,4904270.0,4141685.0,241.44762337068127,full-frame color Canny + start template; cached static template in v2
+preprocess,v2,3,20,3,3397700.0,4868755.000000001,3586035.0,278.85952033373906,full-frame color Canny + start template; cached static template in v2
+match,legacy,3,20,3,10776200.0,13287575.0,10962100.0,91.22339697685662,prepared fire ROI/aim edges; legacy BGRA vs validated v2 single-channel match
+match,v2,3,20,3,2380100.0,2835630.0,2424905.0,412.3872893989661,prepared fire ROI/aim edges; legacy BGRA vs validated v2 single-channel match
+hsv_mask,legacy,3,20,3,1088950.0,1322365.0,1109095.0,901.6360185556692,identical fire ROI output; legacy full-frame HSV/mask vs v2 crop first
+hsv_mask,v2,3,20,3,204700.0,290065.00000000006,219880.0,4547.935237402219,identical fire ROI output; legacy full-frame HSV/mask vs v2 crop first
+heading_mask,legacy,3,20,3,21400.0,23225.000000000004,21805.0,45861.04104563173,identical 60x70 heading mask; legacy identity morphology vs bounded v2 context
+heading_mask,v2,3,20,3,23100.0,24905.0,23265.0,42983.02170642596,identical 60x70 heading mask; legacy identity morphology vs bounded v2 context
+cold_registry,v2,3,20,3,14929500.0,15967920.0,14947430.0,66.90113283688233,"all selected assets: file read/decode, owned copies and edge preparation; warm OS filesystem cache possible"
+decision,v2,1,20,3,373078250.0,407920740.0,377099365.0,2.651820959709121,"actual Application.tick: supported-profile fresh pixels, vision + menu policy + dry input owner; no telemetry/native planner"
+decision,v2,2,20,3,400348000.0,420931025.0,403333510.0,2.4793377569842883,"actual Application.tick: supported-profile fresh pixels, vision + menu policy + dry input owner; no telemetry/native planner"
+decision,v2,3,20,3,396402250.0,414133695.0,395902150.0,2.5258766591694437,"actual Application.tick: supported-profile fresh pixels, vision + menu policy + dry input owner; no telemetry/native planner"

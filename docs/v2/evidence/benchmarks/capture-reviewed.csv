@@ -1,0 +1,3 @@
+stage,variant,repetition,n,warmups,p50_ns,p95_ns,mean_ns,throughput_per_s,scope
+receive_age,selected_backend,1,600,0,0.0,16000000.0,3253333.3333333335,307.37704918032784,monotonic successful receive to benchmark consume; excludes unknown upstream buffering
+capture_read,selected_backend,1,600,0,3172650.0,3956714.999999997,3432301.8333333335,291.34966811145347,successful capture.read call including publication wait/ownership copy; idle waits excluded
