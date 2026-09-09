@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0 and M1 reviewed; M2 capture/geometry implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M2 independently reviewed; M3 vision implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -22,16 +22,16 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A01 / GIT-01 | PASS | M0 scope: isolated `feature/v2-modernization` worktree from exact source 45fc36c; source checkout clean and HEAD/master/default refs unchanged; recorded src/native tree/blob/hash match. Commands and identifiers in Preservation baseline below. Local commit 021f575; no push/merge/release. Final preservation recheck still required at M9. |
 | A02 / AUDIT-01 | PASS | M0 scope: AUDIT.md exact-symbol reconciliation and behavior inventory, three bounded native-only probes, environment constraints and executed 42-test baseline plus 3-test characterization recheck above; characterization at tests/unit/test_legacy_characterization.py, committed in 021f575. Hardware accuracy explicitly unverified. |
 | A03 / ARCH-01 | PASS | autonavy/{__init__,cli,app}.py and three Python shims; tests/integration/test_replay.py::test_all_supported_imports_are_side_effect_free and ::test_entrypoints_use_safe_cli_from_unrelated_cwd; M1 regression command/results in evidence/M1.md; recheck extended modules at M9 |
-| A04 / CAP-01 | NOT RUN | Implementation/validation pending |
-| A05 / FRAME-01 | NOT RUN | Implementation/validation pending |
-| A06 / FRAME-01 | NOT RUN | Implementation/validation pending |
+| A04 / CAP-01 | PASS | M2: production capture.factory selects ProcessCapture/DXcamSource; fake lifecycle/error/restart tests in tests/unit/test_capture.py and tests/integration/test_capture_runtime.py. Final M2 regression168 pass/1 excluded atceee7bb; evidence/M2.md. Hardware NOT RUN. |
+| A05 / FRAME-01 | PASS | M2: bounded latest slot/shared pixel transport and owned FramePacket copies, slow-consumer/replacement/generation-race tests in test_capture.py and test_capture_runtime.py; evidence/M2.md commands/results, reviewedceee7bb. |
+| A06 / FRAME-01 | PARTIAL | M2 retained packet/producer-buffer mutation tests pass; M3 debug-drawing immutability validation pending. |
 | A07 / FRAME-01 | NOT RUN | Implementation/validation pending |
-| A08 / CAP-03 | NOT RUN | Implementation/validation pending |
+| A08 / CAP-03 | PARTIAL | M2 cancellation wakes reads, generation snapshot/start/cleanup races covered, fake hung child reclaimed with bounded process shutdown; pinned native limits documented. Input/cache invalidation integration follows M3/M5/M7. |
 | A09 / VISION-01 | NOT RUN | Implementation/validation pending |
 | A10 / VISION-01 | NOT RUN | Implementation/validation pending |
 | A11 / VISION-02 | NOT RUN | Implementation/validation pending |
 | A12 / VISION-02/03 | NOT RUN | Implementation/validation pending |
-| A13 / GEOM-01 | NOT RUN | Implementation/validation pending |
+| A13 / GEOM-01 | PARTIAL | M2 pure GeometrySnapshot transforms and Windows client/output mapping cover translated/negative origins, bounds and content scaling. Actual OBS source/calibration integration follows M7. |
 | A14 / GEOM-01 | NOT RUN | Implementation/validation pending |
 | A15 / TEL-01 | NOT RUN | Implementation/validation pending |
 | A16 / TEL-01 | NOT RUN | Implementation/validation pending |

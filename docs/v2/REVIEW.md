@@ -18,3 +18,7 @@ M1 fix round1 at0c9a5d8: preflight/offline conflicts and Unicode config errors a
 
 
 M2 review at e7119e0: SPEC FAIL, QUALITY FAIL pending P1 atomic generation transport snapshot (a paused reader returned generation-1 pixels/geometry tagged generation 2 after restart) and P2 application startup cancellation (stop during factory construction was lost, then startup timed out with ERROR). Reviewer reproduced both with device-free in-memory process doubles. Original implementer resumed for deterministic regressions and scoped fixes; no hardware ran.
+
+M2 scoped re-review468ab72: original P1 atomic snapshot and P2 startup cancellation ADDRESSED. New P2 fix regression: Application publishes _closed before resource cleanup; overlapping run-finally returns0/STOPPED before cleanup and misses late cleanup errors. Gated fake reproduction confirmed. Round2 original implementer tasked with shared cleanup completion/error; no hardware ran.
+
+M2 scoped re-reviewceee7bb: cleanup finding ADDRESSED, SPEC PASS, QUALITY PASS, no new fix-local findings. Original generation/start findings remain accepted. M2 complete; M3 vision active. Reviewer verified supplied3new/168regression evidence without redundant rerun.

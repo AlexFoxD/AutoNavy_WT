@@ -39,9 +39,9 @@ Interfaces: `Settings`, `load_settings(path=None, overrides=None) -> Settings`; 
 ### Task 2: M2 capture ownership and geometry
 Files: autonavy/capture/{base,dxcam,latest,factory}.py, autonavy/geometry.py, autonavy/windows.py, autonavy/app.py, toolkit/scn.py, tests/unit/test_capture.py, tests/unit/test_geometry.py.
 Interfaces: `start/read/stop/close` capture protocol; `LatestFrameSlot.publish/read/wait/close`; generation-tagged owned `FramePacket`; pure frame/ROI/desktop transforms.
-- [ ] Test producer buffer mutation, latest-only replacement, shutdown wake, fake DXcam no-frame/error/restart, moved/negative-origin windows.
-- [ ] Preserve pin, explicit startup and non-repeated frames; inspect pinned native read semantics and use narrowly supervised capture process if a blocking call cannot be safely interrupted.
-- [ ] Factory and application must use selected backend; no independent camera reader remains. GREEN/review/commit.
+- [x] Test producer buffer mutation, latest-only replacement, shutdown wake, fake DXcam no-frame/error/restart, moved/negative-origin windows.
+- [x] Preserve pin, explicit startup and non-repeated frames; inspect pinned native read semantics and use narrowly supervised capture process if a blocking call cannot be safely interrupted.
+- [x] Factory and application must use selected backend; no independent camera reader remains. GREEN/review/commit.
 
 ### Task 3: M3 vision
 Files: autonavy/vision/{context,templates,detectors}.py, toolkit/{scn,img_map,deg_cal}.py, firesystem.py, autonavy/app.py, tests/unit/test_vision.py.
