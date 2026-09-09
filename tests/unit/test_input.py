@@ -354,3 +354,50 @@ def test_mode_round_trip_invalidates_issued_but_not_yet_submitted_intents():
     c.set_mode('ui');c.set_mode('battle')
     assert not c.submit(stale)
     assert c.submit(i())
+
+@pytest.mark.parametrize('first_action,second_action', [
+    ('move','move'),('position','move'),('move','position'),
+    ('position','mouse'),('mouse','move'),('wheel','mouse')])
+def test_review_pointer_batch_priority_selects_one_owner(first_action,second_action):
+    c,b,t,i=rig()
+    def pointer(owner,action,priority):
+        value=(10,0) if action in {'move','position'} else 1
+        resource='left' if action=='mouse' else 'wheel' if action=='wheel' else 'pointer'
+        return i(owner=owner,action=action,resource=resource,value=value,priority=priority)
+    c.submit(pointer('search',second_action,10))
+    c.submit(pointer('aim',first_action,100))
+    c.tick()
+    assert b.events==[(first_action,'left' if first_action=='mouse' else 'wheel' if first_action=='wheel' else 'pointer',
+                      (10,0) if first_action in {'move','position'} else 1)]
+
+
+def test_review_pointer_same_owner_position_click_and_releases_are_preserved():
+    c,b,t,i=rig()
+    c.submit(i(owner='search',action='mouse',resource='right',priority=10));c.tick()
+    c.submit(i(owner='aim',action='position',resource='pointer',value=(-10,20),priority=100))
+    c.submit(i(owner='aim',action='mouse',resource='left',priority=100))
+    c.submit(i(owner='search',action='mouse',resource='right',value=0,priority=10))
+    c.tick()
+    assert b.events==[('mouse','right',1),('mouse','right',0),('position','pointer',(-10,20)),('mouse','left',1)]
+    t.advance(1);c.tick()
+    assert b.events[-1]==('mouse','left',0) and not c.held
+
+
+def test_review_held_button_blocks_lower_priority_pointer_but_not_its_release():
+    c,b,t,i=rig()
+    c.submit(i(owner='aim',action='mouse',resource='left',priority=100));c.tick()
+    c.submit(i(owner='search',action='move',resource='pointer',value=(10,0),priority=10))
+    c.tick()
+    assert b.events==[('mouse','left',1)]
+    c.submit(i(owner='aim',action='mouse',resource='left',value=0,priority=1));c.tick()
+    assert b.events[-1]==('mouse','left',0)
+
+
+def test_review_invalid_pointer_candidate_does_not_starve_valid_lower_priority_owner():
+    c,b,t,i=rig(guard=lambda intent:intent.owner!='aim')
+    c.submit(i(owner='aim',action='move',resource='pointer',value=(10,0),priority=100))
+    c.submit(i(owner='search',action='move',resource='pointer',value=(-10,0),priority=10));c.tick()
+    assert b.events==[('move','pointer',(-10,0))]
+    c.guard=lambda intent:True
+    c.submit(i(owner='aim',action='move',resource='pointer',value=(10,0),priority=100));c.tick()
+    assert b.events[-1]==('move','pointer',(10,0))

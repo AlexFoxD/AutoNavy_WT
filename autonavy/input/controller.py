@@ -163,11 +163,24 @@ class InputController:
                         or not self._allowed(i) or not self.guard(i) or self.clock_ns()>=hold.expires_at_ns):
                     releases.append((resource,hold))
             self._release_many(releases)
+            pointer_owner = None
             for intent in self._pending.take():
                 if (self.emergency.is_set() or self.clock_ns() >= intent.deadline_ns
                         or intent.generation != self.generation(intent.owner)
                         or not self._allowed(intent)):
                     continue
+                # Relative movement, absolute positioning, wheel and mouse-button
+                # acquisition share the pointer. Sorted priority selects one owner
+                # per batch; same-owner position/click pairs remain ordered.
+                pointer = (intent.action in {'move','position'} or
+                           intent.action in {'mouse','wheel'} and intent.value != 0)
+                if pointer:
+                    if pointer_owner is not None and pointer_owner != intent.owner: continue
+                    conflicts = [(r,h) for r,h in self.held.items()
+                                 if r[0]=='mouse' and h.intent.owner != intent.owner]
+                    if any(h.intent.priority > intent.priority for _,h in conflicts): continue
+                    # Never move under another owner's held button: release it first.
+                    self._release_many(conflicts)
                 resource = intent.action,intent.resource
                 hold = self.held.get(resource)
                 if hold is not None:
@@ -186,3 +199,4 @@ class InputController:
                     # A failed OS call is uncertain: retain it for retryable cleanup.
                     self.held[resource] = Hold(intent, self.clock_ns()+intent.duration_ns, self._token)
                 self.backend.dispatch(intent.action,intent.resource,intent.value)
+                if pointer: pointer_owner = intent.owner

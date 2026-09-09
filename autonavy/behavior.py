@@ -72,6 +72,7 @@ class BattlePolicy:
     def _reset(self):
         self.app.input.cancel()
         self.sequence=[]; self.sequence_owner=None; self.sequence_done=None
+        self.next_action=0
         self.fire_due=None; self.zoom=False; self.identity=None
         if self.navigation is not None: self.navigation.reset()
 
@@ -203,7 +204,8 @@ class BattlePolicy:
             match=self._matched('start')
             self.emit('ui','position','pointer',match.desktop_center)
             self._tap('ui','enter')
-            self._state(RuntimeState.QUEUEING,'queue',r.queue_timeout_s)
+            if self.stage!='queue':
+                self._state(RuntimeState.QUEUEING,'queue',r.queue_timeout_s)
             self.next_action=now+1_000_000_000; return
         names=('confirm1_queue','confirm2_queue') if self.stage=='queue' else (
             'confirm','confirm1','confirm2','improvement','improvement_','crew_cancel','rtlg_no')

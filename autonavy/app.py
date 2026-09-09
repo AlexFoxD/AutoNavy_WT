@@ -52,7 +52,7 @@ class Application:
         self._stop_errors = []
 
     def _input_guard(self, intent):
-        if self.stop_event.is_set() or self.input.emergency.is_set(): return False
+        if self.stop_event.is_set() or self.input.emergency.is_set() or self.pause_event.is_set(): return False
         p = self.last_frame; obs = self.last_observations
         if p is None or obs is None or obs.packet is not p or not obs.recognition_supported or p.geometry is None: return False
         g = p.geometry; configured = self.settings.geometry
@@ -70,7 +70,7 @@ class Application:
             current = self.telemetry.snapshot().at(self._clock_ns())
             if not current.valid or current.generation != intent.telemetry_generation: return False
         age=self._clock_ns()-p.received_at_ns
-        return (not self.stop_event.is_set() and not self.input.emergency.is_set()
+        return (not self.stop_event.is_set() and not self.input.emergency.is_set() and not self.pause_event.is_set()
                 and self.last_frame is p and 0 <= age < self.settings.runtime.frame_ttl_s*1e9
                 and getattr(self.capture,'source_generation',p.source_generation)==p.source_generation)
 
@@ -97,11 +97,17 @@ class Application:
         if self.stop_event.is_set():
             self.input.release_all()
             return
+        self._consume_pause()
+        self.policy.tick(packet is not None)
+        self.input.tick()
+        # A signal raised inside a late dispatch guard also releases existing holds
+        # before this tick returns. Callbacks themselves remain signal-only.
+        self._consume_pause()
+
+    def _consume_pause(self):
         if self.pause_event.is_set():
             self.pause_event.clear()
             self.policy.toggle_pause()
-        self.policy.tick(packet is not None)
-        self.input.tick()
 
     @property
     def last_snapshot(self):

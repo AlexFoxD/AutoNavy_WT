@@ -361,3 +361,74 @@ def test_battle_producer_cannot_opt_out_of_required_player_prerequisite():
     intent=replace(app.policy._intent('navigation','axis','Z',50,1),requires_telemetry=False)
     t.valid=False
     assert not app._input_guard(intent)
+
+
+@pytest.mark.parametrize('existing_hold', [False,True])
+def test_review_pause_during_final_dispatch_guard_inhibits_acquisition_and_releases_existing_holds(existing_hold):
+    app,b,clock,t,v,step=rig();enter_battle(app,t,step)
+    app.settings=replace(app.settings,input=replace(app.settings.input,enable_input=True))
+    b.physical=True
+    app.window_guard=lambda packet:True
+    if existing_hold:
+        app.policy.emit('navigation','key','s',hold_s=10);app.input.tick()
+    class Navigation:
+        def tick(self,application,observations,snapshot):
+            application.policy.emit('navigation','key','w',hold_s=10)
+            def signal_once(packet):
+                application.pause();application.window_guard=lambda packet:True
+                return True
+            application.window_guard=signal_once
+        def reset(self):pass
+    app.policy.navigation=Navigation()
+    before=len(b.events);step(.1,markers=['lock'])
+    assert ('key','w',1) not in b.events[before:]
+    assert not app.input.held
+    assert app.state==RuntimeState.PAUSED or app.pause_event.is_set()
+    step(.1,markers=['lock'])
+    assert app.state==RuntimeState.PAUSED
+    # A fresh pause/resume signal still resumes menu handling.
+    t.valid=False;app.pause();step(.1,markers=['start'])
+    assert app.state==RuntimeState.QUEUEING
+
+
+def test_review_pending_pause_rejects_guard_without_querying_window():
+    app,b,clock,t,v,step=rig();enter_battle(app,t,step)
+    app.settings=replace(app.settings,input=replace(app.settings.input,enable_input=True))
+    b.physical=True
+    app.window_guard=lambda packet: (_ for _ in ()).throw(AssertionError('window queried after pending pause'))
+    intent=app.policy._intent('navigation','key','w',hold_s=1)
+    app.pause()
+    assert not app._input_guard(intent)
+
+
+def test_review_persistent_start_retries_keep_original_queue_deadline():
+    app,b,clock,t,v,step=rig()
+    app.settings=replace(app.settings,runtime=replace(app.settings.runtime,queue_timeout_s=3))
+    step(markers=['start']);deadline=app.policy.deadline
+    for _ in range(2):
+        step(1,markers=['start'])
+        assert app.policy.deadline==deadline
+    assert b.events.count(('key','enter',1))==3
+    with pytest.raises(RuntimeError,match='queue deadline'):step(1,markers=['start'])
+
+
+@pytest.mark.parametrize('cancellation',['pause','source','telemetry'])
+def test_review_cancelled_recovery_deadline_never_delays_fresh_menu(cancellation):
+    app,b,clock,t,v,step=rig();enter_battle(app,t,step)
+    step(.1,markers=['crashed'])
+    assert app.policy.next_action>clock()+60_000_000_000
+    if cancellation=='pause':
+        app.pause();step(.1)
+        assert app.state==RuntimeState.PAUSED
+        t.valid=False;app.pause();step(.1,markers=['start'])
+    elif cancellation=='telemetry':
+        t.valid=False;step(.1)
+        # Loss of frame freshness cancels the abandoned player wait back to menu.
+        step(.5,fresh=False);step(.1,markers=['start'])
+    else:
+        t.valid=False
+        packet=replace(app.last_frame,source_generation=2,publication_id=99,received_at_ns=clock())
+        app.tick(packet)
+        step(.5,fresh=False);step(.1,markers=['start'])
+    assert app.policy.stage=='queue'
+    assert ('key','enter') in app.input.held
