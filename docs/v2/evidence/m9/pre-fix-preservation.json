@@ -1,0 +1,16 @@
+{
+  "checked_head": "272be6f1c7cbbae903edbed8db89d3423c70bc2d",
+  "original_status": [],
+  "original_refs": [
+    "45fc36cc4d173fb1e46eac2dcd1be3338157c500",
+    "45fc36cc4d173fb1e46eac2dcd1be3338157c500",
+    "c2f889336e5c656763ecac76ed54c960b36a666f",
+    "69570b424a3b552b4d56ebca062cc412ad105521",
+    "070c99be932097c428b3be83a635bb9f749b3283",
+    "e34e40f0db6be26bdfc867c89e36b897c677acdf"
+  ],
+  "manifest_files": 41,
+  "artifact_files": 4,
+  "mismatches": [],
+  "passed": true
+}

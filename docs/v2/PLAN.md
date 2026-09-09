@@ -87,10 +87,10 @@ Files: scripts/benchmark_{pipeline,capture}.py, autonavy/metrics.py, requirement
 M8 execution subdivision: M8a benchmarks and runtime diagnostics (including actual measurements) → independent review/fixes → M8b dependency/CI, launcher/preflight/build and English operation docs (including actual available compile) → independent review/fixes. One production writer; each subtask gets a concrete plan and scoped commits. M8 closes only when both pass. This preserves the approved milestone order while avoiding a single oversized tooling change.
 ### Task 9: M9 final review and handoff
 Files: docs/v2/{STATUS,VERIFICATION,REVIEW,DECISIONS,BENCHMARKS,MIGRATION}.md.
-- [ ] Full suite and scoped lint; finite replay through supported launchers; requirements A01-A39 mapped to real implementation/callers/evidence.
-- [ ] Independent whole-branch review; targeted failing regression tests for findings; fixes and re-review.
-- [ ] Compare source branch/status/assets/native hashes with baseline, retain worktree/branch, record last verified code commit and clean state.
-- [ ] Deliver exact executed/manual commands, measured scope, safe launch/stop/rollback and precise hardware gaps.
+- [x] Full suite and scoped lint; finite replay through supported launchers; requirements A01-A39 mapped to real implementation/callers/evidence.
+- [x] Independent whole-branch review; targeted failing regression tests for findings; fixes and re-review.
+- [x] Compare source branch/status/assets/native hashes with baseline, retain worktree/branch, record last verified code commit and clean state.
+- [x] Deliver exact executed/manual commands, measured scope, safe launch/stop/rollback and precise hardware gaps.
 
 ## Dependency review
 

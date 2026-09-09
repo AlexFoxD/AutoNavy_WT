@@ -1,0 +1,17 @@
+{
+  "checked_head": "e4d207e57fb9ade311a8df15ea27da3d218871f9",
+  "original_status": [],
+  "original_refs": [
+    "45fc36cc4d173fb1e46eac2dcd1be3338157c500",
+    "45fc36cc4d173fb1e46eac2dcd1be3338157c500",
+    "c2f889336e5c656763ecac76ed54c960b36a666f",
+    "69570b424a3b552b4d56ebca062cc412ad105521",
+    "070c99be932097c428b3be83a635bb9f749b3283",
+    "e34e40f0db6be26bdfc867c89e36b897c677acdf"
+  ],
+  "compiled_manifest_files": 41,
+  "final_artifact_and_wrapper_files": 6,
+  "native_sha256": "ABE3EF91491C5C53EDA3BC16C63843545942079DEA80E80C8A139671FBEDF721",
+  "mismatches": [],
+  "passed": true
+}
