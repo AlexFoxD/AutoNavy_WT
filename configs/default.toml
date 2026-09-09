@@ -1,0 +1,126 @@
+# AutoNavy_WT v2: built-in defaults, relative resources use the distribution root.
+# Synthetic replay is finite and requires an explicit fixture.
+# Receive-age TTLs do not establish original game-render age.
+# Physical input requires an explicit --enable-input flag and live prerequisites.
+schema_version = 1
+
+[capture]
+backend = "dxcam"
+device_index = 0
+output_index = 0
+pixel_format = "BGR"
+fps = 60
+repeated_frames = false
+obs_api = "auto"
+width = 1280
+height = 720
+read_failure_limit = 3
+startup_timeout_s = 10.0
+stop_timeout_s = 2.0
+frame_timeout_s = 1.0
+# fixture is unset; provide it explicitly when needed.
+# max_frames is unset; provide it explicitly when needed.
+
+[geometry]
+window_class = "DagorWClass"
+window_title = ""
+profile_id = "legacy-1280x720"
+width = 1280
+height = 720
+ui_scale = 1.0
+obs_content_rect = [0, 0, 1280, 720]
+
+[vision]
+fire_roi = [370, 200, 910, 510]
+heading_roi = [85, 545, 145, 615]
+ammo_roi = [480, 660, 520, 690]
+fire_hsv_lower = [33, 109, 149]
+fire_hsv_upper = [137, 255, 255]
+heading_hsv_lower = [35, 43, 46]
+heading_hsv_upper = [77, 255, 255]
+canny_low = 100
+canny_high = 200
+canny_input = "color"
+morphology_size = 1
+template_threshold = 0.8
+start_threshold = 0.9
+confirm_threshold = 0.95
+join_threshold = 0.9
+aim_threshold = 0.3
+collision_threshold = 0.2
+research_threshold = 0.7
+preprocess_version = 1
+
+[telemetry]
+base_url = "http://127.0.0.1:8111"
+poll_hz = 10.0
+connect_timeout_s = 0.5
+read_timeout_s = 0.5
+object_ttl_s = 1.0
+metadata_ttl_s = 30.0
+retry_backoff_s = 0.5
+max_backoff_s = 5.0
+
+[input]
+enable_input = false
+emergency_stop_key = "f8"
+pause_key = "f9"
+require_focus = true
+vjoy_device_id = 1
+vjoy_neutral = 16384
+max_pending = 64
+intent_ttl_s = 0.25
+press_duration_s = 0.05
+click_duration_s = 0.1
+throttle_interval_s = 0.1
+
+[control]
+aim_kp = 0.6
+aim_ki = 0.0
+aim_kd = 0.02
+aim_limit_px = 30.0
+heading_kp = 0.5
+heading_ki = 0.1
+heading_kd = 0.1
+heading_limit = 100.0
+search_kp = 3.0
+search_ki = 1.0
+search_kd = 1.0
+search_limit = 50.0
+integral_limit = 100.0
+max_dt_s = 1.0
+arrival_distance = 0.01
+lookahead_distance = 0.02
+replan_deviation = 0.1
+replan_attempts = 3
+replan_backoff_s = 1.0
+
+[runtime]
+tick_hz = 30.0
+frame_ttl_s = 0.5
+join_timeout_s = 2.0
+menu_timeout_s = 120.0
+queue_timeout_s = 540.0
+spawn_delay_s = 20.0
+player_timeout_s = 30.0
+battle_settle_s = 15.0
+recovery_reverse_s = 60.0
+recovery_settle_s = 3.0
+recovery_turn_s = 5.0
+recovery_forward_s = 10.0
+
+[diagnostics]
+preview = false
+preview_fps = 5.0
+log_level = "INFO"
+log_max_bytes = 2000000
+log_backups = 3
+fault_interval_s = 5.0
+per_frame = false
+
+[paths]
+templates = "src/game_image"
+aim_template = "src/cir.png"
+route = "path.json"
+logs = "logs/v2"
+cache = "logs/v2/cache"

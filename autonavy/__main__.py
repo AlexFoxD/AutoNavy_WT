@@ -1,4 +1,4 @@
-"""Compatibility launcher; all execution goes through the safe v2 CLI."""
+"""Run the shared CLI with ``python -m autonavy``."""
 from autonavy.cli import main
 
 if __name__ == '__main__':
