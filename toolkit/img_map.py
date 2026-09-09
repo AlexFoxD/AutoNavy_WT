@@ -1,58 +1,19 @@
-import cv2
-import numpy as np
-from toolkit.resources import read_image
+"""Lazy legacy asset names; importing this module performs no resource reads."""
+from autonavy.config import load_settings
+from autonavy.vision.templates import GAME_ASSETS, TemplateRegistry
 
-print("Загрузка шаблонов изображений...")
+_registry = None
 
-start = read_image('src/game_image/start.png')
-join_game = read_image('src/game_image/joingame4.png')
-join = read_image('src/game_image/join.png')
-end = read_image('src/game_image/end.png')
-close = read_image('src/game_image/close.png')
-checkin = read_image('src/game_image/checkin.png')
-no = read_image('src/game_image/no.png')
-ok01 = read_image('src/game_image/ok01.png')
-ok02 = read_image('src/game_image/ok02.png')
-ok03 = read_image('src/game_image/ok03.png')
-tectree = read_image('src/game_image/tectree.png')
-time = read_image('src/game_image/time.png')
-yes = read_image('src/game_image/yes.png')
-exit = read_image('src/game_image/exit.png')
-returntobase = read_image('src/game_image/rtb.png')
-joining = read_image('src/game_image/joining.png')
-havejoin = read_image('src/game_image/hvjoin.png')
-buy = read_image('src/game_image/buy.png')
-back = read_image('src/game_image/back.png')
-base = read_image('src/game_image/base.png')
-ingameing = read_image('src/game_image/ingaming.png')
-backtobase = read_image('src/game_image/backtobase.png')
-backtobase2 = read_image('src/game_image/backtobase2.png')
-autobuyparts = read_image('src/game_image/autobuyparts.png')
-cart = read_image('src/game_image/cart.png')
-confirm = read_image('src/game_image/confirm.png')
-confirm1 = read_image('src/game_image/confirm1.png')
-confirm2 = read_image('src/game_image/confirm2.png')
-improvement = read_image('src/game_image/improvement.png')
-improvement_ = read_image('src/game_image/improvement_.png')
-_purchase = read_image('src/game_image/purchase.png')
-purchase_confirm = read_image('src/game_image/purchase_confirm.png')
-crew_cancel = read_image('src/game_image/crew_cancel.png')
-rtlg_no = read_image('src/game_image/rtlg_no.png')
-research = read_image('src/game_image/research.png')
-research1 = read_image('src/game_image/research1.png')
-box = read_image('src/game_image/box.png')
-waiting = read_image('src/game_image/waiting.png')
-data = read_image('src/game_image/data.png')
-wtlogo = read_image('src/game_image/wtlogo.png')
 
-fire = read_image('src/game_image/6auto.png')
+def load(settings=None):
+    """Explicitly prepare a registry for legacy callers that still require image arrays."""
+    global _registry
+    _registry = TemplateRegistry.from_settings(settings or load_settings())
+    return _registry
 
-lock = read_image('src/game_image/lock.png')
-hsv = cv2.cvtColor(lock, cv2.COLOR_BGR2HSV)
-lower_black = np.array([0, 0, 0])
-upper_black = np.array([180, 255, 46])
-lock = cv2.inRange(hsv, lower_black, upper_black)
-crash_warning = read_image('src/crash_warning.png')
-crashed = read_image('src/crashed.png')
 
-print("Шаблоны изображений успешно загружены.")
+def __getattr__(name):
+    if name not in GAME_ASSETS and name not in ('crash_warning','crashed'):
+        raise AttributeError(name)
+    registry = _registry if _registry is not None else load()
+    return registry.prepared_image(name)

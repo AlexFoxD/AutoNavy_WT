@@ -16,6 +16,8 @@ class Application:
         self.state = RuntimeState.STOPPED
         self.frames_processed = 0
         self.last_frame: FramePacket | None = None
+        self.last_observations = None
+        self.vision = None
         self.last_error: str | None = None
         self.capture = None
         self.stop_event = threading.Event()
@@ -42,6 +44,9 @@ class Application:
         try:
             from autonavy.capture.factory import create_capture
             from autonavy.capture.base import CaptureError, CaptureTimeout
+            from autonavy.vision.detectors import VisionPipeline
+            # Decode and validate every selected template before any live capture resource.
+            self.vision = VisionPipeline(self.settings)
             capture = create_capture(self.settings)
             with self._capture_lifecycle:
                 self.capture = capture
@@ -66,6 +71,7 @@ class Application:
                 if packet.geometry is not None and (self.last_frame is None or self.last_frame.geometry_id != packet.geometry_id):
                     LOG.info('capture_geometry=%s', packet.geometry.diagnostic())
                 self.last_frame = packet
+                self.last_observations = self.vision.observe(packet)
                 self.frames_processed += 1
                 if self.settings.capture.max_frames is not None and self.frames_processed >= self.settings.capture.max_frames:
                     break
