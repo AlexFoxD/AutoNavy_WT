@@ -151,3 +151,33 @@ def test_capture_child_error_payload_contains_bounded_traceback():
     message = bytes(shared.error_text[: shared.error_size.value]).decode()
     assert "Traceback" in message and "source sentinel" in message
     assert shared.error_size.value <= 4096
+
+
+def test_check_config_is_inert_and_replay_cli_writes_bounded_runtime_summary(tmp_path):
+    from autonavy.cli import main
+
+    config = tmp_path / "diagnostics.toml"
+    logs = tmp_path / "output"
+    config.write_text('[paths]\nlogs = "' + logs.as_posix() + '"\n')
+    assert main(["--check-config", "--config", str(config)]) == 0
+    assert not logs.exists()
+    assert (
+        main(
+            [
+                "--config",
+                str(config),
+                "--capture",
+                "replay",
+                "--fixture",
+                "tests/fixtures/smoke",
+                "--max-frames",
+                "2",
+            ]
+        )
+        == 0
+    )
+    text = (logs / "autonavy.log").read_text(encoding="utf-8")
+    assert "runtime_metrics=" in text and "decision_ns" in text
+    assert "resolved_settings=" in text and "source_render_latency=unknown" in text
+    assert "frame=1 generation=" not in text
+    assert not list(logs.glob("*.png"))

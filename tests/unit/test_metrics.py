@@ -113,3 +113,34 @@ def test_native_planner_preserves_bounded_traceback(monkeypatch):
     _native_worker(PlanRequest(("test",), b"", (0, 0), (1, 1)), [], count, error)
     assert count.value == -2
     assert b"Traceback" in error.value and b"planner traceback sentinel" in error.value
+
+
+def test_long_exception_preserves_type_tail_and_device_context():
+    from autonavy.diagnostics import exception_text
+
+    try:
+        raise RuntimeError("x" * 6000 + " final reason")
+    except RuntimeError as exc:
+        data = exception_text(exc, 511, context="backend=obs device=2")
+    assert len(data) <= 511
+    assert b"RuntimeError:" in data and b"final reason" in data
+    assert b"backend=obs device=2" in data and b"truncated" in data
+
+
+def test_telemetry_fault_has_bounded_traceback_and_keeps_existing_throttle(caplog):
+    from autonavy.telemetry import TelemetryService
+
+    service = TelemetryService(Settings().telemetry)
+    with caplog.at_level(logging.WARNING):
+        for _ in range(2):
+            try:
+                raise ValueError("telemetry diagnostic sentinel")
+            except ValueError as exc:
+                service._fault("metadata", exc)
+    messages = [
+        r.message
+        for r in caplog.records
+        if "telemetry diagnostic sentinel" in r.message
+    ]
+    assert len(messages) == 1
+    assert "Traceback" in messages[0] and "metadata" in messages[0]

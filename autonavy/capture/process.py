@@ -77,19 +77,19 @@ def _native_owner(settings, source_factory, shared):
                     break
                 time.sleep(min(remaining, 0.01))
     except BaseException as exc:
-        _write_error(shared, exc)
+        _write_error(shared, exc, context=f'backend={settings.capture.backend} device={settings.capture.device_index} output={settings.capture.output_index}')
     finally:
         if source is not None:
             try:
                 source.close()
             except BaseException as exc:
-                _write_error(shared, exc, cleanup=True)
+                _write_error(shared, exc, cleanup=True, context=f'backend={settings.capture.backend} device={settings.capture.device_index} cleanup')
 
 
-def _write_error(shared, exc, *, cleanup=False):
+def _write_error(shared, exc, *, cleanup=False, context=''):
     # A single child writes bounded error bytes, then publishes length last.
     from autonavy.diagnostics import exception_text
-    encoded = exception_text(exc)
+    encoded = exception_text(exc, context=context)
     size = shared.cleanup_size if cleanup else shared.error_size
     destination = shared.cleanup_text if cleanup else shared.error_text
     if not size.value:

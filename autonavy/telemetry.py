@@ -248,7 +248,8 @@ class TelemetryService:
     def _fault(self, component, exc):
         now = self._clock()
         if self._last_fault_ns is None or now - self._last_fault_ns >= self._fault_interval_ns:
-            LOG.warning('Telemetry %s failed: %s: %.240s', component, type(exc).__name__, str(exc))
+            from autonavy.diagnostics import exception_text
+            LOG.warning('Telemetry %s failed: %s', component, exception_text(exc).decode('utf-8', errors='replace'))
             self._last_fault_ns = now
 
     def _poll(self, session):

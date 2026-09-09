@@ -39,13 +39,21 @@ class FaultThrottle:
         return True
 
 
-def exception_text(exc, limit=4096):
-    """Preserve exception type and final traceback frames within an IPC byte bound."""
+def exception_text(exc, limit=4096, *, context=""):
+    """Bound IPC bytes, retaining context/type and the final exception reason."""
+    if type(limit) is not int or limit < 128:
+        raise ValueError("Exception byte limit must be at least 128")
+    context_bytes = context.encode("utf-8", errors="replace")[: min(160, limit // 3)]
     data = "".join(
         traceback.format_exception(type(exc), exc, exc.__traceback__)
     ).encode("utf-8", errors="replace")
-    marker = b"[traceback truncated]\n"
-    return data if len(data) <= limit else marker + data[-(limit - len(marker)) :]
+    prefix = context_bytes + b"\n" if context_bytes else b""
+    if len(prefix) + len(data) <= limit:
+        return prefix + data
+    marker = (
+        b"[traceback truncated]\n" + type(exc).__name__.encode()[:60] + b": " + prefix
+    )
+    return marker + data[-(limit - len(marker)) :]
 
 
 @contextmanager
