@@ -7,7 +7,7 @@ Last tested and independently reviewed code:20142e08612a9fb7c106e10e772a769e7633
 Initial origin/master:c2f889336e5c656763ecac76ed54c960b36a666f; upstream/master:69570b424a3b552b4d56ebca062cc412ad105521.
 
 Completed: M0 audit/isolation; M1 safe configuration/CLI/replay; M2 DXcam ownership/geometry/lifecycle; M3 packet-bound cached vision; M4 single-owner telemetry; M5 coordinated guarded input and cancellable battle flow. Independently reviewed PASS after scoped fixes; evidence/M1.md through evidence/M5.md.
-Current: M5 review gate PASS, all four findings addressed at20142e0. M6 navigation/controllers next; worker owns production integration/tests/M6 plan, coordinator owns shared records.
+Current: M6 /root/m6 active from9740ead (M5 accepted20142e0). Owns navigation/controller production integration, legacy navigation migration, relevant config/tests and M6 plan. Coordinator owns shared records; one production writer.
 Remaining: M6-M9 navigation, OBS, benchmarks/packaging, final review and verification. OBS selection currently fails safely. No legacy fallback.
 
 Latest tests: M5 fix16new/168covering passed; full326passed1knownlauncherexcluded50.27s; compile/staged diff passed. Evidence/M5.md contains exact RED/GREEN and commands. Coordinator config/replay smoke at12c6379 returned0; fixture3synthetic frames, max-frames caps rather than loops. Independent M5 scoped re-review PASS, no new findings.
