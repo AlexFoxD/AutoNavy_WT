@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-M0-M2 independent reviews passed, including M2 lifecycle and cleanup corrections. M3 implementation is active. Final A01-A39 caller/evidence review remains pending.
+M0-M3 independent reviews passed, including lifecycle/cleanup and preview corrections. M4 implementation is active. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
@@ -22,3 +22,7 @@ M2 review at e7119e0: SPEC FAIL, QUALITY FAIL pending P1 atomic generation trans
 M2 scoped re-review468ab72: original P1 atomic snapshot and P2 startup cancellation ADDRESSED. New P2 fix regression: Application publishes _closed before resource cleanup; overlapping run-finally returns0/STOPPED before cleanup and misses late cleanup errors. Gated fake reproduction confirmed. Round2 original implementer tasked with shared cleanup completion/error; no hardware ran.
 
 M2 scoped re-reviewceee7bb: cleanup finding ADDRESSED, SPEC PASS, QUALITY PASS, no new fix-local findings. Original generation/start findings remain accepted. M2 complete; M3 vision active. Reviewer verified supplied3new/168regression evidence without redundant rerun.
+
+M3 independent review59e5914: SPEC FAIL/QUALITY FAIL for soleP2 unthrottled preview copy/draw; configured preview_fps unused. All other scoped vision/runtime/cache/asset/import checks accepted. Original implementer resumed for clock-injected preview cadence regression/fix before M4.
+
+M3 scoped re-review713a507: previewfinding ADDRESSED, SPEC PASS, QUALITY PASS, no newfixissues.3new/36coveringtests pass; full201pass1excluded previously. M3 complete; M4 telemetry active.

@@ -46,9 +46,9 @@ Interfaces: `start/read/stop/close` capture protocol; `LatestFrameSlot.publish/r
 ### Task 3: M3 vision
 Files: autonavy/vision/{context,templates,detectors}.py, toolkit/{scn,img_map,deg_cal}.py, firesystem.py, autonavy/app.py, tests/unit/test_vision.py.
 Interfaces: `FrameContext(packet)` caches bounded ROI derivatives; `TemplateRegistry` caches color-input Canny per version; structured match and degree observations.
-- [ ] Characterization first: single-channel score/location agrees with legacy expansion; ROI HSV equals cropped full-frame HSV; 1x1 morphology is identity.
-- [ ] RED tests for empty/oversize/constant templates, nonfinite score, positive/negative matches, cache call counts, coordinates, no contours, debug immutability.
-- [ ] Implement cached detectors, same-packet degree extraction and runtime recognition. GREEN/review/commit.
+- [x] Characterization first: single-channel score/location agrees with legacy expansion; ROI HSV equals cropped full-frame HSV; 1x1 morphology is identity.
+- [x] RED tests for empty/oversize/constant templates, nonfinite score, positive/negative matches, cache call counts, coordinates, no contours, debug immutability.
+- [x] Implement cached detectors, same-packet degree extraction and runtime recognition. GREEN/review/commit.
 
 ### Task 4: M4 telemetry
 Files: autonavy/telemetry.py, info.py, toolkit/map.py, autonavy/app.py, tests/unit/test_telemetry.py.

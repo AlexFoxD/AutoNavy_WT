@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0-M2 independently reviewed; M3 vision implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M3 independently reviewed; M4 telemetry implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -24,13 +24,13 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A03 / ARCH-01 | PASS | autonavy/{__init__,cli,app}.py and three Python shims; tests/integration/test_replay.py::test_all_supported_imports_are_side_effect_free and ::test_entrypoints_use_safe_cli_from_unrelated_cwd; M1 regression command/results in evidence/M1.md; recheck extended modules at M9 |
 | A04 / CAP-01 | PASS | M2: production capture.factory selects ProcessCapture/DXcamSource; fake lifecycle/error/restart tests in tests/unit/test_capture.py and tests/integration/test_capture_runtime.py. Final M2 regression168 pass/1 excluded atceee7bb; evidence/M2.md. Hardware NOT RUN. |
 | A05 / FRAME-01 | PASS | M2: bounded latest slot/shared pixel transport and owned FramePacket copies, slow-consumer/replacement/generation-race tests in test_capture.py and test_capture_runtime.py; evidence/M2.md commands/results, reviewedceee7bb. |
-| A06 / FRAME-01 | PARTIAL | M2 retained packet/producer-buffer mutation tests pass; M3 debug-drawing immutability validation pending. |
-| A07 / FRAME-01 | NOT RUN | Implementation/validation pending |
+| A06 / FRAME-01 | PASS | M2 retained packet/producer-buffer mutation tests and M3 debug-copy/overlay immutability tests pass; packet-local observations unchanged. evidence/M2.md and evidence/M3.md. |
+| A07 / FRAME-01 | PASS | M3 Application passes exact acquired packet to VisionPipeline; samepacket degree/ROI observations and import-safe explicit deg_cal.get_deg remove independent capture. test_vision.py/test_vision_runtime.py; evidence/M3.md. Final active-caller audit remains M9. |
 | A08 / CAP-03 | PARTIAL | M2 cancellation wakes reads, generation snapshot/start/cleanup races covered, fake hung child reclaimed with bounded process shutdown; pinned native limits documented. Input/cache invalidation integration follows M3/M5/M7. |
-| A09 / VISION-01 | NOT RUN | Implementation/validation pending |
-| A10 / VISION-01 | NOT RUN | Implementation/validation pending |
-| A11 / VISION-02 | NOT RUN | Implementation/validation pending |
-| A12 / VISION-02/03 | NOT RUN | Implementation/validation pending |
+| A09 / VISION-01 | PASS | M3 FrameContext/TemplateRegistry raw color Canny outputs feed one-channel match_edges; call-count/cache-version/invalidation tests include alpha-only aim asset. evidence/M3.md:201regression pass1excluded, previewfix36covering pass. |
+| A10 / VISION-01 | PASS | M3 real-asset synthetic positive/negative and malformed/constant/oversize/nonfinite tests; frame/desktop ROI mapping and configured-profile gates; required assets validated before capture construction. evidence/M3.md. Live accuracy NOT RUN. |
+| A11 / VISION-02 | PASS | M3 test_vision.py validates pixelwise cropped HSV and actual fire/lock/collision ROI mask-Canny behavior; separates neighborhood boundary effects from HSV equivalence. evidence/M3.md. |
+| A12 / VISION-02/03 | PASS | M0/M3 no-op morphology, empty/degenerate heading, debug-copy on/off equality;713a507 adds independently throttled copy/draw with injectedclock and deadline tests (36covering passed). evidence/M3.md. |
 | A13 / GEOM-01 | PARTIAL | M2 pure GeometrySnapshot transforms and Windows client/output mapping cover translated/negative origins, bounds and content scaling. Actual OBS source/calibration integration follows M7. |
 | A14 / GEOM-01 | NOT RUN | Implementation/validation pending |
 | A15 / TEL-01 | NOT RUN | Implementation/validation pending |
