@@ -124,8 +124,9 @@ def test_factory_selects_live_without_native_import_and_obs_has_no_fallback(monk
     capture.close()
     with pytest.raises(RuntimeError, match='closed'):
         capture.start()
-    with pytest.raises(RuntimeError, match='OBS'):
-        create_capture(load_settings(overrides={'capture': {'backend': 'obs'}}))
+    obs = create_capture(load_settings(overrides={'capture': {'backend': 'obs'}}))
+    assert isinstance(obs, ProcessCapture) and not obs.started
+    obs.close()
 
 
 def test_legacy_screen_import_cannot_acquire_or_start_native_capture(monkeypatch):

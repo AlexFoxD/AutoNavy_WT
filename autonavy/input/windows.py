@@ -1,5 +1,4 @@
 """Lazy Windows transport and owned hotkeys; no physical work at import."""
-from dataclasses import replace
 import ctypes
 import threading
 from ctypes import wintypes
@@ -154,8 +153,8 @@ class LiveWindowGuard:
         if packet is None or packet.geometry is None: return False
         try:
             current = self.geometry.snapshot(packet.geometry.frame_size)
-            if self.settings.capture.backend == 'obs':
-                current = replace(current, content_rect=self.settings.geometry.obs_content_rect)
+            from autonavy.geometry import source_geometry
+            current = source_geometry(self.settings, current)
             if self.foreground is None:
                 api = ctypes.WinDLL('user32',use_last_error=True)
                 api.GetForegroundWindow.argtypes = []

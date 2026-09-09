@@ -48,7 +48,7 @@ def test_config_precedence_and_default_resource_resolution(tmp_path, monkeypatch
     {'capture': {'backend': 'replay'}},
     {'capture': {'backend': 'replay', 'fixture': 'tests/fixtures/smoke'}, 'input': {'enable_input': True}},
     {'capture': {'backend': 'obs', 'pixel_format': 'BGRA'}},
-    {'capture': {'backend': 'obs', 'repeated_frames': True}},
+    {'capture': {'backend': 'replay', 'fixture': 'tests/fixtures/smoke', 'repeated_frames': True}},
     {'capture': {'backend': 'dxcam', 'obs_api': 'dshow'}},
     {'capture': {'backend': 'obs', 'output_index': 1}},
     {'telemetry': {'base_url': 'http://[invalid'}},

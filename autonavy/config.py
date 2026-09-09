@@ -237,7 +237,7 @@ def validate_settings(settings: Settings) -> Settings:
     _require(c.fps <= 1000, 'capture.fps must not exceed 1000')
     _require(c.width * c.height <= 33_177_600, 'Capture dimensions exceed supported allocation limit')
     _require(c.max_frames is None or c.max_frames > 0, 'capture.max_frames must be positive')
-    _require(c.backend == 'dxcam' or not c.repeated_frames, 'repeated_frames is DXcam-only')
+    _require(c.backend in {'dxcam', 'obs'} or not c.repeated_frames, 'repeated_frames requires native capture')
     _require(c.backend != 'obs' or c.pixel_format == 'BGR', 'OBS delivers BGR; configure capture.pixel_format=BGR')
     _require(c.backend == 'replay' or c.fixture is None, 'capture.fixture requires replay')
     _require(c.backend != 'replay' or c.fixture is not None, 'Replay requires --fixture or capture.fixture')

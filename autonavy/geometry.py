@@ -1,7 +1,7 @@
 """Pure immutable mappings between frame, ROI, and desktop coordinates."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 import math
@@ -17,6 +17,7 @@ class GeometrySnapshot:
     ui_scale: float = 1.0
     window_handle: int = 0
     profile_size: tuple[int, int] = (1280, 720)
+    source_id: str = 'desktop'
 
     def __post_init__(self):
         for name, count in (('client_rect', 4), ('frame_size', 2), ('content_rect', 4), ('profile_size', 2)):
@@ -39,9 +40,32 @@ class GeometrySnapshot:
     @property
     def recognition_supported(self) -> bool:
         l, t, r, b = self.client_rect
+        a, top, c, d = self.content_rect
         return (self.profile_id == 'legacy-1280x720' and self.ui_scale == 1.0
                 and self.dpi == 96 and self.profile_size == (1280, 720) and (r-l, b-t) == (1280, 720)
-                and self.frame_size == (1280, 720) and self.content_rect == (0, 0, 1280, 720))
+                and (c-a, d-top) == (1280, 720))
+
+    @property
+    def content_center(self) -> tuple[float, float]:
+        a, b, c, d = self.content_rect
+        return (a+c)/2, (b+d)/2
+
+    def profile_to_frame(self, point) -> tuple[float, float]:
+        """Pure transform; scaling support does not imply calibrated recognition."""
+        x, y = point
+        w, h = self.profile_size
+        if not (math.isfinite(x) and math.isfinite(y) and 0 <= x < w and 0 <= y < h):
+            raise ValueError('Point is outside reference profile')
+        a, b, c, d = self.content_rect
+        return a+x*(c-a)/w, b+y*(d-b)/h
+
+    def frame_to_profile(self, point) -> tuple[float, float]:
+        x, y = point
+        a, b, c, d = self.content_rect
+        if not (math.isfinite(x) and math.isfinite(y) and a <= x < c and b <= y < d):
+            raise ValueError('Frame point is outside game content')
+        w, h = self.profile_size
+        return (x-a)*w/(c-a), (y-b)*h/(d-b)
 
     def frame_to_desktop(self, point, *, _edge=False) -> tuple[float, float]:
         x, y = point
@@ -86,3 +110,12 @@ class GeometrySnapshot:
         return dict(asdict(self), geometry_id=self.geometry_id, recognition_supported=self.recognition_supported,
                     effective_scale=((r-l)/(c-a), (bottom-t)/(d-b)),
                     proposed_center=self.frame_to_desktop(((a+c)/2, (b+d)/2)))
+
+
+def source_geometry(settings, snapshot: GeometrySnapshot) -> GeometrySnapshot:
+    """Apply manual source calibration identically in capture and live input guard."""
+    if settings.capture.backend == 'obs':
+        c = settings.capture
+        return replace(snapshot, content_rect=settings.geometry.obs_content_rect,
+                       source_id=f'obs:{c.device_index}:{c.obs_api}')
+    return snapshot

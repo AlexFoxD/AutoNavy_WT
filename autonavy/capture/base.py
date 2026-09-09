@@ -14,6 +14,7 @@ class CaptureSample:
     image: 'np.ndarray'
     geometry: 'GeometrySnapshot'
     received_at_ns: int
+    diagnostic: dict | None = None
 
 
 class CaptureError(RuntimeError):

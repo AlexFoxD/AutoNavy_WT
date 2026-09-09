@@ -11,5 +11,7 @@ def create_capture(settings) -> Capture:
         from autonavy.capture.process import ProcessCapture
         return ProcessCapture(settings)
     if c.backend == 'obs':
-        raise RuntimeError('OBS capture is unavailable until the M7 adapter; no fallback was selected')
+        from autonavy.capture.obs import OBSSource
+        from autonavy.capture.process import ProcessCapture
+        return ProcessCapture(settings, source_factory=OBSSource)
     raise ValueError(f'Unsupported capture backend: {c.backend}')

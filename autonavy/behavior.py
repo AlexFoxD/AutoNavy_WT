@@ -246,8 +246,8 @@ class BattlePolicy:
         if not new_frame or now<self.next_action: return
         if aim and aim.frame_center:
             dt=self._control_dt('aim',now)
-            x,y=aim.frame_center; w,h=a.last_frame.geometry.frame_size
-            dx,dy=x-w//2,y-h//2
+            x,y=aim.frame_center; center_x,center_y=a.last_frame.geometry.content_center
+            dx,dy=x-center_x,y-center_y
             if abs(dx)<=2 and abs(dy)<=2:
                 if ammo:
                     self.emit('fire','move','pointer',(self.rng.randint(-10,10),self.rng.randint(0,10)))

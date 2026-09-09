@@ -89,6 +89,10 @@ class Application:
         if packet is not None and not self.stop_event.is_set():
             if packet.geometry is not None and (self.last_frame is None or self.last_frame.geometry_id != packet.geometry_id):
                 LOG.info('capture_geometry=%s', packet.geometry.diagnostic())
+            if self.last_frame is None or self.last_frame.source_generation != packet.source_generation:
+                diagnostic = getattr(self.capture, 'diagnostic', None)
+                if diagnostic is not None:
+                    LOG.info('capture_source=%s', diagnostic)
             self.last_frame = packet
             self.last_observations = self.vision.observe(packet, selection=self.policy.detectors)
             self.frames_processed += 1

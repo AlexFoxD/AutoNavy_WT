@@ -7,6 +7,7 @@ depending on a mutex the terminated child may own. No frame FIFO or feeder threa
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
+from copy import deepcopy
 import json
 import math
 import multiprocessing
@@ -58,7 +59,7 @@ def _native_owner(settings, source_factory, shared):
                     raise CaptureError('Native source returned incompatible frame geometry or format')
                 count += 1
                 metadata = json.dumps(dict(publication_id=count, received_at_ns=sample.received_at_ns,
-                                           geometry=asdict(sample.geometry))).encode('utf-8')
+                                           geometry=asdict(sample.geometry), diagnostic=sample.diagnostic)).encode('utf-8')
                 if len(metadata) > len(shared.metadata):
                     raise CaptureError('Capture geometry metadata exceeds transport limit')
                 if shared.lock.acquire(timeout=min(0.05, c.stop_timeout_s)):
@@ -100,6 +101,7 @@ class _Progress:
     # Readiness is historical within a generation; cancellation is a separate one-way signal.
     started: bool = False
     publication_id: int = 0
+    diagnostic: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -154,6 +156,11 @@ class ProcessCapture:
     def publication_id(self):
         session = self._session
         return session.progress.publication_id if session is not None else 0
+
+    @property
+    def diagnostic(self):
+        session = self._session
+        return deepcopy(session.progress.diagnostic) if session is not None else None
 
     @staticmethod
     def _error(shared):
@@ -256,6 +263,7 @@ class ProcessCapture:
                                         return None
                                     raise
                                 session.progress.publication_id = packet.publication_id
+                                session.progress.diagnostic = metadata.get('diagnostic')
                                 return packet
                             finally:
                                 self._lifecycle.release()

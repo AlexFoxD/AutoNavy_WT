@@ -22,10 +22,11 @@ def test_negative_origin_roi_and_boxes_have_literal_desktop_coordinates():
     assert replace(geometry, client_rect=(-1400, 100, -120, 820)).geometry_id != geometry.geometry_id
 
 
-def test_letterbox_mapping_does_not_claim_scaled_profile_is_recognized():
+def test_letterbox_mapping_recognizes_native_content_and_rejects_scaled_content():
     geometry = geometry_type()((100, 200, 1380, 920), (1920, 1080), (320, 180, 1600, 900))
     assert geometry.frame_to_desktop((330, 200)) == (110, 220)
-    assert not geometry.recognition_supported
+    assert geometry.recognition_supported
+    assert not replace(geometry,content_rect=(320,180,960,540)).recognition_supported
     assert geometry.diagnostic()['client_rect'] == (100, 200, 1380, 920)
     for point in ((0, 0), (1600, 900), (float('nan'), 300)):
         with pytest.raises(ValueError):
@@ -83,3 +84,19 @@ def test_windows_uses_client_bounds_under_dpi_context_and_rejects_minimized():
     with pytest.raises(ValueError, match='window'):
         adapter.snapshot((1280, 720))
     assert api.contexts[-1] == 123
+
+
+def test_asymmetric_content_center_and_pure_scaled_profile_round_trip():
+    geometry = geometry_type()((-1500,100,-220,820),(1600,900),(100,50,1380,770))
+    assert geometry.content_center == (740,410)
+    assert geometry.profile_to_frame((640,360)) == (740,410)
+    assert geometry.frame_to_profile((750,430)) == (650,380)
+    assert geometry.frame_to_desktop((740,410)) == (-860,460)
+    scaled = replace(geometry,content_rect=(100,50,740,410))
+    assert scaled.profile_to_frame((640,360)) == (420,230)
+    assert scaled.frame_to_profile((420,230)) == (640,360)
+    assert scaled.frame_to_desktop((420,230)) == (-860,460)
+    assert not scaled.recognition_supported
+    for point in ((1280,720),(-1,0),(float('nan'),3)):
+        with pytest.raises(ValueError): geometry.profile_to_frame(point)
+    with pytest.raises(ValueError): geometry.frame_to_profile((0,0))
