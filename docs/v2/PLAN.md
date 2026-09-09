@@ -73,9 +73,9 @@ Interfaces: immutable ordered `RouteCursor`; lazy `NativePathfinder`; bounded re
 
 ### Task 7: M7 optional OBS and geometry
 Files: autonavy/capture/obs.py, autonavy/capture/factory.py, autonavy/geometry.py, autonavy/app.py, tests/unit/test_obs.py.
-- [ ] RED: selected device only, failed open/read, shape/dimension mismatch, BGR, cleanup/reopen and optional-import isolation.
-- [ ] Real VideoCapture(index,api) with actual properties; content rectangle separate from desktop bounds; test scale/letterbox/move invalidation and diagnostic output.
-- [ ] Native blocking capture uses tested process shutdown if required; fake hanging backend demonstrates termination only after input cleanup. GREEN/review/commit.
+- [x] RED: selected device only, failed open/read, shape/dimension mismatch, BGR, cleanup/reopen and optional-import isolation.
+- [x] Real VideoCapture(index,api) with actual properties; content rectangle separate from desktop bounds; test scale/letterbox/move invalidation and diagnostic output.
+- [x] Native blocking capture uses tested process shutdown if required; fake hanging backend demonstrates termination only after input cleanup. GREEN/review/commit.
 
 ### Task 8: M8 tooling and packaging
 Files: scripts/benchmark_{pipeline,capture}.py, autonavy/metrics.py, requirements-{core,dev}.txt, scripts/{install,run,launcher,build}.ps1, scripts/check_environment.py, .github/workflows/*.yml, README.md, docs/v2/{BENCHMARKS,MIGRATION}.md.

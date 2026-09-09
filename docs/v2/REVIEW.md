@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-M0-M6 independent reviews passed, including lifecycle, vision, telemetry, input and route-progress corrections. M7 implementation is next. Final A01-A39 caller/evidence review remains pending.
+M0-M7 independent reviews passed, including lifecycle, vision, telemetry, input, navigation and OBS geometry. M8 tooling is next. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
@@ -38,3 +38,5 @@ M5 scoped re-review20142e0: all four findings ADDRESSED, SPEC PASS, QUALITY PASS
 M6 independent review9ca0e57: SPEC FAIL/QUALITY FAIL, sole P2 route lookahead can bypass a required corner while advance waits for the smaller arrival radius. Dense128-grid east-then-south route with defaults .02lookahead/.01arrival stalls cursor at corner although target reaches .02beyond; deviation below.1 prevents replan, actualApplication continues steering. Reviewer reproduced pure and realApplication/RecordingBackend, no suite/hardware. Original /root/m6 fixround1 active: consistent ordered target/progress plus dense-turn runtime regression; retain intersection order. Other scoped native/lifecycle/telemetry/controller integration accepted.
 
 M6 scoped re-reviewc4c3810: P2 ADDRESSED, SPEC PASS, QUALITY PASS. Navigation passes arrival radius; lookahead bounded within half-radius of next required waypoint and stops at turns/reversals/unconsumed origin. ActualApplication dense-turn/off-route tests arrive on one plan with monotonic progress and neutralized steering.3new/86covering evidence accepted, no redundant rerun, no new issues. M6 complete.
+
+M7 independent review1b5ca78: SPEC PASS, QUALITY PASS, no actionable findings. Reviewer checked exact configured index/API, ownership/freshness/failure bounds,8192-byte diagnostics, actual profile consumers and live guard, asymmetric aim correction, scale inhibition and runtime cleanup. Worker411full/21finalfocused evidence inspected without redundant rerun. Shutdown claim is input release before parent waits, not a strict ordering of concurrent child release invocation. M7 complete; hardware/friendly device identity/latency remain unverified.
