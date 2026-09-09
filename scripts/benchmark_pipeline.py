@@ -8,6 +8,7 @@ boundaries. The actual offline decision stage has no legacy speedup comparison.
 import argparse
 from dataclasses import replace
 import hashlib
+import random
 from pathlib import Path
 import sys
 import time
@@ -20,8 +21,8 @@ import numpy as np
 from autonavy.app import Application
 from autonavy.config import load_settings
 from autonavy.geometry import GeometrySnapshot
-from autonavy.models import FramePacket
-from autonavy.telemetry import OfflineTelemetry
+from autonavy.models import FramePacket, RuntimeState
+from autonavy.telemetry import OfflineTelemetry, TelemetrySnapshot, Player, MapMetadata
 from autonavy.vision.context import FrameContext
 from autonavy.vision.detectors import VisionPipeline, match_edges
 from autonavy.vision.templates import TemplateRegistry
@@ -125,6 +126,98 @@ def correctness(packet, registry, settings):
     )
 
 
+class BenchmarkTelemetry(OfflineTelemetry):
+    """Valid synthetic player snapshots, without any map/native/network work."""
+
+    def __init__(self):
+        self.current = TelemetrySnapshot()
+
+    def publish(self, now):
+        self.current = TelemetrySnapshot(
+            generation=1,
+            player=Player((0.5, 0.5), 0, -1),
+            metadata=MapMetadata((0, 0), (100, 100), (10, 10), now),
+            received_at_ns=now,
+            valid=True,
+        )
+
+    def snapshot(self):
+        return self.current
+
+
+def measure_decision(
+    settings, registry, packet, rows, samples, warmups, repetitions, seed, *, battle
+):
+    # Fresh packet ownership/copy, publication timestamp and injected telemetry are
+    # outside the timed tick. Real vision/policy/guards/input/metrics execute inside.
+    telemetry = BenchmarkTelemetry() if battle else OfflineTelemetry()
+    vision = VisionPipeline(settings, registry)
+    app = Application(
+        settings, telemetry=telemetry, vision=vision, rng=random.Random(seed)
+    )
+    identity = 0
+    try:
+        app.input.start()
+        app.policy._state(
+            RuntimeState.IN_BATTLE if battle else RuntimeState.WAITING,
+            "battle" if battle else "hangar",
+        )
+        if battle:
+            vision.begin_battle(packet)
+        detectors = sorted(app.policy.detectors)
+        for repetition in range(1, repetitions + 1):
+            values = []
+            for index in range(warmups + samples):
+                identity += 1
+                fresh = replace(
+                    packet, publication_id=identity, received_at_ns=time.monotonic_ns()
+                )
+                if battle:
+                    telemetry.publish(fresh.received_at_ns)
+                started = time.perf_counter_ns()
+                app.tick(fresh)
+                elapsed = time.perf_counter_ns() - started
+                assert (
+                    app.last_observations.packet is fresh
+                    and app.last_observations.recognition_supported
+                )
+                assert app.state == (
+                    RuntimeState.IN_BATTLE if battle else RuntimeState.WAITING
+                )
+                if index >= warmups:
+                    values.append(elapsed)
+            rows.append(
+                timing_row(
+                    "decision_battle" if battle else "decision",
+                    "v2",
+                    values,
+                    warmups=warmups,
+                    repetition=repetition,
+                    scope="actual Application.tick: fresh supported pixels, real vision + "
+                    + (
+                        "battle policy, valid injected telemetry, dry input; map/native planning excluded"
+                        if battle
+                        else "menu policy, OfflineTelemetry, dry input"
+                    ),
+                )
+            )
+        metrics = app.metrics.snapshot()
+        return dict(
+            frames_processed=app.frames_processed,
+            recognition_supported=app.last_observations.recognition_supported,
+            packet_copy_in_timing=False,
+            native_planner_measured=False,
+            state=app.state.value,
+            valid_injected_telemetry=battle,
+            detectors=detectors,
+            vision_fraction_of_tick_mean=metrics["samples"]["vision_ns"]["mean"]
+            / metrics["samples"]["decision_ns"]["mean"],
+            metrics=metrics,
+        )
+    finally:
+        app.close()
+
+
 def run_benchmark(*, samples=20, warmups=3, seed=42, repetitions=3):
     for name, value, lower, upper in (
         ("samples", samples, 1, 10000),
@@ -219,51 +312,28 @@ def run_benchmark(*, samples=20, warmups=3, seed=42, repetitions=3):
                         scope=scope,
                     )
                 )
-    # Fresh packet ownership/copy and receive timestamp are outside the timed tick.
-    # Real vision selection, policy, guards, input owner and metrics execute inside.
-    app = Application(
+    decision = measure_decision(
         settings,
-        telemetry=OfflineTelemetry(),
-        vision=VisionPipeline(settings, registry),
+        registry,
+        packet,
+        rows,
+        samples,
+        warmups,
+        repetitions,
+        seed,
+        battle=False,
     )
-    identity = 0
-    try:
-        for repetition in range(1, repetitions + 1):
-            values = []
-            for index in range(warmups + samples):
-                identity += 1
-                fresh = replace(
-                    packet, publication_id=identity, received_at_ns=time.monotonic_ns()
-                )
-                started = time.perf_counter_ns()
-                app.tick(fresh)
-                elapsed = time.perf_counter_ns() - started
-                assert (
-                    app.last_observations.packet is fresh
-                    and app.last_observations.recognition_supported
-                )
-                if index >= warmups:
-                    values.append(elapsed)
-            rows.append(
-                timing_row(
-                    "decision",
-                    "v2",
-                    values,
-                    warmups=warmups,
-                    repetition=repetition,
-                    scope="actual Application.tick: supported-profile fresh pixels, vision + menu policy + dry input owner; no telemetry/native planner",
-                )
-            )
-        decision = dict(
-            frames_processed=app.frames_processed,
-            recognition_supported=app.last_observations.recognition_supported,
-            packet_copy_in_timing=False,
-            native_planner_measured=False,
-            state=app.state.value,
-            metrics=app.metrics.snapshot(),
-        )
-    finally:
-        app.close()
+    battle_decision = measure_decision(
+        settings,
+        registry,
+        packet,
+        rows,
+        samples,
+        warmups,
+        repetitions,
+        seed,
+        battle=True,
+    )
     comparisons = []
     for stage, _, variants in groups:
         if "legacy" not in variants:
@@ -305,6 +375,7 @@ def run_benchmark(*, samples=20, warmups=3, seed=42, repetitions=3):
         ),
         correctness=gates,
         decision=decision,
+        battle_decision=battle_decision,
         comparisons=comparisons,
         timings=rows,
     )

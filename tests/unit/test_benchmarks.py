@@ -153,3 +153,24 @@ def test_environment_discloses_monotonic_clock_resolution():
     clocks = environment()["clocks"]
     assert clocks["monotonic"]["resolution_s"] > 0
     assert clocks["perf_counter"]["resolution_s"] > 0
+
+
+def test_battle_benchmark_runs_real_vision_policy_and_recording_input_without_native(
+    monkeypatch,
+):
+    from scripts.benchmark_pipeline import run_benchmark
+    from autonavy.navigation.planner import PlanningService
+
+    monkeypatch.setattr(
+        PlanningService,
+        "submit",
+        lambda *args: pytest.fail("Native planning not part of pixel benchmark"),
+    )
+    report = run_benchmark(samples=1, warmups=0, repetitions=1)
+    battle = report["battle_decision"]
+    assert battle["frames_processed"] == 1 and battle["state"] == "in_battle"
+    assert battle["recognition_supported"] and battle["valid_injected_telemetry"]
+    assert battle["metrics"]["counters"]["input_dispatches"] >= 1
+    assert battle["native_planner_measured"] is False
+    assert battle["detectors"] != report["decision"]["detectors"]
+    assert any(row["stage"] == "decision_battle" for row in report["timings"])
