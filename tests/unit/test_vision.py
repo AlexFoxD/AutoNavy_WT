@@ -309,3 +309,74 @@ def test_degree_invalid_direction_debug_alias_and_explicit_roi():
         degree(ctx,debug_image=ctx.packet.image)
     from toolkit.deg_cal import get_deg
     assert get_deg(image[545:615,85:145]) is None
+
+
+@pytest.mark.parametrize('fps', [2.0,10.0])
+def test_preview_cadence_skips_copy_and_drawing_without_reusing_stale_overlay(monkeypatch,fps):
+    import time
+    Context, Registry, _, _, _, Pipeline = api()
+    settings = load_settings()
+    settings = replace(settings,diagnostics=replace(settings.diagnostics,preview=True,preview_fps=fps))
+    now = [0.0]
+    monkeypatch.setattr(time,'monotonic',lambda:now[0])
+    pipeline = Pipeline(settings)
+    image = np.zeros((720,1280,3),np.uint8)
+    image[300:328,500:602] = asset('src/game_image/start.png')
+    cv2.fillPoly(image,[np.array([(110,550),(120,550),(115,580)],np.int32)],(0,255,0))
+    copied,drawn = [],[]
+    original_copy,original_contours,original_rectangle = Context.debug_image,cv2.drawContours,cv2.rectangle
+    def copy(context):
+        copied.append(context.packet.publication_id)
+        return original_copy(context)
+    def contours(*args,**kwargs):
+        drawn.append('contour')
+        return original_contours(*args,**kwargs)
+    def rectangle(*args,**kwargs):
+        drawn.append('rectangle')
+        return original_rectangle(*args,**kwargs)
+    monkeypatch.setattr(Context,'debug_image',copy)
+    monkeypatch.setattr(cv2,'drawContours',contours)
+    monkeypatch.setattr(cv2,'rectangle',rectangle)
+    interval = 1/fps
+    for sequence,(moment,due) in enumerate(((0,True),(interval-1e-6,False),(interval,True),(10,True),(10,False)),1):
+        now[0] = moment
+        p = packet(image,geometry(),sequence)
+        before = p.image.copy()
+        copy_count,draw_count = len(copied),len(drawn)
+        observed = pipeline.observe(p)
+        assert (observed.debug_image is not None) is due
+        assert len(copied)-copy_count == int(due)
+        assert (len(drawn)>draw_count) is due
+        assert observed.packet is p
+        assert observed.matches['start'].matched and observed.degree.available
+        assert observed.matches['start'].publication_id == sequence
+        if due:
+            assert not np.array_equal(observed.debug_image,before)
+        np.testing.assert_array_equal(p.image,before)
+    assert copied == [1,3,4]
+
+
+def test_preview_injected_clock_and_disabled_path_preserve_observations(monkeypatch):
+    import inspect
+    Context, Registry, _, _, _, Pipeline = api()
+    assert 'clock' in inspect.signature(Pipeline).parameters, 'Preview cadence needs an injectable monotonic clock'
+    settings = load_settings()
+    registry = Registry.from_settings(settings)
+    moment = [0.0]
+    preview = Pipeline(replace(settings,diagnostics=replace(settings.diagnostics,preview=True)),registry,clock=lambda:moment[0])
+    def forbidden():
+        raise AssertionError('Disabled preview must not sample its clock')
+    plain = Pipeline(settings,registry,clock=forbidden)
+    p = packet(geometry=geometry())
+    baseline = plain.observe(p)
+    due = preview.observe(p)
+    assert due.debug_image is not None
+    def forbidden_copy(*args,**kwargs):
+        raise AssertionError('Disabled or nondue preview must not copy or draw')
+    monkeypatch.setattr(Context,'debug_image',forbidden_copy)
+    monkeypatch.setattr(cv2,'drawContours',forbidden_copy)
+    monkeypatch.setattr(cv2,'rectangle',forbidden_copy)
+    for observed in (plain.observe(p),preview.observe(p)):
+        assert observed.debug_image is None
+        assert observed.matches == baseline.matches == due.matches
+        assert observed.degree == baseline.degree == due.degree

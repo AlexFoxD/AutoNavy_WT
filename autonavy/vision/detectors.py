@@ -1,6 +1,7 @@
 """Pure observations from a selected frame; timing and input belong to runtime policy."""
 from dataclasses import dataclass, field
 import math
+import time
 from types import MappingProxyType
 from typing import Mapping
 
@@ -147,9 +148,11 @@ class VisionObservations:
 
 
 class VisionPipeline:
-    def __init__(self, settings, registry=None):
+    def __init__(self, settings, registry=None, *, clock=None):
         self.settings = settings
         self.registry = registry if registry is not None else TemplateRegistry.from_settings(settings)
+        self._clock = time.monotonic if clock is None else clock
+        self._next_preview_at = None
         self._ammo_registry = None
         self._ammo_identity = None
         self._ammo_error = 'Battle ammo baseline is not initialized'
@@ -210,7 +213,13 @@ class VisionPipeline:
             matches['ammo'] = match_template(ctx,self._ammo_registry,'ammo',ctx.profile_roi(v.ammo_roi),.9,settings=v)
         else:
             matches['ammo'] = MatchObservation(*identity(packet),reason=self._ammo_error if self._ammo_registry is None else 'Ammo baseline belongs to another generation or geometry')
-        debug = ctx.debug_image() if self.settings.diagnostics.preview else None
+        debug = None
+        if self.settings.diagnostics.preview:
+            now = self._clock()
+            if self._next_preview_at is None or now >= self._next_preview_at:
+                debug = ctx.debug_image()
+                # Schedule from this observation; delayed ticks never accumulate previews.
+                self._next_preview_at = now + 1 / self.settings.diagnostics.preview_fps
         degree = detect_degree(ctx,settings=v,debug_image=debug)
         if debug is not None:
             for observation in matches.values():
