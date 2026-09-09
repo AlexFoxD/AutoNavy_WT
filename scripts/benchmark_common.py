@@ -9,6 +9,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
+import time
 
 from autonavy.config import resource_root
 from autonavy.metrics import summarize
@@ -45,6 +46,14 @@ def environment():
         processor=platform.processor(),
         dependencies=dependencies,
         opencv_threads=cv2.getNumThreads(),
+        clocks={
+            name: dict(
+                implementation=time.get_clock_info(name).implementation,
+                resolution_s=time.get_clock_info(name).resolution,
+                monotonic=time.get_clock_info(name).monotonic,
+            )
+            for name in ("monotonic", "perf_counter")
+        },
         git_commit=git("rev-parse", "HEAD"),
         git_dirty=git("status", "--porcelain"),
         code_sha256={

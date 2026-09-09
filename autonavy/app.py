@@ -94,8 +94,12 @@ class Application:
         try:
             return self._tick(packet)
         finally:
-            self.metrics.observe('decision_ns' if packet is not None else 'idle_tick_ns',
-                                 time.perf_counter_ns()-started)
+            elapsed = time.perf_counter_ns()-started
+            self.metrics.observe('decision_ns' if packet is not None else 'idle_tick_ns', elapsed)
+            if packet is not None and self.settings.diagnostics.per_frame:
+                LOG.info('frame=%s generation=%s backend=%s state=%s receive_age_ns=%s tick_ns=%s',
+                         packet.publication_id, packet.source_generation, self.settings.capture.backend,
+                         self.state.value, max(0, self._clock_ns()-packet.received_at_ns), elapsed)
 
     def _tick(self, packet=None):
         """One actual decision tick, also used when capture has no new publication."""
@@ -132,10 +136,6 @@ class Application:
         # before this tick returns. Callbacks themselves remain signal-only.
         self._consume_pause()
         if packet is not None:
-            if self.settings.diagnostics.per_frame:
-                LOG.info('frame=%s generation=%s backend=%s state=%s receive_age_ns=%s',
-                         packet.publication_id, packet.source_generation, self.settings.capture.backend,
-                         self.state.value, max(0, self._clock_ns()-packet.received_at_ns))
             debug = getattr(self.last_observations, 'debug_image', None)
             if self.settings.diagnostics.preview and debug is not None:
                 try:

@@ -145,3 +145,11 @@ def test_report_rejects_asset_and_route_outputs():
     for path in (resource_root() / "src" / "protected", resource_root() / "path.json"):
         with pytest.raises(ValueError, match="overwrite"):
             write_report({"timings": []}, path)
+
+
+def test_environment_discloses_monotonic_clock_resolution():
+    from scripts.benchmark_common import environment
+
+    clocks = environment()["clocks"]
+    assert clocks["monotonic"]["resolution_s"] > 0
+    assert clocks["perf_counter"]["resolution_s"] > 0

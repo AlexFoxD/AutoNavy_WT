@@ -181,3 +181,23 @@ def test_check_config_is_inert_and_replay_cli_writes_bounded_runtime_summary(tmp
     assert "resolved_settings=" in text and "source_render_latency=unknown" in text
     assert "frame=1 generation=" not in text
     assert not list(logs.glob("*.png"))
+
+
+def test_explicit_per_frame_logging_connects_publication_and_tick_timing(caplog):
+    settings = Settings()
+    settings = replace(
+        settings, diagnostics=replace(settings.diagnostics, per_frame=True)
+    )
+    app = Application(
+        settings, telemetry=OfflineTelemetry(), vision=VisionPipeline(settings)
+    )
+    with caplog.at_level(logging.INFO):
+        app.tick(packet())
+    frame_logs = [
+        r.message
+        for r in caplog.records
+        if "frame=1 generation=1 backend=" in r.message
+    ]
+    assert len(frame_logs) == 1 and "tick_ns=" in frame_logs[0]
+    assert "receive_age_ns=" in frame_logs[0]
+    app.close()
