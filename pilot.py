@@ -4,6 +4,7 @@ import random
 import time
 
 import cv2
+from toolkit.resources import read_image
 
 from toolkit.map import get_point, download_map
 from toolkit.process_path import PATH_FILE, pathfinding, get_next_point
@@ -40,7 +41,7 @@ def pathfinder(auto=False):
     pos = (int(pos[0][0] * 128), int(pos[0][1] * 128))
     download_map()
     # Step 2: Get the path
-    img = cv2.imread('src/origin_map.png')
+    img = read_image('src/origin_map.png')
     if auto:
         final_pos = random.choice(zone_list)
         # print(f"Final Pos: {final_pos}")

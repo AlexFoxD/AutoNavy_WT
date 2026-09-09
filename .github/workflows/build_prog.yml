@@ -27,27 +27,19 @@ jobs:
           .venv\Scripts\python.exe -m pip install --disable-pip-version-check -r requirements-build.txt
           .venv\Scripts\python.exe scripts\check_environment.py --installation-only
 
-      - name: Compile with Nuitka
-        run: .venv\Scripts\python.exe -m nuitka --standalone --assume-yes-for-downloads start_prog.py
-
-      - name: Copy runtime resources
-        run: |
-          Copy-Item -Recurse -LiteralPath src -Destination start_prog.dist\src
-          Copy-Item -LiteralPath path.json -Destination start_prog.dist\path.json
-          Copy-Item -LiteralPath README.md -Destination start_prog.dist\README.md
-
-      - name: Create archive
-        run: Compress-Archive -Path start_prog.dist -DestinationPath AutoNavy_WT-win64.zip
+      - name: Build and package standalone application
+        shell: powershell
+        run: .\scripts\build.ps1
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: AutoNavy_WT-win64
-          path: AutoNavy_WT-win64.zip
+          path: .output\AutoNavy_WT-win64.zip
           if-no-files-found: error
 
       - name: Upload to Release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" AutoNavy_WT-win64.zip --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" .output\AutoNavy_WT-win64.zip --clobber

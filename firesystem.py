@@ -6,6 +6,7 @@ import sys
 import time
 
 import cv2
+from toolkit.resources import read_image
 import numpy as np
 import win32con
 
@@ -21,7 +22,7 @@ PID_mouse_x.output_limits = (-30, 30)
 PID_mouse_y = PID(0.6, 0, 0.02, setpoint=0)
 PID_mouse_y.output_limits = (-30, 30)
 
-aim = cv2.imread('src/cir.png', cv2.IMREAD_UNCHANGED)
+aim = read_image('src/cir.png', cv2.IMREAD_UNCHANGED)
 mouse = MnK.Mouse()
 keyboard = MnK.Keyboard()
 

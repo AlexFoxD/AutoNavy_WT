@@ -1,7 +1,10 @@
 ﻿#Requires -Version 5.1
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$CheckOnly,
+    [switch]$NoPause
+)
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -9,23 +12,8 @@ Set-StrictMode -Version Latest
 $OutputEncoding = [Console]::OutputEncoding
 $env:PYTHONUTF8 = "1"
 
-$RepositoryRoot = Split-Path -Parent $PSScriptRoot
-$Python = Join-Path $RepositoryRoot ".venv\Scripts\python.exe"
-
-if (-not (Test-Path -LiteralPath $Python -PathType Leaf)) {
-    Write-Error "Виртуальное окружение не найдено. Сначала выполните .\scripts\install.ps1"
-}
-
-Set-Location -LiteralPath $RepositoryRoot
-Write-Host "Проверка среды..."
-& $Python (Join-Path $PSScriptRoot "check_environment.py")
-if ($LASTEXITCODE -ne 0) {
-    throw "Запуск отменён: проверка среды обнаружила ошибки."
-}
-
-Write-Host "Запуск AutoNavy_WT... Для остановки нажмите Ctrl+C."
-& $Python (Join-Path $RepositoryRoot "start_prog.py")
-$ApplicationExitCode = $LASTEXITCODE
-if ($ApplicationExitCode -ne 0) {
-    throw "AutoNavy_WT завершился с кодом ошибки $ApplicationExitCode."
-}
+$Arguments = @()
+if ($CheckOnly) { $Arguments += "-CheckOnly" }
+if ($NoPause) { $Arguments += "-NoPause" }
+& (Join-Path $PSScriptRoot "launcher.ps1") @Arguments
+exit $LASTEXITCODE

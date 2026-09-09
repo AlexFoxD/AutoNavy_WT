@@ -28,8 +28,12 @@ REQUIRED_IMPORTS = (
     ("toolkit.way_search", "bundled CPython extension"),
 )
 REQUIRED_FILES = (
+    "autonavy.py",
+    "runtime_preflight.py",
     "start_prog.py",
     "path.json",
+    "ЗАПУСТИТЬ.bat",
+    "scripts/launcher.ps1",
     "toolkit/way_search.cp311-win_amd64.pyd",
     "src/origin_map.png",
     "src/cir.png",
@@ -37,6 +41,7 @@ REQUIRED_FILES = (
     "src/crashed.png",
     "src/game_image/start.png",
 )
+IGNORED_SOURCE_DIRECTORIES = {".venv", ".output", "__pycache__", "tests"}
 
 
 class CheckResult(NamedTuple):
@@ -78,20 +83,25 @@ def check_required_file(repo_root: Path, relative_path: str) -> CheckResult:
 def check_image_resources(repo_root: Path) -> CheckResult:
     """Verify that every PNG referenced by cv2.imread can be decoded."""
     try:
-        cv2 = importlib.import_module("cv2")
+        read_image = importlib.import_module("toolkit.resources").read_image
     except Exception as exc:
         return CheckResult(False, f"OpenCV недоступен для проверки изображений: {exc}")
 
     image_paths: set[Path] = set()
-    pattern = re.compile(r"cv2\.imread\(\s*['\"]([^'\"]+\.png)['\"]")
+    pattern = re.compile(r"(?:cv2\.imread|read_image)\(\s*['\"]([^'\"]+\.png)['\"]")
     for source_path in repo_root.rglob("*.py"):
-        if ".venv" in source_path.parts:
+        relative_parts = source_path.relative_to(repo_root).parts[:-1]
+        if any(
+            part in IGNORED_SOURCE_DIRECTORIES
+            or part.endswith((".build", ".dist", ".onefile-build"))
+            for part in relative_parts
+        ):
             continue
         source = source_path.read_text(encoding="utf-8-sig")
         image_paths.update(repo_root / match for match in pattern.findall(source))
     if not image_paths:
         return CheckResult(False, "В исходном коде не найдены ссылки на PNG-ресурсы.")
-    invalid = [path.relative_to(repo_root) for path in sorted(image_paths) if cv2.imread(str(path)) is None]
+    invalid = [path.relative_to(repo_root) for path in sorted(image_paths) if read_image(path) is None]
     if invalid:
         names = ", ".join(str(path) for path in invalid)
         return CheckResult(False, f"Не удалось прочитать изображения: {names}")
@@ -108,12 +118,12 @@ def check_import(module_name: str, package_name: str) -> CheckResult:
 
 def check_vjoy_driver() -> CheckResult:
     try:
-        pyvjoy = importlib.import_module("pyvjoy")
-        pyvjoy.VJoyDevice(1)
-    except Exception as exc:
+        preflight = importlib.import_module("runtime_preflight")
+        result = preflight.check_vjoy(preflight.PyVJoyApi())
+    except BaseException as exc:
         detail = str(exc) or type(exc).__name__
-        return CheckResult(False, f"Устройство vJoy № 1 недоступно: {detail}")
-    return CheckResult(True, "Драйвер vJoy и устройство № 1 доступны.")
+        return CheckResult(False, f"vJoy не установлен, отключён или требует перезапуска Windows: {detail}")
+    return CheckResult(result.ok, result.message)
 
 
 def run_checks(repo_root: Path, installation_only: bool = False) -> list[CheckResult]:

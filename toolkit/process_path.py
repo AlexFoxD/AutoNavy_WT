@@ -3,6 +3,7 @@ import os
 import random
 from pathlib import Path
 import cv2
+from toolkit.resources import read_image
 from toolkit.way_search import Jps, MapGrid, Point
 import numpy as np
 import time
@@ -136,7 +137,7 @@ if __name__ == '__main__':
 
     pos, deg = map.get_point(onlyplayer=True)
     pos = (int(pos[0] * 128), int(pos[1] * 128))
-    img = cv2.imread('src/origin_map.png')
+    img = read_image('src/origin_map.png')
     a = pathfinding(img, show_img=True, human=True, start_point=pos)
     b = get_next_point(a, pos)
     print(b)

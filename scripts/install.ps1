@@ -17,31 +17,47 @@ if ($env:OS -ne "Windows_NT") {
 }
 
 function Find-Python311 {
+    $Candidates = New-Object System.Collections.Generic.List[string]
     if (Get-Command py.exe -ErrorAction SilentlyContinue) {
         $Executable = & py.exe -3.11 -c "import sys; print(sys.executable)" 2>$null
         if ($LASTEXITCODE -eq 0 -and $Executable) {
-            return $Executable.Trim()
+            $Candidates.Add($Executable.Trim())
         }
     }
 
     if (Get-Command python.exe -ErrorAction SilentlyContinue) {
         $Executable = & python.exe -c "import sys; print(sys.executable)" 2>$null
         if ($LASTEXITCODE -eq 0 -and $Executable) {
-            return $Executable.Trim()
+            $Candidates.Add($Executable.Trim())
         }
     }
 
-    throw "Не найден CPython 3.11 x64. Установите его с python.org и повторите запуск."
+    foreach ($Candidate in $Candidates | Select-Object -Unique) {
+        & $Candidate -c "import struct, sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) and struct.calcsize('P') == 8 else 1)"
+        if ($LASTEXITCODE -eq 0) {
+            return $Candidate
+        }
+    }
+
+    throw "Не найден 64-битный CPython 3.11. Он нужен только для запуска из исходников. Установите Python 3.11 x64 с python.org и повторите запуск."
 }
 
 $Python = Find-Python311
-& $Python -c "import struct, sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) and struct.calcsize('P') == 8 else 1)"
-if ($LASTEXITCODE -ne 0) {
-    throw "Требуется именно 64-битный CPython 3.11 из-за модуля toolkit\way_search.cp311-win_amd64.pyd."
-}
 
 $VirtualEnvironment = Join-Path $RepositoryRoot ".venv"
 $VenvPython = Join-Path $VirtualEnvironment "Scripts\python.exe"
+if (Test-Path -LiteralPath $VenvPython -PathType Leaf) {
+    & $VenvPython -c "import struct, sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) and struct.calcsize('P') == 8 else 1)"
+    if ($LASTEXITCODE -ne 0) {
+        $ExpectedVenv = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot ".venv"))
+        $ActualVenv = [System.IO.Path]::GetFullPath($VirtualEnvironment)
+        if ($ExpectedVenv -ne $ActualVenv -or $ActualVenv -eq [System.IO.Path]::GetPathRoot($ActualVenv)) {
+            throw "Небезопасный путь виртуального окружения: $ActualVenv"
+        }
+        Write-Host "Повреждённое или несовместимое окружение .venv будет пересоздано."
+        Remove-Item -LiteralPath $ActualVenv -Recurse -Force
+    }
+}
 if (-not (Test-Path -LiteralPath $VenvPython -PathType Leaf)) {
     Write-Host "Создание виртуального окружения .venv..."
     & $Python -m venv $VirtualEnvironment
@@ -56,6 +72,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "Установка зависимостей завершилась с ошибкой."
 }
 
+$VJoyRuntimeSource = Join-Path $RepositoryRoot "third_party\vjoy\2.1.9.1\x64\vJoyInterface.dll"
+$VJoyRuntimeTarget = Join-Path $VirtualEnvironment "Lib\site-packages\pyvjoy\utils\x64\vJoyInterface.dll"
+if (-not (Test-Path -LiteralPath $VJoyRuntimeSource -PathType Leaf)) {
+    throw "Отсутствует библиотека управления vJoy 2.1.9.1. Получите полный комплект исходного кода."
+}
+Copy-Item -LiteralPath $VJoyRuntimeSource -Destination $VJoyRuntimeTarget -Force
+
 Write-Host "Проверка установленной среды..."
 & $VenvPython (Join-Path $PSScriptRoot "check_environment.py") --installation-only
 if ($LASTEXITCODE -ne 0) {
@@ -63,5 +86,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Установка Python-зависимостей завершена."
-Write-Host "Перед запуском отдельно установите драйвер vJoy, включите устройство № 1 и настройте War Thunder."
-Write-Host "Запуск: .\scripts\run.ps1"
+Write-Host "Продолжайте через файл ЗАПУСТИТЬ.bat в корне проекта."

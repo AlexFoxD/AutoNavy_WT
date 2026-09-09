@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 CHECKER_PATH = Path(__file__).resolve().parents[1] / "scripts" / "check_environment.py"
@@ -57,6 +58,31 @@ class EnvironmentCheckTests(unittest.TestCase):
 
         self.assertFalse(result.ok)
         self.assertIn("PNG", result.message)
+
+    def test_image_scan_ignores_generated_output_directories(self):
+        checker = load_checker()
+
+        class Resources:
+            @staticmethod
+            def read_image(path):
+                return object() if Path(path).is_file() else None
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "module.py").write_text("cv2.imread('src/image.png')", encoding="utf-8")
+            (root / "src").mkdir()
+            (root / "src" / "image.png").write_bytes(b"fixture")
+            (root / ".output").mkdir()
+            (root / ".output" / "foreign_encoding.py").write_bytes(b"# coding: latin-1\n# \xe4")
+            (root / "tests").mkdir()
+            (root / "tests" / "test_fixture.py").write_text(
+                "cv2.imread('src/not-a-runtime-resource.png')", encoding="utf-8"
+            )
+
+            with mock.patch.object(checker.importlib, "import_module", return_value=Resources()):
+                result = checker.check_image_resources(root)
+
+        self.assertTrue(result.ok)
 
     def test_current_interpreter_matches_bundled_abi(self):
         checker = load_checker()

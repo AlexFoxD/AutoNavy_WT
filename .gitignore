@@ -1,5 +1,6 @@
 /.idea
 /.output
+/logs/
 .venv/
 *.build/
 *.dist/
