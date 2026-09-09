@@ -14,7 +14,7 @@ GUARD = '''
 import importlib.abc, socket, sys
 class Guard(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
-        if fullname.split('.')[0] in {'dxcam','pyvjoy','win32gui','win32api','win32con','pydirectinput','keyboard','mouse','requests','pilot','firesystem','info'} or fullname in {'toolkit.scn','toolkit.MnK'}:
+        if fullname.split('.')[0] in {'runtime_preflight','dxcam','pyvjoy','win32gui','win32api','win32con','pydirectinput','keyboard','mouse','requests','pilot','firesystem','info'} or fullname in {'toolkit.scn','toolkit.MnK'}:
             raise AssertionError('forbidden import: ' + fullname)
 sys.meta_path.insert(0, Guard())
 def forbidden(*args, **kwargs):
@@ -42,13 +42,26 @@ def test_all_supported_imports_are_side_effect_free():
     (['--check-config', '--config', str(ROOT / 'configs/default.toml')], 0),
     (['--dry-run', '--capture', 'replay', '--fixture', str(FIXTURE), '--max-frames', '2'], 0),
     (['--capture', 'replay', '--enable-input'], 2),
+    (['--capture', 'replay', '--enable-input', '--preflight'], 2),
+    (['--capture', 'replay', '--preflight'], 2),
+    (['--check-config', '--preflight'], 2),
 ])
 def test_entrypoints_use_safe_cli_from_unrelated_cwd(entry, arguments, expected, tmp_path):
     command = "runpy.run_module('autonavy', run_name='__main__')" if entry == 'module' else f'runpy.run_path({str(ROOT / entry)!r}, run_name="__main__")'
     result = run_guarded(f'import runpy\nsys.argv = ["autonavy"] + {arguments!r}\n{command}', tmp_path)
     assert result.returncode == expected, result.stdout + result.stderr
+    assert 'forbidden import' not in result.stderr
     if '--max-frames' in arguments:
         assert 'frames=2' in result.stdout
+
+
+def test_non_utf8_config_returns_exit_two_without_device_or_network_access(tmp_path):
+    path = tmp_path / 'non-utf8.toml'
+    path.write_bytes(b'[geometry]\nprofile_id = "\xff"\n')
+    result = run_guarded(f'from autonavy.cli import main\nsys.exit(main(["--check-config", "--config", {str(path)!r}]))', tmp_path)
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert 'Configuration error' in result.stderr
+    assert 'forbidden import' not in result.stderr
 
 
 def replay_class():

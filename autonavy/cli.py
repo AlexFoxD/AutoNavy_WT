@@ -55,6 +55,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.status_file is not None and not args.preflight:
             raise ConfigurationError('--status-file requires --preflight')
         if args.preflight:
+            if any((args.check_config, args.config is not None, args.capture is not None,
+                    args.fixture is not None, args.max_frames is not None,
+                    args.dry_run, args.enable_input, args.run)):
+                raise ConfigurationError('--preflight is a standalone diagnostic mode; only --status-file may accompany it')
             return _preflight(args.status_file)
         capture = {key: value for key, value in {'backend': args.capture, 'fixture': args.fixture, 'max_frames': args.max_frames}.items() if value is not None}
         overrides = {'capture': capture}

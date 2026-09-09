@@ -71,6 +71,29 @@ def test_toml_errors_are_configuration_errors(tmp_path):
         config.load_settings(tmp_path / 'missing.toml')
 
 
+def test_non_utf8_config_is_classified_as_invalid_configuration(tmp_path):
+    config = config_module()
+    path = tmp_path / 'non-utf8.toml'
+    path.write_bytes(b'[geometry]\nprofile_id = "\xff"\n')
+    with pytest.raises(config.ConfigurationError):
+        config.load_settings(path)
+
+
+@pytest.mark.parametrize('arguments', [
+    ['--capture', 'replay', '--enable-input'], ['--capture', 'replay'],
+    ['--check-config'], ['--dry-run'], ['--enable-input'],
+    ['--fixture', 'tests/fixtures/smoke'], ['--max-frames', '2'],
+    ['--config', 'configs/default.toml'], ['--run'],
+])
+def test_preflight_conflicts_are_rejected_before_diagnostic_dispatch(arguments, monkeypatch):
+    config_module()
+    from autonavy import cli
+    def forbidden_preflight(status_file):
+        raise AssertionError('Conflicting modes must not dispatch preflight')
+    monkeypatch.setattr(cli, '_preflight', forbidden_preflight)
+    assert cli.main(arguments + ['--preflight']) == 2
+
+
 def test_frame_packet_owns_readonly_pixels_and_rejects_bad_metadata():
     config_module()
     from autonavy.models import FramePacket

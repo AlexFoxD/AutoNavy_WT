@@ -300,7 +300,7 @@ def load_settings(path: str | Path | None = None, overrides: Mapping[str, object
         try:
             with Path(path).open('rb') as stream:
                 settings = _merge(settings, tomllib.load(stream))
-        except (OSError, tomllib.TOMLDecodeError) as exc:
+        except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
             raise ConfigurationError(f'Cannot load configuration {path}: {exc}') from exc
     if overrides is not None:
         settings = _merge(settings, overrides)
