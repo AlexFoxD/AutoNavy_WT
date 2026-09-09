@@ -1,0 +1,556 @@
+# AutoNavy_WT v2 — Approved Modernization Specification
+
+**Specification version:** 1.0  
+**Prepared:** 2026-09-09  
+**Target repository:** `AlexFoxD/AutoNavy_WT`  
+**Required branch:** `feature/v2-modernization`  
+**Reference repository:** `Priler/csgobot` — architectural reference, not a source to copy wholesale  
+**Delivery:** working implementation, tests, benchmark tools, migration documentation, and local commits on the v2 branch. No automatic push, pull request, merge, tag, or release.
+
+This is an implementation specification, not a request for another repository comparison. The accompanying launch prompt is the user's explicit approval of this design and authorization to implement its bounded scope. The agent must inspect the actual checkout before converting these requirements into executable plans. Public-source observations were checked on the preparation date but are not pinned to a commit; the agent must record the actual source commit and reconcile differences.
+
+## Contents
+
+1. Outcome and scope
+2. Execution contract and Superpowers workflow
+3. Git isolation and recovery
+4. Discovery and baseline
+5. Target structure and shared contracts
+6. Capture and frame ownership
+7. Vision and image-processing changes
+8. Geometry and calibration
+9. Telemetry
+10. Runtime lifecycle and coordinated input
+11. Navigation and controllers
+12. Configuration, diagnostics, and packaging
+13. Benchmarks and performance decisions
+14. Implementation milestones
+15. Acceptance matrix
+16. Definition of done and final handoff
+17. Source references
+
+---
+
+## 1. Outcome and scope
+
+### Objective
+
+Modernize the existing screen-capture, recognition, telemetry, navigation, and input pipeline without replacing the project with a new game bot. Preserve the existing game-specific functionality where it is valid, remove demonstrably unnecessary work, and make latency, data freshness, shutdown behavior, and backend selection observable and testable.
+
+**Priority:** correct and safe behavior first, freshness and responsiveness second, reduced resource use third, reported FPS last.
+
+### Approved decisions
+
+- Keep DXcam as the default capture backend. Implement OBS Virtual Camera as a fully wired, optional alternative. Do not assume OBS is faster.
+- Use one process with managed threads initially. Introduce process isolation only for a documented native-call shutdown problem or a measured CPU bottleneck, not by copying the donor's topology.
+- Preserve Windows x64 and CPython 3.11 compatibility, including `toolkit/way_search.cp311-win_amd64.pyd`, unless the checked-out repository has an explicitly newer, working compatibility contract. Do not silently change the ABI or rename the binary.
+- Use explicit data ownership, a latest-frame slot, immutable-by-contract snapshots, and one owner of physical input.
+- Keep the existing template-based approach. Cache preprocessing and limit image work to relevant regions.
+- Use deterministic offline tests, fake devices, replay fixtures, and a dry-run input backend so most development does not require the game.
+- Migrate the actual startup path. A parallel framework that is not used by the real application does not satisfy this specification.
+- Write all new development communication, plans, review prompts, commit messages, identifiers, comments, docstrings, documentation, and new application messages in English. Preserve protocol values, game strings, resource filenames, template pixels, and third-party notices verbatim.
+
+### Compatibility and non-goals
+
+Preserve the existing supported screen/UI profile and input mappings unless an intentional change is documented and tested. English development does **not** imply support for the English game UI. The repository describes an existing 1280x720, 100% UI-scale profile and a game-language-specific template set; audit these assumptions and preserve the assets. [R02]
+
+Do not introduce YOLO, neural-network weights, a GUI, cloud services, a plugin marketplace, a new pathfinding algorithm, anti-cheat evasion, game-memory access, DLL injection, account automation, or automatic purchases. Do not change installed system drivers, OBS scenes, game settings, global Python packages, security settings, or credentials. Do not launch live matchmaking or send real input during agent-driven verification. Hardware capture tests may be run only within the host's permitted environment; live actuation remains an explicit manual acceptance step.
+
+Keep warnings about game-automation risks. Do not claim that this modernization prevents account sanctions or makes deployment permissible.
+
+## 2. Execution contract and Superpowers workflow
+
+### Autonomy
+
+This is an end-to-end implementation task. Do not stop after producing a design, task list, skeleton, or interface definitions. Continue through the milestones and verification that the environment permits.
+
+Resolve ordinary implementation choices using this spec and the actual source. Record reversible assumptions in `docs/v2/DECISIONS.md`; do not ask the user to decide filenames, test libraries, branch placement, or the execution style already selected here.
+
+Respect host-level permissions, sandbox boundaries, higher-priority instructions, and any mandatory approval gate that the installed tooling does not accept as pre-approved. Do not fabricate authorization or disable the host's safeguards. Record a genuine blocker precisely, preserve all work, complete independent unblocked tasks, and report what remains.
+
+### Skills
+
+Read repository instructions and discover the **installed** Superpowers version and available skills. Use its actual invocation mechanism; do not invent slash commands, tools, or model-switching features. If available, use:
+
+- `using-superpowers` to establish workflow;
+- design/spec review under the installed `brainstorming` workflow, treating this supplied specification as the design submitted with explicit user approval;
+- `using-git-worktrees` for isolation where permitted;
+- `writing-plans` to produce concrete milestone plans;
+- `subagent-driven-development`, with sequential execution as the fallback when subagents are unavailable;
+- `test-driven-development`, `systematic-debugging`, and `verification-before-completion`;
+- `requesting-code-review` and `receiving-code-review`;
+- `finishing-a-development-branch`, with the finish choice already selected: **keep the development branch and worktree; do not merge, push, discard, or remove them**.
+
+The public Superpowers workflow includes planning, test-first implementation, review, and branch completion, but installed versions and host integration can differ. [R15–R19]
+
+Prefer a coordinator plus one implementation worker and a read-only reviewer. Parallelize only independent tasks with disjoint file ownership. Never have several implementation agents editing the same runtime or configuration files concurrently. If no reviewer tool exists, perform a separate explicit self-review and label it as such rather than inventing an independent review.
+
+### Task loop
+
+For each task: inspect the relevant code, define the observable behavior, add a focused failing test, run it and confirm the intended failure, implement the smallest coherent change, run focused and regression tests, review spec compliance and code quality, fix findings, update evidence, and make a scoped local commit.
+
+For a behavior-preserving refactor, first add passing characterization tests, then refactor while retaining them. Documentation-only changes need link/content checks rather than artificial failing tests. Do not add permanent production scaffolding merely to create a RED test.
+
+Do not weaken tests or silently change expected behavior to manufacture a pass. Existing failures must be recorded and classified; distinguish them from new regressions.
+
+### Persistent work records
+
+Create these files on the v2 branch, not the protected source branch:
+
+```text
+docs/v2/SPEC.md
+docs/v2/PLAN.md
+docs/v2/STATUS.md
+docs/v2/AUDIT.md
+docs/v2/DECISIONS.md
+docs/v2/VERIFICATION.md
+docs/v2/BENCHMARKS.md
+docs/v2/MIGRATION.md
+docs/v2/REVIEW.md
+```
+
+Persist the supplied specification as `docs/v2/SPEC.md`. Preserve its normative requirements; record implementation-specific clarifications separately. `PLAN.md` may index several concrete milestone plans. Follow installed skill conventions inside those plans, including exact inspected file paths, interface signatures, test cases, commands, expected results, and acceptance IDs. Do not copy hypothetical source line numbers from this spec.
+
+`STATUS.md` must record source commit, branch, worktree, current HEAD, completed/current/next tasks, last verification commands and outcomes, blockers, and the next executable command. Update it at each milestone and before context compaction. Record a verified code commit and working-tree state; do not attempt an impossible self-referential final commit hash inside the same commit.
+
+After compaction or a new worker session, re-read these records and inspect Git before changing code. Continue the existing work; do not restart the migration. A context/rate/permission limit is not evidence of completion and cannot be bypassed by this prompt.
+
+## 3. Git isolation and recovery — GIT-01
+
+1. Inspect the repository root, remotes, current branch/HEAD, status including untracked files, and existing worktrees. Read applicable `AGENTS.md` and other host/repository instructions. Confirm this is the intended project.
+2. Record `SOURCE_SHA`, `SOURCE_BRANCH` (or detached state), the initial tracked and untracked changes, and the existing default-branch tips. Use the current checked-out committed HEAD as the base. Do not silently switch to a newer remote commit or another branch. If cloning is necessary and permitted, clone the target repository and record its initial checked-out HEAD.
+3. Before any project-file edit or commit, establish `feature/v2-modernization`. Prefer a host-native isolated worktree if available and permitted. Otherwise use a sibling directory such as `../AutoNavy_WT-v2` with a Git worktree; this preference is pre-approved and avoids editing `.gitignore` on the source branch.
+4. If the initial worktree is dirty, leave its files and index untouched. Build the v2 worktree from `SOURCE_SHA`; do not silently copy, stash, discard, or commit unrelated work. Report that uncommitted changes were excluded. Copy only explicitly identified user-supplied spec inputs into the new branch. If a required input exists only in those changes, record the precise dependency rather than guessing.
+5. If the host already provides an isolated workspace, reuse it when compatible. Do not create nested worktrees or fight host-managed state. Establish the required named branch before edits unless the host forbids it; in that case complete only safe read-only planning and report the branch-creation blocker rather than editing a protected or wrong branch.
+6. If the target branch already exists, resume it only when its recorded source/project identity clearly matches this task. Otherwise choose `feature/v2-modernization-2`, then the next available suffix, and explain the collision. Never overwrite or reset an existing branch.
+7. Make small, coherent local commits using the configured Git identity. Never invent an identity or change global Git configuration. If commits are unavailable, keep the work and report the uncommitted status; do not claim the delivery contract is fully met.
+8. Do not run destructive resets, force checkout, `git clean`, force push, automatic stash, rebase, branch deletion, or worktree removal. Do not push, open a PR, merge, tag, or publish a release.
+9. At completion, verify the source/default branches did not move because of this task and the initial worktree changes were not altered. Report the retained branch, absolute worktree path, final commit, and any uncommitted files. Ignore ordinary Git administrative metadata when comparing worktree content.
+
+Use shell-appropriate quoting and paths; the development host may be Windows. Inspection commands such as `git status --porcelain=v1 -uall`, `git rev-parse HEAD`, and `git worktree list --porcelain` do not authorize destructive follow-up commands.
+
+## 4. Discovery and baseline — AUDIT-01
+
+Inspect source without importing modules that might start capture, register hotkeys, initialize vJoy, or send input. Inventory actual entrypoints, imports, build/install/run scripts, CI, assets, configuration, and tests. Record the active path from launcher to capture, recognition, telemetry, control, and cleanup.
+
+These are **audit targets**, not assumptions that every observed problem still exists in the checkout:
+
+| Target | Observation to verify | Required disposition |
+|---|---|---|
+| `toolkit/scn.py` | DXcam creation/start at import, 1000 target FPS, repeated-frame mode, edge maps expanded before matching | Remove side effects; add backend boundary; optimize matching [R03] |
+| `toolkit/img_map.py` | Template loading/preprocessing lifetime | Cache the correct derived template representations |
+| `toolkit/deg_cal.py` | Independent frame read, drawing on an ROI view, 1x1 morphology | Accept a frame; do not mutate shared pixels; test removal of no-op work [R04] |
+| `firesystem.py` | Full-frame HSV before crop, sleeps, controller reuse | ROI-first processing and cancellable actions [R05] |
+| `toolkit/th_pool.py` | Asynchronous exceptions used to stop threads | Replace with cooperative lifecycle [R06] |
+| `toolkit/MnK.py` | Static-key release, negative scrolling, hidden pauses, global failsafe change | Centralize input and repair edge cases [R07] |
+| `info.py`, `toolkit/map.py` | Duplicate requests, long/missing timeouts, stale fields and inconsistent filtering | One telemetry snapshot service [R08–R09] |
+| `toolkit/process_path.py`, `pilot.py` | Lost route order, repeated nearest-point structures, retries and angle handling | Ordered path cursor and tested controller semantics [R10–R11] |
+| `start_prog.py`, `main.py` | Multiple orchestration paths and blocking UI/recovery sequences | One runtime used by supported launchers [R12] |
+| `scripts/`, build workflows, requirements | ABI, resource paths, packaging and Windows-only imports | Preserve/install/test the supported environment [R01–R02] |
+
+For every finding record: confirmed/not present/already fixed/uncertain, exact file and symbol, consequence, intended replacement, regression test, and milestone. Do not reintroduce an already-fixed issue to match this table.
+
+Create a behavior inventory: hangar/queue/join flow, battle initialization, aiming, firing, navigation, collision recovery, battle end, stop/restart, hotkeys, vJoy axes/buttons, assets and supported profile. Mark preserved behavior and deliberate changes.
+
+Establish an offline baseline from side-effect-free functions, saved fixtures, and deterministic synthetic cases. Do not import the old application just to benchmark it. Extract narrowly scoped legacy computations into benchmark/test helpers with provenance when needed. Existing user-owned code may be reused for this baseline; do not vendor the donor project.
+
+Record Python/platform/package versions, commit, test outcomes and unavailable hardware. Synthetic tests are not proof of game recognition accuracy. Screenshots must be existing authorized assets or explicitly generated fixtures; do not download an arbitrary private/game dataset or capture unrelated applications.
+
+## 5. Target structure and shared contracts — ARCH-01
+
+Use a small package with explicit dependencies. This is a suggested organization, not a mandate to create empty files:
+
+```text
+autonavy/
+    __init__.py
+    __main__.py          # CLI; imports must not actuate devices
+    app.py               # startup, state machine, shutdown
+    config.py
+    models.py            # small shared contracts; split only as needed
+    capture/             # protocol, factory, DXcam, OBS, replay/latest-frame
+    vision/              # template registry, ROI preprocessing, detectors
+    telemetry.py
+    input/               # controller, action scheduler, Windows and fake devices
+    navigation/          # route cursor, angle/PID logic, native path adapter
+    geometry.py
+    metrics.py
+configs/default.toml
+tests/unit/
+tests/integration/
+tests/fixtures/
+scripts/benchmark_pipeline.py
+scripts/benchmark_capture.py
+```
+
+Use existing file locations where that yields a simpler migration, but document the actual equivalent and wire all callers. Avoid a new generic event bus, dependency-injection framework, or plugin system. Small classes/protocols and explicit construction are sufficient.
+
+### Data contracts
+
+**FramePacket** carries an owned NumPy image, an explicit pixel format, a monotonically ordered publication identifier with a source generation, `received_at_ns` measured with a monotonic clock, optional source timestamp with its clock domain, geometry/profile identity, and optional source sequence metadata.
+
+A publication identifier is not proof of a unique game-rendered frame. `received_at_ns` is not the original game render time. Never fabricate a source timestamp.
+
+**FrameContext** represents one decision's specific packet and its lazily computed, bounded ROI/gray/edge/HSV cache. It is not a shared mutable global. Bound caches to active packets and template versions, not all frames ever seen.
+
+**TelemetrySnapshot** includes session/generation, player, enemies, zones, relevant map metadata, last successful receive time, validity/error state, and per-component freshness when multiple requests supply different fields. Collections are copied or immutable. A failed update must not refresh the successful-data timestamp.
+
+**InputIntent** describes owner, action, priority, creation/deadline, cancellation generation, and required data/profile identity. Reject expired or superseded actions. Prefer a typed small structure over a universal command language.
+
+**RuntimeState** is explicit and supports stopped, starting, waiting/queueing, in-battle, recovering, paused, error, and stopping states as appropriate to the audited flow. Recovery and UI sub-sequences may be small state objects, not deeply nested sleep loops.
+
+## 6. Capture and frame ownership
+
+### CAP-01 — Backend interface and DXcam
+
+Implement a minimal common capture contract: initialize/start, obtain a frame or a typed no-frame/failure result within the documented lifecycle, report actual geometry/format/capabilities, stop, and close. Resource acquisition must happen during explicit startup, never import or class definition. Start/stop/close must be idempotent or reject invalid transitions clearly.
+
+DXcam remains the default. Replace the hard-coded 1000 FPS target with validated configuration; use 60 FPS as an initial conservative setting and provide 120 FPS as a benchmark setting. Default artificial repeated-frame mode to off where the supported DXcam version allows it, and document actual semantics. Do not describe configured FPS as achieved FPS.
+
+Keep the existing DXcam pin during initial refactoring. Later assess a compatible stable update as a separate task and commit using primary documentation and actual tests. An update is optional if it cannot be validated; the requirement is a documented compatibility decision, not blindly installing the newest release.
+
+Handle missing window, invalid/minimized bounds, source loss and restart. Do not silently switch to full-desktop capture and continue sending game input when the target window disappears.
+
+### CAP-02 — OBS Virtual Camera
+
+Implement a working backend using `cv2.VideoCapture`, not a placeholder or a dependency on the donor package. Support configured device index, explicit backend/API preference when needed, requested resolution/FPS, read-failure policy and actual capability reporting. Device-name discovery may be optional with a narrowly scoped extra dependency; document that enumeration and camera opening must use compatible device indexing/API semantics.
+
+Validate `isOpened`, read status, nonempty images, expected channel count, actual dimensions and negotiated settings. A successful `set` call does not prove that the requested mode or buffer depth is in effect. Keep delivered BGR as BGR unless a consumer genuinely needs another format. Do not add a round trip to RGB.
+
+Document OBS setup for a game-only source, canvas/output size, scaling/letterboxing and starting Virtual Camera. Do not require obs-websocket or OBS control automation. Do not modify existing user scenes. Missing OBS must not prevent the default DXcam application from importing or running.
+
+Backend selection must work through the actual CLI/config, and failure to open the selected OBS device must return a useful error. Do not silently replace an explicitly requested OBS device with another camera.
+
+The donor's OBS adapter reads through OpenCV and performs a BGR-to-RGB conversion; it is not evidence of a direct zero-copy GPU path or a latency win. [R13]
+
+### FRAME-01 — Latest-only handoff
+
+Exactly one application-level capture owner reads a selected backend. Consumers never reach into the camera independently. Publish through an atomic/locked latest-frame slot or an equivalent bounded mechanism; no unbounded frame queue and no `Queue.empty()` synchronization scheme.
+
+Readers retain a stable snapshot while a newer one is published. Slow consumers skip old packets instead of draining a backlog. Waiting consumers must wake on shutdown or source failure. Do not busy-spin when the source has no new frame.
+
+Protect against a backend reusing its buffers. Setting a NumPy array read-only is not sufficient when another alias can still mutate its backing storage. Copy once at a well-defined ownership boundary unless buffer lifetime is genuinely guaranteed. Test by mutating a fake producer's original array after publication. Avoid redundant per-consumer full-frame copies.
+
+Never draw overlays into a published image. Debug rendering uses a copy only when enabled. Refactor `get_deg` and similar helpers to accept the selected packet/ROI instead of retrieving another frame.
+
+### CAP-03 — Interruptibility and source semantics
+
+A stop event does not automatically interrupt a native blocking `VideoCapture.read()` or DXcam call. Verify the selected API's behavior; do not promise bounded reads merely because a timeout field exists. Ensure input release is independent of capture termination.
+
+Use a tested stop/unblock mechanism. If a backend cannot be safely interrupted in-thread, isolate **that backend only** in a supervised owned process as a documented exception, with bounded IPC and controlled process termination after input cleanup. Never asynchronously kill Python threads. A daemon thread left permanently blocked is not a clean shutdown.
+
+On restart increment source generation, invalidate stale geometry/cache/intents, and do not republish an old image with a fresh receive timestamp. Distinguish no new presentation, identical image content, and failed acquisition. Static scene pixels alone must not be interpreted as a disconnected source. Report source-age uncertainty explicitly.
+
+## 7. Vision and image-processing changes
+
+### VISION-01 — Single-channel matching and template registry
+
+Remove the expansion of already single-channel Canny outputs into BGRA before `matchTemplate`. Keep edge maps as `uint8` one-channel images, with matching image/template types. Precompute each unchanged template's edges and other genuinely used derivatives once per template/profile/preprocessing version.
+
+Cache current-frame ROI preprocessing and share it among detectors that require the same representation and parameters. Do not cache scores across different frames. Invalidate caches on ROI, threshold, preprocessing, template, resolution or profile changes as applicable.
+
+Do not silently change Canny input semantics while optimizing channel counts. Canny on a color image and Canny on a grayscale conversion need not yield the same edges. First characterize the existing preprocessing, then preserve it or demonstrate an intentional change with fixtures and documented threshold calibration. The output used for matching is still single-channel.
+
+Handle missing/undecodable templates, empty ROIs, template larger than ROI, nonfinite scores, and degenerate constant/empty-edge templates explicitly. Return a structured no-match/error rather than indexing invalid data or accepting an all-ones score surface. Convert local match coordinates through the geometry contract.
+
+Maintain wrappers for legacy callers only while they are needed. Preserve legacy return shapes at the wrapper boundary until callers are migrated; do not leave two production implementations of matching afterward.
+
+### VISION-02 — ROI before conversion
+
+In fire detection, select the configured ROI **before** HSV conversion and thresholding. Audit other loops for the same waste. Preserve color threshold semantics and copy behavior.
+
+The current fire ROI `[200:510, 370:910]` is a baseline audit target, not a universally valid screen coordinate. Validate bounds against the supported profile, keep coordinates in configuration, and test conversion between ROI-local and frame coordinates. Cropping first can change neighborhood-dependent edge/morphology results at boundaries; use a halo or explicit boundary policy when those operations are involved. Pixelwise HSV conversion and thresholding should match the cropped legacy result exactly for identical source pixels.
+
+Remove 1x1 morphology only after a regression test demonstrates equivalence. Keep useful morphology configurable rather than deleting it indiscriminately. Missing contours and invalid direction estimates must result in a typed unavailable observation, not an invented direction.
+
+### VISION-03 — Color and debug contracts
+
+Choose an explicit native-boundary contract (BGR or BGRA with metadata) and minimal consumer conversions. Ordinary color operations use BGR semantics; masks/edges remain one-channel. The DXcam adapter may retain BGRA and convert only a needed ROI if this avoids unnecessary full-frame work. Do not force every backend through several formats to make the interface look uniform.
+
+Debug preview is optional and off by default, throttled independently, and never required in headless tests. Detection must behave identically with preview on/off. Add fixture tests for template matches/nonmatches, color masks, empty frames and coordinates. Use real fixtures only when supplied or already available, and report synthetic coverage honestly.
+
+## 8. Geometry and calibration — GEOM-01
+
+Replace hard-coded window-decoration offsets with a Windows adapter based on client-area bounds and client-to-screen conversion. Establish DPI awareness appropriately before window APIs/GUI initialization; preserve correct behavior in a packaged executable. Keep platform APIs out of the pure transform module.
+
+Model three coordinate spaces explicitly: capture-frame pixels, ROI pixels, and desktop/input pixels. For OBS, add the game-content rectangle in the OBS frame plus scale/letterbox mapping to the target game's client rectangle. Never crop an OBS game-only frame using the game's desktop `left/top` offsets.
+
+Transform centers, boxes and points consistently; clamp or reject out-of-bounds input. Support translated windows and negative desktop origins in pure geometry tests. Validate current display/window/profile before physical input, and cancel stale actions after move/resize/profile changes.
+
+The baseline profile is the verified legacy configuration. Additional resolutions/DPI modes may be accepted only with a configured, validated profile and suitable templates or validated scaling. Do not claim arbitrary-resolution recognition just because a coordinate transform scales points. For unsupported geometry, pause actuation and explain the mismatch.
+
+Include a non-actuating calibration/diagnostic output that reports client bounds, actual frame size, content rectangle, effective scale and proposed point mappings. A new GUI calibrator is out of scope.
+
+## 9. Telemetry — TEL-01
+
+Consolidate gameplay HTTP acquisition from `info.py` and `toolkit/map.py` into one lifecycle-managed service. Use one owner of a reusable `requests.Session`, bounded polling, explicit connect/read timeouts and controlled retry/backoff. Consumers read a snapshot; aiming, route following and input dispatch must not initiate network requests.
+
+Suggested starting configuration: 10 Hz poll target, 0.5-second connect timeout, 0.5-second read timeout and 1.0-second object-data TTL. These are tunable engineering defaults, not measured guarantees. Polling must never create overlapping requests or an accumulating backlog when requests exceed the target period. Document Requests timeout semantics rather than claiming the tuple is a hard end-to-end deadline. [R21]
+
+Keep map image/metadata refresh separate from fast-changing object polling; cache by map/session and invalidate on changes. Do not redownload a map image on each control tick or overwrite tracked asset files during normal runs. Store runtime outputs in an ignored data/cache location and preserve input assets.
+
+Validate HTTP status, JSON shape/types, finite coordinates and required fields. Distinguish no battle, missing player, empty enemy list, empty zones, schema error, timeout and service failure. Clear or mark unavailable stale fields; a successful HTTP response without a player is not permission to keep using the previous player.
+
+Centralize player/enemy/zone interpretation using the checked-out protocol behavior and fixtures. Do not guess a new enemy classifier or translate values such as `Player`/`Ship` or protocol keys. Record uncertain classifications as unavailable rather than treating everything as hostile.
+
+Use monotonic receive times and explicit TTL checks. A fresh packet containing stale telemetry is still stale. In menus, absent battle telemetry must not prevent legitimate image-based state recognition; in battle, actions that depend on unavailable telemetry must be canceled or safely paused. On session change invalidate routes, targets and pending battle actions.
+
+## 10. Runtime lifecycle and coordinated input
+
+### LIFE-01 — Cooperative workers and startup/stop
+
+Replace `PyThreadState_SetAsyncExc` and equivalent asynchronous thread termination. Use managed workers, stop/pause events, interruptible waits, bounded joins, named ownership, explicit error propagation and `finally` cleanup. Starting capture, telemetry, input devices and hotkeys happens in application startup with reverse-order rollback if any step fails.
+
+Pause/stop must wake blocked waits. A stopped/paused worker must not execute one final unintended action after waking. Avoid nested uncontrolled infinite loops, tight exception-print loops and swallowed shutdown errors. Retrying a recoverable failure uses bounded backoff; fatal failures move the runtime to a safe error state.
+
+Release input and cancel intents before waiting for slow capture/network cleanup. Isolate cleanup failures so a camera error does not prevent keyboard/mouse/vJoy release. Cleanup is idempotent; Ctrl+C, emergency stop, exceptions, startup failure and normal exit follow the same safety path.
+
+### INPUT-01 — One input owner
+
+Provide a single `InputController` for keyboard, mouse and vJoy. Navigation, aiming, recovery and UI logic emit intents; they must not import low-level actuation libraries or call OS input functions directly. Remove bypasses from all active entrypoints and wrappers.
+
+Track actually held keys/buttons and vJoy state, not a hand-written list of possible keys. Release every tracked held input and neutralize the configured vJoy axes/buttons on stop, focus loss, invalid geometry, applicable stale-data conditions, mode switch and errors. Continue attempting releases after an individual failure and log the result. A lost operating system or device cannot be guaranteed to acknowledge release; expose failure instead of claiming success.
+
+Use explicit priorities and resource ownership: emergency stop overrides everything; recovery preempts conflicting navigation; UI and battle actuation are mutually exclusive. Concurrent nonconflicting channels are allowed only with deterministic arbitration. Remove canceled owners' pending press/hold/release actions so stale releases do not cancel a newer owner's hold. Use generations or equivalent ownership tokens and test this race.
+
+Repair negative/zero scrolling and complete mouse-event arguments. Audit implicit PyDirectInput pauses, set any library timing policy explicitly at startup, and represent required delays in the scheduler. Do not remove useful click/hold duration semantics just to report more FPS.
+
+Do not silently disable an existing library failsafe. Provide a documented emergency-stop mechanism and focus guard. Real input requires an explicit CLI opt-in and valid live backend/device/profile checks. Dry-run uses a fake/recording backend and never registers system-wide hotkeys or actuates devices.
+
+### INPUT-02 — Nonblocking action scheduling
+
+Replace sleeps in aiming/fire/recovery/UI decision paths with short tickable sequences or deadline-based scheduled actions. Preserve required timing as configurable durations: press now, continue observing, release at a deadline. Use a monotonic clock with an injectable fake clock in tests.
+
+The scheduler is bounded. Coalesce superseded movement intents, expire stale actions, and cancel an entire sequence on stop, preemption or state change. Do not implement a queue of every historical cursor move. The controller checks safety conditions immediately before dispatch, not only when the intent was created.
+
+### APP-01 — Real integration
+
+Implement one runtime state machine used by the actual supported launcher. Keep `start_prog.py` as a thin compatibility launcher unless the audited build contract requires an equivalent migration. Retire duplicate `main.py` orchestration only after migrating its relevant behavior or explicitly documenting obsolete flags/functions. Do not leave a legacy launch path that bypasses the new safety/controller/capture boundary.
+
+State transitions have deadlines and recovery/error handling rather than unbounded waiting. Battle end and data/session changes cancel pending battle actions and reset appropriate controllers. Pause is neutral and observable; resume requires fresh prerequisites. Preserve non-purchasing UI flow; purchase/spend dialogs must pause for manual handling rather than spend in-game or real currency automatically.
+
+## 11. Navigation and controllers
+
+### NAV-01 — Ordered path and native boundary
+
+Keep the bundled native pathfinder as an isolated, lazy-loaded adapter. Inspect actual return types and ordering. The pure navigation layer accepts ordered immutable route points and is testable without importing the `.pyd`.
+
+Do not pass a route through `set`, append the current player position to it, or rebuild a global KDTree every control tick. Maintain a route cursor and configurable arrival/lookahead thresholds. Progress forward on the selected route; intersections and geometrically close but later segments must not cause arbitrary jumps.
+
+If the native result is a graph or unordered collection, recover order from path/predecessor semantics; do not sort coordinates or use a nearest-point guess and call it a path. Preserve adjacent deduplication only when it keeps route topology. Validate empty/unreachable routes and native return values.
+
+Replace recursive path retries with bounded iterative attempts scheduled outside the high-frequency control tick. Check stop/session state between attempts. Replan only on explicit invalidation, significant deviation, destination/map change or configured failure criteria; use backoff instead of rebuilding continuously.
+
+Validate the native extension on supported Windows when available. Do not fake a straight-line production path to make non-Windows tests pass. Fake adapters belong in tests/dry-run. If the native call itself is uninterruptibly long, keep input release independent and document the remaining lifecycle constraint or justify narrow worker-process isolation.
+
+### CTRL-01 — Units, wraparound and controller lifecycle
+
+Use shortest signed angular error:
+
+```python
+error_deg = (target_deg - current_deg + 180.0) % 360.0 - 180.0
+```
+
+Test 359→1 (+2), 1→359 (-2), identical headings, negative inputs and the ±180 tie convention. Verify the sign at the actuator boundary against legacy mappings; do not assume positive means a particular key/axis direction.
+
+Separate pixel-based aim control from degree-based heading/search control. Use explicit units/names, separate gains/state, output limits, appropriate integral handling and valid elapsed time. Reset controllers on mode/target/session change, prolonged data loss, pause and resume as appropriate. Handle missing/nonfinite observations and large time gaps without a control spike. Do not borrow the donor's sensitivity/FOV constants.
+
+## 12. Configuration, diagnostics, and packaging
+
+### CFG-01 — Validated settings
+
+Use one documented configuration model. Prefer TOML with Python 3.11 `tomllib` and small dataclasses/validation unless an existing suitable configuration stack is present. Avoid a heavy framework for this change.
+
+Provide one example/default file with schema version and settings for capture backend/device/format/FPS, OBS content mapping, target window/profile, ROIs and template thresholds, telemetry rates/timeouts/TTLs, scheduling durations, control limits, logs, debug preview and safe actuation. Validate unknown keys, negative/zero timing where invalid, nonfinite values, ROI bounds, nonexistent resources and incompatible backend options before opening devices.
+
+Precedence: built-in safe defaults < explicitly loaded config < explicit CLI flags. Log the resolved nonsecret settings. Resource paths resolve independently of the current working directory and work in the packaged distribution. User config/runtime logs/cache must not overwrite checked-in templates or `path.json` unexpectedly.
+
+Provide safe defaults: DXcam selected, initial 60 FPS target, preview off, dry-run/no actuation unless explicitly enabled. Set initial staleness budgets and state-specific rules in config, documenting that receive-age is a lower bound when the source timestamp is unknown. Do not allow a large user-set TTL to disable emergency-stop/focus checks.
+
+### CLI contract — CLI-01
+
+Implement and test these commands or retain exact equivalent compatibility wrappers documented in `MIGRATION.md`:
+
+```text
+python -m autonavy --help
+python -m autonavy --check-config --config configs/default.toml
+python -m autonavy --dry-run --capture replay --fixture tests/fixtures/smoke --max-frames 120
+python -m autonavy --dry-run --capture dxcam --config configs/default.toml
+python -m autonavy --dry-run --capture obs --config configs/default.toml
+python -m autonavy --capture dxcam --config configs/default.toml --enable-input
+python -m autonavy --capture obs --config configs/default.toml --enable-input
+```
+
+`--help`, configuration validation and fixture smoke mode must work without a game, camera, vJoy, Windows-only import or network request. Replay plus `--enable-input` is an invalid combination. Replay mode exits after a finite fixture sequence or explicit frame budget, and repeated fixture cycles must remain distinguishable by publication identity.
+
+The agent may implement the last two live-input commands but must not execute them. Run/install wrappers must forward arguments and preserve the safe default. Invalid config/startup failure returns nonzero; normal finite replay and deliberate stop have documented exit codes.
+
+### OBSERVE-01 — Diagnostics
+
+Add structured/consistent logging with module names, actionable errors, state transitions and exception tracebacks. Rate-limit repetitive faults and support rotating/bounded files. Per-frame logging is off by default. Include monotonic stage timings, frame IDs, freshness/drop metrics and selected backend. Do not save raw screenshots or input text automatically; use explicit local diagnostic options.
+
+### BUILD-01 — Dependencies, CI and distribution
+
+Separate or mark hardware-only dependencies so core unit/integration tests run headlessly. Lazy import Windows, DXcam, vJoy and optional OBS discovery libraries at adapter initialization. Do not install the Windows runtime requirement set on Linux and then treat installation failure as a reason not to test the pure core.
+
+Use the existing test stack if reasonable; otherwise add pytest and a small development requirement set. Adopt narrowly scoped lint/format checks, not a repository-wide formatting churn. Do not upgrade NumPy/OpenCV/SciPy/Python as a side effect of this refactor. Preserve runtime compatibility with the binary pathfinder and pin any added dependencies to a reviewed compatible range/version.
+
+Update existing install/run/check scripts and the actual Nuitka/build workflow discovered in the repository. Include the new package, default configuration, templates, native extension and required data in the output. Preserve full Windows preflight checks and add a headless/config-only check instead of deleting hardware validation. Test packaged resource lookup from a different working directory when a build is available.
+
+Add/extend CI for Python 3.11 core tests on Linux and Windows. Windows CI must not require the game, a physical desktop, OBS, vJoy hardware, or real input; mark true hardware checks separately. Retain build smoke validation where practical. Do not publish artifacts/releases automatically as part of this task or claim that authoring a workflow means it has run.
+
+Write the primary v2 documentation in English. Preserve useful existing localized documentation separately when appropriate, but update any conflicting development-language guidance for new v2 work. Do not translate image assets or external protocol literals. Keep licenses/notices unchanged and document original implementations inspired by the donor; do not import its source code, models or dependencies wholesale. [R14]
+
+## 13. Benchmarks and performance decisions — PERF-01
+
+Deliver runnable tools, not only a proposed measurement plan.
+
+### Offline pipeline benchmark
+
+Implement `scripts/benchmark_pipeline.py` with a finite deterministic fixture input and JSON/CSV output. Compare narrowly extracted legacy computations against the new computations on identical pixels, ROIs, parameters and hardware. Include cold template preparation separately from steady-state cached processing, and keep correctness checks outside the timed region where necessary.
+
+Measure at least preprocessing, template matching, HSV/masking and whole offline decision-stage duration. Warm up, run multiple repetitions, disclose sample count/environment, and report p50/p95 plus relevant throughput. Use `perf_counter_ns` or an equivalent monotonic clock. Fixed seeds and fixture provenance must be recorded.
+
+Required structural results are testable without an FPS promise: no four-channel expansion of edge maps; unchanged templates prepared once per version; same frame/ROI prepared once per configuration; unused full-frame HSV work removed; no accumulating frame or action backlog. Provide call-count/shape tests in addition to timing.
+
+### Live capture comparison
+
+Implement `scripts/benchmark_capture.py` for the selected backend with configurable duration and output path. It must not actuate input. Compare DXcam and OBS at the same game-content resolution, with the same processing/profile and debug preview off. Report actual negotiated settings and distinguish capture-only measurements from full-pipeline runs.
+
+Record delivered frame rate, source sequence/presentation rate where genuinely available, drops/replacements, failures, application receive-to-consume age, decision-to-dispatch time where applicable, CPU/memory and available GPU/game measurements. Report unavailable GPU/game metrics as unavailable instead of adding major dependencies or inventing values.
+
+Do not label frame-loop iterations as unique rendered FPS. Content hashes may be an explicitly labeled heuristic in a separate diagnostic run, not a full-frame per-tick overhead imposed on normal operation. Identical pixels do not prove duplicate acquisition.
+
+Full render-to-input latency requires a trustworthy source timestamp with a known clock relationship or a suitable visual-counter/external measurement method. A timestamp taken after `VideoCapture.read()` cannot reveal prior camera/OBS buffering. Label unmeasured portions and do not compare unequal latency definitions.
+
+### Decision rule
+
+No fixed whole-project speedup is promised. On representative available fixtures, investigate regressions; do not hide slow cases or drop correctness checks. An observed >10% median regression over repeated comparable hot-path runs is a review trigger, not a flaky timing assertion in CI. A documented safety/correctness tradeoff may be accepted but must not be described as an acceleration.
+
+Keep DXcam default for this delivery unless representative same-machine measurements establish a repeatable OBS advantage in the relevant p95 end-to-end latency without material correctness, stability or game-performance regressions. If complete latency cannot be measured, do not infer superiority from delivery FPS alone. Missing live hardware means the default stays DXcam and live results stay NOT RUN.
+
+## 14. Implementation milestones
+
+Execute in order, splitting each milestone into concrete skill-compliant tasks. A milestone is not permission for a giant unreviewed commit. Reconcile requirements before starting downstream work; update plans when evidence changes an implementation detail.
+
+| Milestone | Work and integrated deliverable | Exit evidence |
+|---|---|---|
+| M0 — Isolation and baseline | Branch/worktree, persisted spec, source audit, behavior inventory, characterization harness and plans | GIT-01, AUDIT-01; baseline recorded without running live actuation |
+| M1 — Safe foundations | Import-safe package, configuration, shared contracts, fake clock/devices, finite replay, minimal lifecycle and input cleanup | ARCH-01, initial CFG/CLI/LIFE/INPUT tests; a finite headless path runs |
+| M2 — DXcam and ownership | Capture interface, default DXcam, latest-frame slot, geometry boundary; migrate real capture consumers | CAP-01, FRAME-01, initial GEOM-01; no second reader or import-time capture |
+| M3 — Vision hot paths | Template registry/cache, single-channel matching, ROI-first processing, immutable debug views, degree helper | VISION-01/02/03; fixture equivalence and structural benchmark evidence |
+| M4 — Telemetry | One snapshot service, validation/freshness, map cache, migrated consumers | TEL-01; no HTTP requests in control/vision ticks |
+| M5 — Input and runtime | Single actuation owner, scheduler, state machine, emergency stop/focus rules; migrate UI/fire/recovery paths | LIFE-01, INPUT-01/02, APP-01; integrated fake battle-cycle tests |
+| M6 — Navigation/control | Ordered cursor, bounded replanning, native adapter, wraparound and separate controllers | NAV-01, CTRL-01; route and fake-actuator scenario tests |
+| M7 — OBS and geometry | Fully implemented optional backend, source-specific mapping, shutdown behavior and diagnostic setup guide | CAP-02/03, GEOM-01; mocked camera coverage and permitted hardware checks |
+| M8 — Tooling and packaging | Benchmarks, English migration docs, launcher/preflight/build/CI updates, dependency compatibility decision | PERF-01, OBSERVE-01, BUILD-01, final CFG/CLI checks |
+| M9 — Review and handoff | Full available regression suite, spec/code review, fixes, requirement-to-evidence map, local branch retained | All acceptance rows classified; no hidden unfinished implementation |
+
+Each milestone must modify or integrate the production path it owns; tests plus unused new classes are insufficient. Remove superseded code only after callers and tests are migrated. Do not retain an unsafe legacy fallback for convenience.
+
+## 15. Acceptance matrix
+
+Maintain the full matrix in `docs/v2/VERIFICATION.md`, mapping each ID to implementation paths, concrete test names, executed commands, result and evidence location. Status values: **PASS**, **FAIL**, **BLOCKED**, **NOT RUN**. An unavailable device may justify NOT RUN for hardware validation, not for implementing its adapter or mock tests.
+
+| ID | Required acceptance behavior |
+|---|---|
+| A01 / GIT-01 | All edits/commits are isolated on the recorded v2 branch; initial worktree/default branches preserved; no push/merge/release |
+| A02 / AUDIT-01 | Every audit target reconciled with checked-out source; baseline, behavior inventory and dependency constraints recorded |
+| A03 / ARCH-01 | Importing core and supported entry modules does not create devices, capture, workers, network requests, hotkeys or input |
+| A04 / CAP-01 | Fake DXcam lifecycle tests cover start/read/no-frame/error/stop/restart; real adapter selected from production factory |
+| A05 / FRAME-01 | Fast fake producer and slow consumers do not accumulate a queue; consumers obtain newest available stable snapshots |
+| A06 / FRAME-01 | Producer-buffer mutation and debug drawing cannot alter already published/retained packets |
+| A07 / FRAME-01 | Same decision uses one packet; `get_deg` and other consumers never read capture independently |
+| A08 / CAP-03 | Stop wakes application waits; source generation changes invalidate cached data/intents; native blocking limits are tested or documented honestly |
+| A09 / VISION-01 | Matcher receives one-channel edge arrays; static template/ROI preprocessing call counts prove cache reuse/invalidation |
+| A10 / VISION-01 | Positive/negative, empty, oversized, constant-template and nonfinite-result cases are handled; coordinates map correctly |
+| A11 / VISION-02 | Cropped HSV/mask result matches cropped legacy output for identical pixels; preprocessing sees only the needed ROI |
+| A12 / VISION-02/03 | No-op morphology removal, empty-contour handling and debug-on/off equivalence have tests |
+| A13 / GEOM-01 | Pure tests cover translated windows, ROI offsets, OBS content rectangles, scaling/letterboxing, bounds and negative desktop origins |
+| A14 / GEOM-01 | Unsupported/mismatched profile or changed geometry prevents physical input; diagnostics state effective mapping |
+| A15 / TEL-01 | Fake HTTP tests cover timeout, non-2xx, malformed JSON, missing fields/player, empty zones, stale data and recovery |
+| A16 / TEL-01 | Failed updates do not refresh success timestamps; session/map changes invalidate dependent state; no request backlog |
+| A17 / TEL-01 | Active control/vision paths perform no direct HTTP calls; map/image refresh is cached independently of object polling |
+| A18 / LIFE-01 | Normal stop, pause-then-stop, Ctrl+C, startup failure and worker failure converge on idempotent cleanup |
+| A19 / LIFE-01 | Input cleanup executes even when camera/network cleanup fails; no asynchronous thread-kill mechanism remains in active code |
+| A20 / INPUT-01 | Every actuated key/button is tracked; W/S and all used inputs release, vJoy is neutralized, release failures do not abort other cleanup |
+| A21 / INPUT-01 | Negative/positive/zero wheel events, focus loss and emergency stop behave as specified with fake devices |
+| A22 / INPUT-01/02 | Arbitration, stale/expired intents, owner-generation cancellation and stale-release races are covered |
+| A23 / INPUT-02 | Fake-clock tests prove holds/sequences do not block decisions, cancellation is immediate at the next tick and the action store is bounded |
+| A24 / APP-01 | Headless replay traverses waiting→battle→recovery/pause→battle-end→stop using fake observations, telemetry and input; no low-level bypass |
+| A25 / APP-01 | Supported legacy launcher delegates to v2; obsolete flags and deliberate safety changes documented; no automatic purchase behavior |
+| A26 / NAV-01 | Route order/input immutability, intersections, waypoint progress, empty/unreachable route and bounded retry are tested |
+| A27 / NAV-01 | Native adapter boundary is real and lazy; tests use a fake adapter, not a fake production pathfinder |
+| A28 / CTRL-01 | Wraparound values, tie convention, finite observations, units, limits and controller resets have tests |
+| A29 / CAP-02 | Mock OBS covers missing device, failed open/read, actual resolution mismatch, invalid shape, cleanup/reopen and BGR contract |
+| A30 / CAP-02/03 | Optional OBS dependency missing does not break DXcam/core imports; explicit OBS selection never silently opens another camera |
+| A31 / CFG-01 | Defaults/CLI precedence/invalid values/unknown keys/ROI/profile errors/resource lookup tested; safe default is non-actuating |
+| A32 / CLI-01 | Help, config check and finite replay commands run without game/hardware/network; replay cannot enable input |
+| A33 / OBSERVE-01 | Errors have context/tracebacks; repetitive logs and metrics buffers are bounded; preview and screenshot saving are opt-in |
+| A34 / PERF-01 | Offline benchmark is runnable and produces labeled JSON/CSV with environment, sample sizes, correctness checks, p50/p95 and cold/warm distinction |
+| A35 / PERF-01 | Capture benchmark is runnable without input; metrics distinguish delivery, freshness and unmeasured source latency; backend default has an evidence-based decision |
+| A36 / BUILD-01 | Core tests/lint run with documented dev dependencies; Windows-specific imports are isolated; CI/build files use supported Python and resources |
+| A37 / BUILD-01 | Install/run/preflight scripts and packaging are migrated; available Windows build/resource smoke checks pass or are explicitly NOT RUN |
+| A38 / HANDOFF | English docs include DXcam/OBS setup, dry-run/live opt-in, calibration, migration, rollback, known limits and manual acceptance commands |
+| A39 / HANDOFF | Final review maps requirements to real callers/tests; no empty adapters, hidden TODO implementations, fabricated passes or unsupported speed claims |
+
+Tests for lifecycle and scheduling should primarily use fake clocks, deterministic synchronization and bounded joins, not long real sleeps. A small real-thread smoke test is appropriate. Hardware-marked tests must have meaningful skip reasons; do not skip the entire core suite when Windows is absent.
+
+The offline smoke fixture may combine existing templates with generated frames and mocked telemetry, but its provenance and limits must be explicit. Do not present it as a recording of a real battle.
+
+## 16. Definition of done and final handoff
+
+### Implementation completion
+
+All mandatory production paths are implemented and wired; no unimplemented OBS adapter, no dummy native pathfinder, no unused v2 runtime, and no active direct-input/capture/HTTP bypass. Available unit/integration tests and static checks pass, with existing unrelated failures separately evidenced. Required artifacts and local commits exist on the recorded branch.
+
+### Validation completion
+
+Separate offline verification from Windows/native/hardware/live-game validation. Label each independently. A working mock test is not proof of device behavior, and an authored CI workflow is not an executed build. If hardware is missing, deliver the real implementations, mock tests and a precise manual validation checklist, and say **implementation delivered; hardware validation pending** only when the implementation itself is actually complete.
+
+If any mandatory implementation remains unfinished, report **partial implementation** and list exact outstanding tasks. Never mark a milestone complete merely because the agent ran out of context or the hardware was unavailable. Keep unsafe or unverified live paths disabled by default.
+
+### Required manual checklist
+
+Provide commands/steps and pass/fail observations for: Windows x64/Python 3.11 preflight; native extension; finite replay; capture-only DXcam and OBS; actual image/profile/coordinate checks without actuation; device cleanup and repeated stop/start; optional explicitly user-run input validation in an authorized controlled environment; packaged-launch resource lookup; and same-machine latency comparison. Do not perform live matchmaking or real-input validation automatically.
+
+### Final response format
+
+Write the agent's final report in English with:
+
+1. **Delivery status:** implemented/partial; offline verified/not verified; hardware verified/pending.
+2. **Git:** source SHA, branch, absolute worktree path, final commit, uncommitted files, and confirmation that no push/merge/release occurred.
+3. **Changes:** concise table of removed/replaced/added components and their practical effect, tied to actual files.
+4. **Verification:** exact commands, environment, test counts/outcomes, failures/skips and evidence paths. Distinguish executed commands from proposed manual commands.
+5. **Performance:** only measured numbers and their scope; explicitly state what was not measured and why DXcam/OBS default was chosen.
+6. **Operation:** exact replay, default DXcam, optional OBS, explicit live-input, stop and rollback instructions that match the delivered implementation.
+7. **Remaining risks:** known regressions, incomplete work, missing hardware checks and any deviations, each with a concrete next step.
+
+Do not end by asking whether to start implementation: implementation was the task. Do not promise to continue after the session ends. Leave a usable branch and a truthful checkpoint.
+
+## 17. Source references
+
+These references explain the audit starting point and workflow assumptions. They do not override the inspected checkout, user requirements or host policies. URLs are intentionally included for the implementation agent; record commit-specific permalinks in the repository audit where available.
+
+- **R01:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/scripts/check_environment.py` — supported interpreter/platform/native file checks.
+- **R02:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/README.md` — supported game profile, template-language caveat, entrypoints and packaging.
+- **R03:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/toolkit/scn.py` — current capture and template matching.
+- **R04:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/toolkit/deg_cal.py` — direction extraction and ROI mutation audit.
+- **R05:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/firesystem.py` — fire detection and control audit.
+- **R06:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/toolkit/th_pool.py` — worker lifecycle audit.
+- **R07:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/toolkit/MnK.py` — keyboard/mouse lifecycle and wheel audit.
+- **R08:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/info.py` — telemetry audit.
+- **R09:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/toolkit/map.py` — map/HTTP acquisition audit.
+- **R10:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/toolkit/process_path.py` — native path adapter and route processing audit.
+- **R11:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/pilot.py` — navigation/controller audit.
+- **R12:** `https://raw.githubusercontent.com/AlexFoxD/AutoNavy_WT/master/start_prog.py` — actual orchestration and recovery/UI audit.
+- **R13:** `https://raw.githubusercontent.com/Priler/csgobot/main/grabbers/obs_vc_grabber.py` and `https://raw.githubusercontent.com/Priler/csgobot/main/grabbers/base.py` — optional source boundary and OBS/OpenCV reference.
+- **R14:** `https://raw.githubusercontent.com/Priler/csgobot/main/LICENSE` and `https://raw.githubusercontent.com/Priler/csgobot/main/pyproject.toml` — differing license declarations; use independent implementation and preserve notices rather than assuming copying permissions.
+- **R15:** `https://github.com/obra/superpowers` — public workflow overview; installed version controls actual skill availability.
+- **R16:** `https://raw.githubusercontent.com/obra/superpowers/main/skills/brainstorming/SKILL.md` — design review/approval workflow.
+- **R17:** `https://raw.githubusercontent.com/obra/superpowers/main/skills/writing-plans/SKILL.md` — executable task plans.
+- **R18:** `https://raw.githubusercontent.com/obra/superpowers/main/skills/using-git-worktrees/SKILL.md` — isolated workspaces and host integration.
+- **R19:** `https://raw.githubusercontent.com/obra/superpowers/main/skills/finishing-a-development-branch/SKILL.md` — completion and branch retention workflow.
+- **R20:** `https://github.com/ra1nty/DXcam` — consult current primary documentation when assessing a dependency update; verify against the selected pinned version.
+- **R21:** `https://requests.readthedocs.io/en/latest/user/advanced/` — session reuse and timeout semantics; verify against installed Requests.
+
+**End of specification.**
