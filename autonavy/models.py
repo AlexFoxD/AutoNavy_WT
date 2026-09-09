@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import numpy as np
+    from autonavy.geometry import GeometrySnapshot
 
 
 class RuntimeState(str, Enum):
@@ -34,6 +35,7 @@ class FramePacket:
     source_timestamp: float | None = None
     source_clock: str | None = None
     source_sequence: int | None = None
+    geometry: GeometrySnapshot | None = None
 
     def __post_init__(self):
         import numpy as np
@@ -44,6 +46,8 @@ class FramePacket:
             raise ValueError('Frame identifiers and receive timestamp must be nonnegative integers')
         if not isinstance(self.geometry_id, str) or not self.geometry_id.strip():
             raise ValueError('Frame geometry identity is required')
+        if self.geometry is not None and (self.geometry.geometry_id != self.geometry_id or self.geometry.frame_size != (self.image.shape[1], self.image.shape[0])):
+            raise ValueError('Frame geometry snapshot must match identity and pixel dimensions')
         if (self.source_timestamp is None) != (self.source_clock is None):
             raise ValueError('Source timestamp requires its clock domain and vice versa')
         if self.source_timestamp is not None and (not math.isfinite(self.source_timestamp) or not self.source_clock.strip()):

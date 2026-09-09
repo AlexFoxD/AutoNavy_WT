@@ -54,7 +54,8 @@ class ReplayCapture:
         self.source_generation += 1
         self.started = True
 
-    def read(self) -> FramePacket | None:
+    def read(self, timeout: float | None = None) -> FramePacket | None:
+        # Replay is synchronous and finite; a caller wait budget never delays it.
         if self.closed or not self.started:
             raise RuntimeError('Replay must be started before reading')
         data = self._manifest

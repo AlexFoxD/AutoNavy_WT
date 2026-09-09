@@ -109,7 +109,7 @@ def test_frame_packet_owns_readonly_pixels_and_rejects_bad_metadata():
         FramePacket(producer, 'BGR', 1, 1, 10, 'test', source_timestamp=1.0)
 
 
-def test_cli_input_requires_explicit_flag_and_replay_rejects_it(tmp_path, capsys):
+def test_cli_input_requires_explicit_flag_and_replay_rejects_it(tmp_path, capsys, monkeypatch):
     config_module()
     from autonavy.cli import main
     assert main(['--capture', 'replay', '--enable-input']) == 2
@@ -118,8 +118,15 @@ def test_cli_input_requires_explicit_flag_and_replay_rejects_it(tmp_path, capsys
     assert main(['--check-config', '--config', str(path)]) == 2
     assert main(['--check-config', '--config', str(path), '--dry-run']) == 0
     assert main(['--capture', 'dxcam', '--dry-run', '--enable-input']) == 2
-    assert main(['--capture', 'dxcam', '--dry-run']) == 3
-    assert 'unavailable' in capsys.readouterr().err.lower()
+    from autonavy.capture import factory
+    from autonavy.capture.replay import ReplayCapture
+    selected = []
+    def fake_selected_capture(settings):
+        selected.append(settings.capture.backend)
+        return ReplayCapture(ROOT / 'tests/fixtures/smoke')
+    monkeypatch.setattr(factory, 'create_capture', fake_selected_capture)
+    assert main(['--capture', 'dxcam', '--dry-run']) == 0
+    assert selected == ['dxcam']
 
 
 def test_explicit_preflight_reports_missing_resources_instead_of_config_failure(tmp_path, monkeypatch):

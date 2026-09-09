@@ -36,18 +36,24 @@ class Application:
             return 0
         self._transition(RuntimeState.STARTING)
         try:
-            if self.settings.capture.backend != 'replay':
-                raise RuntimeError(f'{self.settings.capture.backend} capture is unavailable at this milestone; use --dry-run --capture replay --fixture tests/fixtures/smoke')
-            from autonavy.capture.replay import ReplayCapture
-            self.capture = ReplayCapture(self.settings.capture.fixture, max_frames=self.settings.capture.max_frames)
+            from autonavy.capture.factory import create_capture
+            from autonavy.capture.base import CaptureTimeout
+            self.capture = create_capture(self.settings)
             self.capture.start()
             self._transition(RuntimeState.WAITING)
             while not self.stop_event.is_set():
-                packet = self.capture.read()
+                try:
+                    packet = self.capture.read()
+                except CaptureTimeout:
+                    continue  # Healthy static/no-new-frame source; still check stop on every wait.
                 if packet is None or self.stop_event.is_set():
                     break
+                if packet.geometry is not None and (self.last_frame is None or self.last_frame.geometry_id != packet.geometry_id):
+                    LOG.info('capture_geometry=%s', packet.geometry.diagnostic())
                 self.last_frame = packet
                 self.frames_processed += 1
+                if self.settings.capture.max_frames is not None and self.frames_processed >= self.settings.capture.max_frames:
+                    break
         except KeyboardInterrupt:
             LOG.info('Application stopped by user')
         except Exception as exc:
@@ -69,6 +75,8 @@ class Application:
 
     def stop(self) -> None:
         self.stop_event.set()
+        if self.capture is not None and hasattr(self.capture, 'request_stop'):
+            self.capture.request_stop()
 
     def close(self) -> None:
         self.stop()
