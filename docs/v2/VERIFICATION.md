@@ -69,3 +69,9 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 - upstream/master: 69570b424a3b552b4d56ebca062cc412ad105521.
 - Rechecked initial worktree: clean; HEAD unchanged. At final compare asset/native tree objects and branch refs; no screenshot capture is needed.
 - M0 record-fix recheck executed: `git -C 'C:\Develop\game\WT\AutoNavy_WT' status --porcelain=v1 -uall` produced no output; `git -C 'C:\Develop\game\WT\AutoNavy_WT' rev-parse HEAD master origin/master upstream/master 'HEAD:src' 'HEAD:toolkit/way_search.cp311-win_amd64.pyd'` returned the recorded source/default refs and tree/blob identifiers above. `Get-FileHash toolkit/way_search.cp311-win_amd64.pyd -Algorithm SHA256` matched the recorded native hash in the v2 worktree. This confirms current M0 preservation, not a future final state.
+
+## M1 foundations evidence
+
+Code commit 43aa40e7f3485dda9de807448d3a5b742ebbffad. See [M1 test-first report](evidence/M1.md) for 66 focused and 107 regression passes (one known side-effecting policy test excluded), import guards, actual launcher calls and explicit later-milestone limitations.
+
+Coordinator executed at that commit: `.venv\Scripts\python.exe -m autonavy --check-config --config configs/default.toml` => exit0; `.venv\Scripts\python.exe -m autonavy --dry-run --capture replay --fixture tests/fixtures/smoke --max-frames 120` => exit0, 3 synthetic frames, stopped. Frame budget caps the finite three-frame sequence; this is not a recorded battle or a performance measurement.
