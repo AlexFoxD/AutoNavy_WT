@@ -7,6 +7,7 @@ from dataclasses import replace
 
 import numpy as np
 import pytest
+from autonavy.telemetry import OfflineTelemetry
 
 
 class SyntheticSource:
@@ -130,7 +131,7 @@ def test_application_uses_selected_factory_and_stop_signals_before_close(monkeyp
     from autonavy.app import Application
     from autonavy.capture import factory
     monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
-    app = Application(capture.settings)
+    app = Application(capture.settings, telemetry=OfflineTelemetry())
     results = []
     runner = threading.Thread(target=lambda: results.append(app.run()))
     runner.start()
@@ -181,7 +182,7 @@ def test_application_does_not_treat_healthy_no_frame_as_disconnect(monkeypatch):
     from autonavy.app import Application
     from autonavy.capture import factory
     monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
-    app = Application(capture.settings)
+    app = Application(capture.settings, telemetry=OfflineTelemetry())
     results = []
     runner = threading.Thread(target=lambda: results.append(app.run()))
     runner.start()
@@ -199,7 +200,7 @@ def test_application_emits_geometry_calibration_for_actual_packet(monkeypatch, c
     from autonavy.app import Application
     from autonavy.capture import factory
     monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
-    app = Application(capture.settings)
+    app = Application(capture.settings, telemetry=OfflineTelemetry())
     with caplog.at_level('INFO', logger='autonavy.app'):
         assert app.run() == 0
     assert app.frames_processed == 1
@@ -301,7 +302,7 @@ def test_application_stop_during_capture_installation_never_launches_native_owne
             assert resume.wait(4)
             return original_start()
         monkeypatch.setattr(capture, 'start', delayed_start)
-    app = Application(capture.settings)
+    app = Application(capture.settings, telemetry=OfflineTelemetry())
     results = []
     runner = threading.Thread(target=lambda: results.append(app.run()))
     runner.start()
@@ -361,7 +362,7 @@ def test_stop_during_native_startup_wakes_application_before_ready_deadline(monk
     from autonavy.app import Application
     from autonavy.capture import factory
     monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
-    app = Application(capture.settings)
+    app = Application(capture.settings, telemetry=OfflineTelemetry())
     results = []
     runner = threading.Thread(target=lambda: results.append(app.run()))
     runner.start()
@@ -475,7 +476,7 @@ def test_run_finally_waits_for_external_cleanup_and_shares_its_result(monkeypatc
     from autonavy.models import RuntimeState
     capture = GatedCleanupCapture(failure)
     monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
-    app = Application(Settings())
+    app = Application(Settings(), telemetry=OfflineTelemetry())
     original_close = app.close
     follower_entered, run_done = threading.Event(), threading.Event()
     def observed_close():
@@ -529,7 +530,7 @@ def test_concurrent_close_wait_budget_cannot_become_an_unbounded_wait():
     settings = Settings()
     settings = replace(settings, capture=replace(settings.capture, stop_timeout_s=0.05),
                        runtime=replace(settings.runtime, join_timeout_s=0.05))
-    app = Application(settings)
+    app = Application(settings, telemetry=OfflineTelemetry())
     capture = GatedCleanupCapture()
     app.capture = capture
     errors = []

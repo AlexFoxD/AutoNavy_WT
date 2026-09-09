@@ -1,70 +1,24 @@
-import requests
+"""Legacy-shaped information view; caller supplies an owned telemetry source."""
 import math
-url_map_object = "http://127.0.0.1:8111/map_obj.json"
-url_map_info = "http://127.0.0.1:8111/map_info.json"
 
 
 class info:
-    def __init__(self):
+    def __init__(self, source):
+        self.source = source
         self.player = None
         self.mapinfo = None
         self.enemy = []
         self.connected = False
 
     def update(self):
-        try:
-            self.map_object = requests.get(url_map_object, timeout=300).json()
-            self.map_info = requests.get(url_map_info, timeout=300).json()
-            self.connected = self.map_info["valid"]
-            print(f'Отладка: соединение с локальным API: {self.connected}')
-        except Exception:
-            self.connected = False
-        self.analyse()
-
-    def analyse(self):
-        if not self.connected:
+        snapshot = self.source.snapshot()
+        self.connected = snapshot.valid
+        self.player, self.mapinfo, self.enemy = None, None, []
+        if not snapshot.valid:
             return
-        try:
-            self.get_map_info()
-        except Exception:
-            self.mapinfo = None
-        try:
-            self.get_player()
-        except Exception:
-            self.player = None
-        try:
-            self.get_enemy()
-        except Exception:
-            self.enemy = []
-
-    def get_player(self):
-        for _ in self.map_object:
-            if _["icon"] == "Player":
-                self.player = {
-                    "pos": [_["x"], _["y"]],
-                    "dx": _["dx"],
-                    "dy": _["dy"],
-                }
-
-    def get_map_info(self):
-        self.mapinfo = {
-            'scale': int(self.map_info['map_max'][0]-self.map_info['map_min'][0]),
-            'step': self.map_info['grid_steps'][0],
-        }
-
-    def get_enemy(self):
-        self.enemy = []
-        for _ in self.map_object:
-            if _["icon"] == "Ship" and _["color[]"] in [
-                [250, 12, 0],
-                [240, 12, 0],
-            ]:
-                data = {
-                    "pos": [_["x"], _["y"]],
-                    "dis": math.sqrt(
-                        ((_["x"] - self.player["pos"][0]) ** 2
-                         + (_["y"] - self.player["pos"][1]) ** 2) * self.mapinfo["scale"] ** 2
-                    )
-                }
-                self.enemy.append(data)
-        self.enemy = sorted(self.enemy, key=lambda x: x["dis"])
+        player, metadata = snapshot.player, snapshot.metadata
+        self.player = {'pos': list(player.position), 'dx': player.dx, 'dy': player.dy}
+        self.mapinfo = {'scale': metadata.scale, 'step': metadata.grid_steps[0]}
+        self.enemy = sorted(({'pos': list(e.position),
+                              'dis': math.dist(e.position, player.position) * metadata.scale}
+                             for e in snapshot.enemies), key=lambda e: e['dis'])

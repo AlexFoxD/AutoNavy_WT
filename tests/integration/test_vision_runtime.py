@@ -8,6 +8,7 @@ import sys
 import cv2
 import numpy as np
 import pytest
+from autonavy.telemetry import OfflineTelemetry
 
 from autonavy.app import Application
 from autonavy.config import load_settings
@@ -27,7 +28,7 @@ def test_runtime_observes_the_packet_delivered_by_its_only_reader(monkeypatch):
         def read(self): return p
         def close(self): pass
     monkeypatch.setattr('autonavy.capture.factory.create_capture', lambda settings: Capture())
-    app = Application(load_settings(overrides={'capture': {'max_frames':1}}))
+    app = Application(load_settings(overrides={'capture': {'max_frames':1}}), telemetry=OfflineTelemetry())
     assert app.run() == 0
     assert getattr(app, 'last_observations', None) is not None, 'runtime never called vision'
     assert app.last_observations.packet is p
@@ -43,7 +44,7 @@ def test_missing_selected_template_fails_before_capture_factory(tmp_path, monkey
     (folder/filename).unlink()
     called = []
     monkeypatch.setattr('autonavy.capture.factory.create_capture', lambda settings: called.append(True))
-    app = Application(load_settings(overrides={'paths': {'templates': str(folder)}}))
+    app = Application(load_settings(overrides={'paths': {'templates': str(folder)}}), telemetry=OfflineTelemetry())
     assert app.run() == 3
     assert not called, 'capture factory ran before template validation'
     assert filename in app.last_error
@@ -54,7 +55,7 @@ def test_undecodable_aim_fails_before_capture_factory(tmp_path, monkeypatch):
     bad.write_text('not an image')
     called = []
     monkeypatch.setattr('autonavy.capture.factory.create_capture', lambda settings: called.append(True))
-    app = Application(load_settings(overrides={'paths': {'aim_template':str(bad)}}))
+    app = Application(load_settings(overrides={'paths': {'aim_template':str(bad)}}), telemetry=OfflineTelemetry())
     assert app.run() == 3 and not called
     assert 'aim' in app.last_error and 'decode' in app.last_error
 
@@ -90,6 +91,6 @@ def test_missing_collision_template_is_named_before_capture(tmp_path,monkeypatch
     monkeypatch.setattr(templates,'resource_root',lambda:tmp_path)
     called = []
     monkeypatch.setattr('autonavy.capture.factory.create_capture',lambda settings:called.append(True))
-    app = Application(load_settings())
+    app = Application(load_settings(), telemetry=OfflineTelemetry())
     assert app.run() == 3 and not called
     assert filename in app.last_error

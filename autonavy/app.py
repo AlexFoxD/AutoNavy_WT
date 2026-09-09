@@ -3,16 +3,26 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
+from dataclasses import replace
 
 from autonavy.config import Settings, validate_settings
 from autonavy.models import FramePacket, RuntimeState
+from autonavy.telemetry import OfflineTelemetry, TelemetryService, TelemetrySnapshot
 
 LOG = logging.getLogger(__name__)
 
 
 class Application:
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, *, telemetry=None, clock_ns=time.monotonic_ns):
         self.settings = validate_settings(settings)
+        self._clock_ns = clock_ns
+        self.telemetry = telemetry if telemetry is not None else (
+            OfflineTelemetry() if self.settings.capture.backend == 'replay' else
+            TelemetryService(self.settings.telemetry, clock_ns=clock_ns,
+                             join_timeout_s=self.settings.runtime.join_timeout_s,
+                             fault_interval_s=self.settings.diagnostics.fault_interval_s))
+        self._last_snapshot = TelemetrySnapshot()
         self.state = RuntimeState.STOPPED
         self.frames_processed = 0
         self.last_frame: FramePacket | None = None
@@ -26,6 +36,13 @@ class Application:
         self._close_complete = threading.Event()
         self._close_error: str | None = None
         self._capture_lifecycle = threading.Lock()
+
+    @property
+    def last_snapshot(self):
+        snapshot = self._last_snapshot
+        if self.stop_event.is_set():
+            snapshot = replace(snapshot, valid=False, error='application stopped')
+        return snapshot.at(self._clock_ns())
 
     def _transition(self, state: RuntimeState) -> None:
         LOG.info('state=%s previous=%s', state.value, self.state.value)
@@ -60,8 +77,15 @@ class Application:
                     if not self.stop_event.is_set():
                         raise
             if not self.stop_event.is_set():
+                try:
+                    self.telemetry.start()
+                except Exception:
+                    if not self.stop_event.is_set():
+                        raise
+            if not self.stop_event.is_set():
                 self._transition(RuntimeState.WAITING)
             while not self.stop_event.is_set():
+                self._last_snapshot = self.telemetry.snapshot()
                 try:
                     packet = self.capture.read()
                 except CaptureTimeout:
@@ -72,6 +96,7 @@ class Application:
                     LOG.info('capture_geometry=%s', packet.geometry.diagnostic())
                 self.last_frame = packet
                 self.last_observations = self.vision.observe(packet)
+                self._last_snapshot = self.telemetry.snapshot()
                 self.frames_processed += 1
                 if self.settings.capture.max_frames is not None and self.frames_processed >= self.settings.capture.max_frames:
                     break
@@ -96,6 +121,7 @@ class Application:
 
     def stop(self) -> None:
         self.stop_event.set()
+        self.telemetry.request_stop()
         with self._capture_lifecycle:
             capture = self.capture
         if capture is not None and hasattr(capture, 'request_stop'):
@@ -109,22 +135,29 @@ class Application:
                 self._closing = True
                 capture = self.capture
         failure = None
+        failures = []
         if owner:
             try:
-                if capture is not None:
-                    capture.close()
-            except BaseException as exc:
-                failure = exc
+                # Every resource is attempted even after another cleanup fails.
+                # M5 input cleanup belongs before these potentially bounded waits.
+                for resource in (capture, self.telemetry):
+                    if resource is not None:
+                        try:
+                            resource.close()
+                        except BaseException as exc:
+                            failures.append(exc)
+                failure = next((exc for exc in failures if not isinstance(exc, Exception)),
+                               failures[0] if failures else None)
             finally:
                 with self._capture_lifecycle:
-                    self._close_error = f'{type(failure).__name__}: {failure}' if failure is not None else None
+                    self._close_error = '; '.join(f'{type(exc).__name__}: {exc}' for exc in failures) or None
                     self._closed = True
                     self._closing = False
                     self._close_complete.set()
         else:
             # The resource owner has its own bounded cleanup. Concurrent callers
             # allow that budget plus the runtime join allowance, then fail explicitly.
-            budget = self.settings.capture.stop_timeout_s + self.settings.runtime.join_timeout_s
+            budget = self.settings.capture.stop_timeout_s + 2 * self.settings.runtime.join_timeout_s
             if not self._close_complete.wait(budget):
                 raise RuntimeError('Application cleanup did not complete within the concurrent wait budget')
         with self._capture_lifecycle:
