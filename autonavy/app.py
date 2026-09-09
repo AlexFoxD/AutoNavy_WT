@@ -20,6 +20,7 @@ class Application:
         self.capture = None
         self.stop_event = threading.Event()
         self._closed = False
+        self._capture_lifecycle = threading.Lock()
 
     def _transition(self, state: RuntimeState) -> None:
         LOG.info('state=%s previous=%s', state.value, self.state.value)
@@ -37,10 +38,21 @@ class Application:
         self._transition(RuntimeState.STARTING)
         try:
             from autonavy.capture.factory import create_capture
-            from autonavy.capture.base import CaptureTimeout
-            self.capture = create_capture(self.settings)
-            self.capture.start()
-            self._transition(RuntimeState.WAITING)
+            from autonavy.capture.base import CaptureError, CaptureTimeout
+            capture = create_capture(self.settings)
+            with self._capture_lifecycle:
+                self.capture = capture
+                cancelled = self._closed or self.stop_event.is_set()
+            if cancelled:
+                capture.close()
+            else:
+                try:
+                    capture.start()
+                except CaptureError:
+                    if not self.stop_event.is_set():
+                        raise
+            if not self.stop_event.is_set():
+                self._transition(RuntimeState.WAITING)
             while not self.stop_event.is_set():
                 try:
                     packet = self.capture.read()
@@ -75,15 +87,17 @@ class Application:
 
     def stop(self) -> None:
         self.stop_event.set()
-        if self.capture is not None and hasattr(self.capture, 'request_stop'):
-            self.capture.request_stop()
+        with self._capture_lifecycle:
+            capture = self.capture
+        if capture is not None and hasattr(capture, 'request_stop'):
+            capture.request_stop()
 
     def close(self) -> None:
         self.stop()
-        if self._closed:
-            return
-        try:
-            if self.capture is not None:
-                self.capture.close()
-        finally:
+        with self._capture_lifecycle:
+            if self._closed:
+                return
             self._closed = True
+            capture = self.capture
+        if capture is not None:
+            capture.close()

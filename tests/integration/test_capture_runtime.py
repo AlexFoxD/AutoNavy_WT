@@ -110,7 +110,7 @@ def test_dead_writer_lock_cannot_block_read_or_cleanup():
     capture.start()
     ctx = multiprocessing.get_context('spawn')
     ready = ctx.Event()
-    holder = ctx.Process(target=hold_lock, args=(capture._shared.lock, ready))
+    holder = ctx.Process(target=hold_lock, args=(capture._session.shared.lock, ready))
     holder.start()
     try:
         assert ready.wait(4)
@@ -239,6 +239,205 @@ def test_inflight_old_read_cannot_publish_after_close_or_restart(monkeypatch, re
         assert errors == [] and results == [None]
         if restart:
             assert capture.read().source_generation == 2
+    finally:
+        resume.set()
+        reader.join(2)
+        capture.close()
+
+
+def test_read_snapshot_is_one_generation_even_when_paused_at_first_attribute(monkeypatch):
+    capture = make_capture()
+    capture.start()
+    entered, resume = threading.Event(), threading.Event()
+    original = type(capture).__getattribute__
+    paused = False
+    def delayed_snapshot(self, name):
+        nonlocal paused
+        value = original(self, name)
+        if self is capture and threading.current_thread().name == 'early-reader' and name in {'_shared', '_session'} and not paused:
+            paused = True
+            entered.set()
+            assert resume.wait(5)
+        return value
+    monkeypatch.setattr(type(capture), '__getattribute__', delayed_snapshot)
+    results, errors = [], []
+    def read():
+        try: results.append(capture.read())
+        except Exception as exc: errors.append(exc)
+    reader = threading.Thread(target=read, name='early-reader')
+    reader.start()
+    try:
+        assert entered.wait(3)
+        capture.stop()
+        capture.start()
+        resume.set()
+        reader.join(2)
+        assert errors == [] and results == [None]
+        assert capture.read().source_generation == 2
+    finally:
+        resume.set()
+        reader.join(2)
+        capture.close()
+
+
+@pytest.mark.parametrize('boundary', ['factory', 'start'])
+@pytest.mark.parametrize('action', ['stop', 'close'])
+def test_application_stop_during_capture_installation_never_launches_native_owner(monkeypatch, boundary, action):
+    capture = make_capture(5)
+    capture.settings = replace(capture.settings, capture=replace(capture.settings.capture, startup_timeout_s=0.3))
+    from autonavy.app import Application
+    from autonavy.capture import factory
+    entered, resume = threading.Event(), threading.Event()
+    def create(settings):
+        if boundary == 'factory':
+            entered.set()
+            assert resume.wait(4)
+        return capture
+    monkeypatch.setattr(factory, 'create_capture', create)
+    if boundary == 'start':
+        original_start = capture.start
+        def delayed_start():
+            entered.set()
+            assert resume.wait(4)
+            return original_start()
+        monkeypatch.setattr(capture, 'start', delayed_start)
+    app = Application(capture.settings)
+    results = []
+    runner = threading.Thread(target=lambda: results.append(app.run()))
+    runner.start()
+    try:
+        assert entered.wait(3)
+        stopped = time.monotonic()
+        getattr(app, action)()
+        assert time.monotonic()-stopped < 0.2
+        resume.set()
+        runner.join(2)
+        assert results == [0] and app.last_error is None
+        assert capture.process is None and capture.closed
+    finally:
+        resume.set()
+        runner.join(3)
+        capture.close()
+
+
+def test_close_keeps_restart_excluded_until_terminal_state_is_installed(monkeypatch):
+    capture = make_capture()
+    capture.start()
+    first_process = capture.process
+    entered, resume = threading.Event(), threading.Event()
+    original_stop = capture.stop
+    def delayed_stop():
+        original_stop()
+        entered.set()
+        assert resume.wait(4)
+    monkeypatch.setattr(capture, 'stop', delayed_stop)
+    closing = threading.Thread(target=capture.close)
+    errors = []
+    def start():
+        try: capture.start()
+        except Exception as exc: errors.append(exc)
+    starting = threading.Thread(target=start)
+    closing.start()
+    try:
+        assert entered.wait(3)
+        starting.start()
+        time.sleep(0.05)
+        resume.set()
+        closing.join(2)
+        starting.join(2)
+        assert len(errors) == 1 and 'closed' in str(errors[0])
+        assert capture.process is first_process and not first_process.is_alive()
+    finally:
+        resume.set()
+        closing.join(2)
+        if starting.ident is not None: starting.join(3)
+        if capture.process is not None and capture.process.is_alive():
+            capture.process.terminate()
+            capture.process.join(2)
+
+
+def test_stop_during_native_startup_wakes_application_before_ready_deadline(monkeypatch):
+    capture = make_capture(5)
+    from autonavy.app import Application
+    from autonavy.capture import factory
+    monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
+    app = Application(capture.settings)
+    results = []
+    runner = threading.Thread(target=lambda: results.append(app.run()))
+    runner.start()
+    try:
+        deadline = time.monotonic()+3
+        while (capture.process is None or capture.process.pid is None) and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert capture.process is not None and capture.process.pid is not None
+        now = time.monotonic()
+        app.stop()
+        assert time.monotonic()-now < 0.2
+        runner.join(2)
+        assert results == [0] and app.last_error is None
+        assert time.monotonic()-now < 2
+        assert not capture.process.is_alive()
+    finally:
+        app.stop()
+        runner.join(3)
+        capture.close()
+
+
+def test_stop_during_session_allocation_latches_before_native_launch(monkeypatch):
+    capture = make_capture()
+    from autonavy.capture import process as module
+    original_shared = module._Shared
+    entered, resume = threading.Event(), threading.Event()
+    def delayed_shared(*args):
+        entered.set()
+        assert resume.wait(4)
+        return original_shared(*args)
+    monkeypatch.setattr(module, '_Shared', delayed_shared)
+    errors = []
+    def start():
+        try: capture.start()
+        except Exception as exc: errors.append(exc)
+    runner = threading.Thread(target=start)
+    runner.start()
+    try:
+        assert entered.wait(3)
+        now = time.monotonic()
+        capture.request_stop()
+        assert time.monotonic()-now < 0.2
+        resume.set()
+        runner.join(2)
+        assert errors == [] and not runner.is_alive()
+        assert capture.process.pid is None
+    finally:
+        resume.set()
+        runner.join(2)
+        capture.close()
+
+
+def test_cancel_between_read_preconditions_returns_cancellation(monkeypatch):
+    capture = make_capture()
+    from autonavy.capture import process as module
+    capture.start()
+    entered, resume = threading.Event(), threading.Event()
+    original = module._Progress.__getattribute__
+    def delayed_ready(self, name):
+        if name == 'started' and threading.current_thread().name == 'ready-reader':
+            entered.set()
+            assert resume.wait(4)
+        return original(self, name)
+    monkeypatch.setattr(module._Progress, '__getattribute__', delayed_ready)
+    results, errors = [], []
+    def read():
+        try: results.append(capture.read())
+        except Exception as exc: errors.append(exc)
+    reader = threading.Thread(target=read, name='ready-reader')
+    reader.start()
+    try:
+        assert entered.wait(3)
+        capture.stop()
+        resume.set()
+        reader.join(2)
+        assert errors == [] and results == [None]
     finally:
         resume.set()
         reader.join(2)
