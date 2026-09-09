@@ -53,9 +53,9 @@ Interfaces: `FrameContext(packet)` caches bounded ROI derivatives; `TemplateRegi
 ### Task 4: M4 telemetry
 Files: autonavy/telemetry.py, info.py, toolkit/map.py, autonavy/app.py, tests/unit/test_telemetry.py.
 Interfaces: immutable `TelemetrySnapshot`; lifecycle-owned `TelemetryService` with `snapshot()`; isolated cached map metadata/image.
-- [ ] RED: timeout/status/schema/missing player/empty zones/nonfinite/stale/recovery/session change; failed polls preserve last-success time.
-- [ ] Single reusable Session; 10 Hz, (0.5,0.5) timeout, 1s TTL; serial polling without backlog; move all active HTTP callers behind snapshot service.
-- [ ] GREEN/review/commit; document Requests tuple is not a total deadline.
+- [x] RED: timeout/status/schema/missing player/empty zones/nonfinite/stale/recovery/session change; failed polls preserve last-success time.
+- [x] Single reusable Session; 10 Hz, (0.5,0.5) timeout, 1s TTL; serial polling without backlog; move all active HTTP callers behind snapshot service.
+- [x] GREEN/review/commit; document Requests tuple is not a total deadline.
 
 ### Task 5: M5 coordinated input and integrated battle flow
 Files: autonavy/input/{controller,scheduler,windows}.py, autonavy/app.py, autonavy/behavior.py, toolkit/{MnK,joystick,th_pool}.py, firesystem.py, dxin.py, tests/unit/test_input.py, tests/integration/test_battle_cycle.py.

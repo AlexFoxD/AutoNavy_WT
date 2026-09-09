@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0-M3 independently reviewed; M4 telemetry implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M4 independently reviewed; M5 input/runtime implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -33,9 +33,9 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A12 / VISION-02/03 | PASS | M0/M3 no-op morphology, empty/degenerate heading, debug-copy on/off equality;713a507 adds independently throttled copy/draw with injectedclock and deadline tests (36covering passed). evidence/M3.md. |
 | A13 / GEOM-01 | PARTIAL | M2 pure GeometrySnapshot transforms and Windows client/output mapping cover translated/negative origins, bounds and content scaling. Actual OBS source/calibration integration follows M7. |
 | A14 / GEOM-01 | NOT RUN | Implementation/validation pending |
-| A15 / TEL-01 | NOT RUN | Implementation/validation pending |
-| A16 / TEL-01 | NOT RUN | Implementation/validation pending |
-| A17 / TEL-01 | NOT RUN | Implementation/validation pending |
+| A15 / TEL-01 | PASS | M4 real TelemetryService/parser with fake Session covers HTTP/status/JSON/schema/player/nonfinite/zero-heading/empty-zones/stale/recovery; evidence/M4.md full241pass1excluded, focusedmetadatafix41pass. No live HTTP executed. |
+| A16 / TEL-01 | PASS | M4 serial worker/no queue, monotonic per-component timestamps, TTL at consumption, locally inferred map/recovery generations.0c44df0 atomically invalidates published data on metadata failure while next request blocks; reviewer4case repro passed. evidence/M4.md. |
+| A17 / TEL-01 | PASS | Application owns TelemetryService/OfflineTelemetry; info.py and toolkit/map.py require explicit snapshot source and issue no HTTP. Separate bounded metadata/image cache in memory; no asset writes. evidence/M4.md and test_telemetry_runtime.py. M5/M6 consumer integration and final caller audit remain required. |
 | A18 / LIFE-01 | NOT RUN | Implementation/validation pending |
 | A19 / LIFE-01 | NOT RUN | Implementation/validation pending |
 | A20 / INPUT-01 | NOT RUN | Implementation/validation pending |

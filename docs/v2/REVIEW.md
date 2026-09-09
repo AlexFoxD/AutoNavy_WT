@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-M0-M3 independent reviews passed, including lifecycle/cleanup and preview corrections. M4 implementation is active. Final A01-A39 caller/evidence review remains pending.
+M0-M4 independent reviews passed, including lifecycle, preview and telemetry publication corrections. M5 implementation is active. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
@@ -26,3 +26,7 @@ M2 scoped re-reviewceee7bb: cleanup finding ADDRESSED, SPEC PASS, QUALITY PASS, 
 M3 independent review59e5914: SPEC FAIL/QUALITY FAIL for soleP2 unthrottled preview copy/draw; configured preview_fps unused. All other scoped vision/runtime/cache/asset/import checks accepted. Original implementer resumed for clock-injected preview cadence regression/fix before M4.
 
 M3 scoped re-review713a507: previewfinding ADDRESSED, SPEC PASS, QUALITY PASS, no newfixissues.3new/36coveringtests pass; full201pass1excluded previously. M3 complete; M4 telemetry active.
+
+M4 review2ca2587: SPEC FAIL/QUALITY FAIL, soleP1 known invalid metadata clears privatecache but leaves published player snapshot actionable until following objectrequest completes. Offlinegatedrepro confirmed; changed-mapkey branch separately verified immediateinvalidation. Originalimplementer fixing atomic invalidsnapshot publication with timestamp preservation and gated regression.
+
+M4 scoped re-review0c44df0: P1 ADDRESSED, SPEC PASS, QUALITY PASS; immediate snapshot invalidation preserves timestamp/generation. Reviewer independently ran4newcases:4passed37deselected1.16s. No new fixissues. M4 complete; M5 active.
