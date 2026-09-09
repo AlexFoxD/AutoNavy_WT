@@ -20,6 +20,9 @@ class Application:
         self.capture = None
         self.stop_event = threading.Event()
         self._closed = False
+        self._closing = False
+        self._close_complete = threading.Event()
+        self._close_error: str | None = None
         self._capture_lifecycle = threading.Lock()
 
     def _transition(self, state: RuntimeState) -> None:
@@ -95,9 +98,32 @@ class Application:
     def close(self) -> None:
         self.stop()
         with self._capture_lifecycle:
-            if self._closed:
-                return
-            self._closed = True
-            capture = self.capture
-        if capture is not None:
-            capture.close()
+            owner = not self._closing and not self._closed
+            if owner:
+                self._closing = True
+                capture = self.capture
+        failure = None
+        if owner:
+            try:
+                if capture is not None:
+                    capture.close()
+            except BaseException as exc:
+                failure = exc
+            finally:
+                with self._capture_lifecycle:
+                    self._close_error = f'{type(failure).__name__}: {failure}' if failure is not None else None
+                    self._closed = True
+                    self._closing = False
+                    self._close_complete.set()
+        else:
+            # The resource owner has its own bounded cleanup. Concurrent callers
+            # allow that budget plus the runtime join allowance, then fail explicitly.
+            budget = self.settings.capture.stop_timeout_s + self.settings.runtime.join_timeout_s
+            if not self._close_complete.wait(budget):
+                raise RuntimeError('Application cleanup did not complete within the concurrent wait budget')
+        with self._capture_lifecycle:
+            error = self._close_error
+        if failure is not None and not isinstance(failure, Exception):
+            raise failure
+        if error is not None:
+            raise RuntimeError(error) from failure

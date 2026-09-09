@@ -442,3 +442,109 @@ def test_cancel_between_read_preconditions_returns_cancellation(monkeypatch):
         resume.set()
         reader.join(2)
         capture.close()
+
+
+class GatedCleanupCapture:
+    """A device-free resource whose one cleanup can be observed before completion."""
+    def __init__(self, failure=False):
+        self.failure = failure
+        self.read_entered = threading.Event()
+        self.read_resume = threading.Event()
+        self.cleanup_entered = threading.Event()
+        self.cleanup_resume = threading.Event()
+        self.close_calls = 0
+    def start(self): pass
+    def request_stop(self): pass
+    def read(self):
+        self.read_entered.set()
+        assert self.read_resume.wait(4)
+        return None
+    def close(self):
+        self.close_calls += 1
+        self.cleanup_entered.set()
+        assert self.cleanup_resume.wait(4)
+        if self.failure:
+            raise RuntimeError('synthetic gated cleanup failure')
+
+
+@pytest.mark.parametrize('failure', [False, True])
+def test_run_finally_waits_for_external_cleanup_and_shares_its_result(monkeypatch, failure):
+    from autonavy.app import Application
+    from autonavy.capture import factory
+    from autonavy.config import Settings
+    from autonavy.models import RuntimeState
+    capture = GatedCleanupCapture(failure)
+    monkeypatch.setattr(factory, 'create_capture', lambda settings: capture)
+    app = Application(Settings())
+    original_close = app.close
+    follower_entered, run_done = threading.Event(), threading.Event()
+    def observed_close():
+        if threading.current_thread().name == 'app-runner':
+            follower_entered.set()
+        return original_close()
+    monkeypatch.setattr(app, 'close', observed_close)
+    results, errors = [], []
+    def run():
+        results.append(app.run())
+        run_done.set()
+    def external_close():
+        try: app.close()
+        except Exception as exc: errors.append(exc)
+    runner = threading.Thread(target=run, name='app-runner')
+    closer = threading.Thread(target=external_close)
+    runner.start()
+    try:
+        assert capture.read_entered.wait(2)
+        closer.start()
+        assert capture.cleanup_entered.wait(2)
+        capture.read_resume.set()
+        assert follower_entered.wait(2)
+        assert not run_done.wait(0.05), 'Application returned while resource cleanup was still in progress'
+        assert app.state is RuntimeState.STOPPING
+        capture.cleanup_resume.set()
+        runner.join(2)
+        closer.join(2)
+        assert not runner.is_alive() and not closer.is_alive()
+        assert capture.close_calls == 1
+        if failure:
+            assert results == [3] and app.state is RuntimeState.ERROR
+            assert 'synthetic gated cleanup failure' in app.last_error
+            assert len(errors) == 1 and 'synthetic gated cleanup failure' in str(errors[0])
+            with pytest.raises(RuntimeError, match='synthetic gated cleanup failure'):
+                app.close()
+        else:
+            assert results == [0] and errors == [] and app.last_error is None
+            assert app.state is RuntimeState.STOPPED
+            app.close()
+    finally:
+        capture.read_resume.set()
+        capture.cleanup_resume.set()
+        runner.join(3)
+        if closer.ident is not None: closer.join(3)
+
+
+def test_concurrent_close_wait_budget_cannot_become_an_unbounded_wait():
+    from autonavy.app import Application
+    from autonavy.config import Settings
+    settings = Settings()
+    settings = replace(settings, capture=replace(settings.capture, stop_timeout_s=0.05),
+                       runtime=replace(settings.runtime, join_timeout_s=0.05))
+    app = Application(settings)
+    capture = GatedCleanupCapture()
+    app.capture = capture
+    errors = []
+    def external_close():
+        try: app.close()
+        except Exception as exc: errors.append(exc)
+    closer = threading.Thread(target=external_close)
+    closer.start()
+    try:
+        assert capture.cleanup_entered.wait(2)
+        started = time.monotonic()
+        with pytest.raises(RuntimeError, match='cleanup.*budget'):
+            app.close()
+        assert time.monotonic()-started < 0.5
+    finally:
+        capture.cleanup_resume.set()
+        closer.join(2)
+    assert errors == [] and capture.close_calls == 1
