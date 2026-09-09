@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-M0-M4 independent reviews passed, including lifecycle, preview and telemetry publication corrections. M5 implementation is active. Final A01-A39 caller/evidence review remains pending.
+M0-M5 independent reviews passed, including lifecycle, preview, telemetry publication and input dispatch corrections. M6 implementation is next. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
@@ -30,3 +30,7 @@ M3 scoped re-review713a507: previewfinding ADDRESSED, SPEC PASS, QUALITY PASS, n
 M4 review2ca2587: SPEC FAIL/QUALITY FAIL, soleP1 known invalid metadata clears privatecache but leaves published player snapshot actionable until following objectrequest completes. Offlinegatedrepro confirmed; changed-mapkey branch separately verified immediateinvalidation. Originalimplementer fixing atomic invalidsnapshot publication with timestamp preservation and gated regression.
 
 M4 scoped re-review0c44df0: P1 ADDRESSED, SPEC PASS, QUALITY PASS; immediate snapshot invalidation preserves timestamp/generation. Reviewer independently ran4newcases:4passed37deselected1.16s. No new fixissues. M4 complete; M5 active.
+
+M5 independent review12c6379: SPEC FAIL/QUALITY FAIL pending P1 pause signaled during slow guard is not checked before dispatch; P2 persistent Start retries extend total queue deadline; P2 canceled recovery next_action delays resumed menu; P2 competing pointer owners both dispatch despite priorities. Reviewer used device-free deterministic reproductions. Original implementer fix round1 active; focused regressions reproduced before corrections. Current geometry-first/foreground-last ordering and SDK release ownership accepted. M6 remains gated.
+
+M5 scoped re-review20142e0: all four findings ADDRESSED, SPEC PASS, QUALITY PASS. Guard now checks pending pause at both boundaries and tick consumes late pause; queue retries preserve original deadline; reset clears canceled recovery cooldown; pointer batch chooses one eligible owner while preserving same-owner clicks and releases. Reviewer verified16new/168covering/326full1excluded evidence against five-file diff, no redundant rerun and no new blocking findings. M5 complete.

@@ -60,9 +60,9 @@ Interfaces: immutable `TelemetrySnapshot`; lifecycle-owned `TelemetryService` wi
 ### Task 5: M5 coordinated input and integrated battle flow
 Files: autonavy/input/{controller,scheduler,windows}.py, autonavy/app.py, autonavy/behavior.py, toolkit/{MnK,joystick,th_pool}.py, firesystem.py, dxin.py, tests/unit/test_input.py, tests/integration/test_battle_cycle.py.
 Interfaces: `InputIntent`; `InputController.submit/tick/cancel/release_all`; owned generation tokens; clock-injected bounded scheduling; runtime waiting/battle/recovery/pause/end/stop states.
-- [ ] RED: priority/preemption, stale release race, focus/emergency/profile/telemetry checks immediately before dispatch, wheel signs/zero, all held input release despite errors, vJoy neutral, bounded coalescing.
-- [ ] RED: fake complete battle cycle, startup/worker/camera errors, pause then stop, cancellation without sleeps, purchase dialogs pause.
-- [ ] Implement physical adapters lazily; preserve failsafe; explicit live opt-in and hotkey lifecycle; release before slow cleanup. Remove direct-input/asynchronous-kill bypasses. GREEN/review/commit.
+- [x] RED: priority/preemption, stale release race, focus/emergency/profile/telemetry checks immediately before dispatch, wheel signs/zero, all held input release despite errors, vJoy neutral, bounded coalescing.
+- [x] RED: fake complete battle cycle, startup/worker/camera errors, pause then stop, cancellation without sleeps, purchase dialogs pause.
+- [x] Implement physical adapters lazily; preserve failsafe; explicit live opt-in and hotkey lifecycle; release before slow cleanup. Remove direct-input/asynchronous-kill bypasses. GREEN/review/commit.
 
 ### Task 6: M6 navigation and controllers
 Files: autonavy/navigation/{route,native,control,planner}.py, pilot.py, toolkit/process_path.py, autonavy/behavior.py, tests/unit/test_navigation.py.

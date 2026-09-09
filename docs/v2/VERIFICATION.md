@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0-M4 independently reviewed; M5 input/runtime implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M5 independently reviewed; M6 navigation/controllers next. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -26,23 +26,23 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A05 / FRAME-01 | PASS | M2: bounded latest slot/shared pixel transport and owned FramePacket copies, slow-consumer/replacement/generation-race tests in test_capture.py and test_capture_runtime.py; evidence/M2.md commands/results, reviewedceee7bb. |
 | A06 / FRAME-01 | PASS | M2 retained packet/producer-buffer mutation tests and M3 debug-copy/overlay immutability tests pass; packet-local observations unchanged. evidence/M2.md and evidence/M3.md. |
 | A07 / FRAME-01 | PASS | M3 Application passes exact acquired packet to VisionPipeline; samepacket degree/ROI observations and import-safe explicit deg_cal.get_deg remove independent capture. test_vision.py/test_vision_runtime.py; evidence/M3.md. Final active-caller audit remains M9. |
-| A08 / CAP-03 | PARTIAL | M2 cancellation wakes reads, generation snapshot/start/cleanup races covered, fake hung child reclaimed with bounded process shutdown; pinned native limits documented. Input/cache invalidation integration follows M3/M5/M7. |
+| A08 / CAP-03 | NOT RUN | M2 cancellation wakes reads, generation snapshot/start/cleanup races covered, fake hung child reclaimed with bounded process shutdown; pinned native limits documented. Input/cache invalidation integration follows M3/M5/M7. |
 | A09 / VISION-01 | PASS | M3 FrameContext/TemplateRegistry raw color Canny outputs feed one-channel match_edges; call-count/cache-version/invalidation tests include alpha-only aim asset. evidence/M3.md:201regression pass1excluded, previewfix36covering pass. |
 | A10 / VISION-01 | PASS | M3 real-asset synthetic positive/negative and malformed/constant/oversize/nonfinite tests; frame/desktop ROI mapping and configured-profile gates; required assets validated before capture construction. evidence/M3.md. Live accuracy NOT RUN. |
 | A11 / VISION-02 | PASS | M3 test_vision.py validates pixelwise cropped HSV and actual fire/lock/collision ROI mask-Canny behavior; separates neighborhood boundary effects from HSV equivalence. evidence/M3.md. |
 | A12 / VISION-02/03 | PASS | M0/M3 no-op morphology, empty/degenerate heading, debug-copy on/off equality;713a507 adds independently throttled copy/draw with injectedclock and deadline tests (36covering passed). evidence/M3.md. |
-| A13 / GEOM-01 | PARTIAL | M2 pure GeometrySnapshot transforms and Windows client/output mapping cover translated/negative origins, bounds and content scaling. Actual OBS source/calibration integration follows M7. |
+| A13 / GEOM-01 | NOT RUN | M2 pure GeometrySnapshot transforms and Windows client/output mapping cover translated/negative origins, bounds and content scaling. Actual OBS source/calibration integration follows M7. |
 | A14 / GEOM-01 | NOT RUN | Implementation/validation pending |
 | A15 / TEL-01 | PASS | M4 real TelemetryService/parser with fake Session covers HTTP/status/JSON/schema/player/nonfinite/zero-heading/empty-zones/stale/recovery; evidence/M4.md full241pass1excluded, focusedmetadatafix41pass. No live HTTP executed. |
 | A16 / TEL-01 | PASS | M4 serial worker/no queue, monotonic per-component timestamps, TTL at consumption, locally inferred map/recovery generations.0c44df0 atomically invalidates published data on metadata failure while next request blocks; reviewer4case repro passed. evidence/M4.md. |
 | A17 / TEL-01 | PASS | Application owns TelemetryService/OfflineTelemetry; info.py and toolkit/map.py require explicit snapshot source and issue no HTTP. Separate bounded metadata/image cache in memory; no asset writes. evidence/M4.md and test_telemetry_runtime.py. M5/M6 consumer integration and final caller audit remain required. |
-| A18 / LIFE-01 | NOT RUN | Implementation/validation pending |
-| A19 / LIFE-01 | NOT RUN | Implementation/validation pending |
-| A20 / INPUT-01 | NOT RUN | Implementation/validation pending |
-| A21 / INPUT-01 | NOT RUN | Implementation/validation pending |
-| A22 / INPUT-01/02 | NOT RUN | Implementation/validation pending |
-| A23 / INPUT-02 | NOT RUN | Implementation/validation pending |
-| A24 / APP-01 | NOT RUN | Implementation/validation pending |
+| A18 / LIFE-01 | PASS | M2/M5 Application shared cleanup; test_battle_cycle.py::test_actual_run_input_cleanup_on_startup_worker_and_observation_errors and ::test_pause_then_stop_signals_never_dispatch_again. evidence/M5.md:326 regression passed1excluded at20142e0. |
+| A19 / LIFE-01 | PASS | M5 input.close precedes capture/telemetry cleanup; ::test_paused_stop_and_cleanup_release_before_capture_or_telemetry_errors and test_input.py::test_legacy_input_and_thread_modules_have_no_raw_hardware_or_kill_paths. evidence/M5.md; remaining legacy navigation retired in M6. |
+| A20 / INPUT-01 | PASS | M5 InputController and WindowsBackend track uncertain holds, attempt all releases, retain failures for retry and neutralize queried vJoy axes before relinquish. test_input.py release failure, owned vJoy and close retry cases; evidence/M5.md. Physical hardware NOT RUN. |
+| A21 / INPUT-01 | PASS | M5 test_input.py signed wheel/zero no-op/focus/emergency and fake Windows transport tests; test_battle_cycle.py current prerequisite and delayed guard tests. evidence/M5.md. No real input executed. |
+| A22 / INPUT-01/02 | PASS | M5 owner generations/global epochs and bounded coalescing; test_input.py::test_mode_round_trip_invalidates_issued_but_not_yet_submitted_intents and four review_pointer regressions. Scoped re-review20142e0 PASS; evidence/M5.md. |
+| A23 / INPUT-02 | PASS | M5 SequenceScheduler and real policy fake-clock recovery/UI cycles; test_battle_cycle.py::test_review_persistent_start_retries_keep_original_queue_deadline and ::test_review_cancelled_recovery_deadline_never_delays_fresh_menu; bounded pending/history in test_input.py. evidence/M5.md. |
+| A24 / APP-01 | PASS | M5 ::test_full_scripted_cycle_uses_real_application_run executes actual Application/Policy/Input with synthetic capture double, observations and immutable telemetry through full states. 168 covering tests passed; evidence/M5.md. This is a scripted offline scenario, not recorded gameplay. |
 | A25 / APP-01 | NOT RUN | Implementation/validation pending |
 | A26 / NAV-01 | NOT RUN | Implementation/validation pending |
 | A27 / NAV-01 | NOT RUN | Implementation/validation pending |
@@ -80,3 +80,5 @@ Coordinator executed at that commit: `.venv\Scripts\python.exe -m autonavy --che
 Environment package snapshot after the legacy baseline repair and M1: evidence/environment-after-M1.txt (`.venv\Scripts\python.exe -m pip freeze`). It records the actual local venv; it is not a new dependency requirement or a claim that hardware was tested.
 
 M2-close/M3-active preservation recheck at987dc61: source status --porcelain=v1 -uall empty; source HEAD/master/origin/master/upstream/master unchanged at recorded identifiers. Target HEAD:src and native blob match baseline; native file SHA256 matches ABE3EF91491C5C53EDA3BC16C63843545942079DEA80E80C8A139671FBEDF721. No asset/native/source changes. Final M9 recheck still required.
+
+M5 current code20142e0 independently reviewed PASS. Exact new16/covering168/full326pass1excluded commands and RED evidence in evidence/M5.md. Source shim config/replay smoke at12c6379 exited0 (3synthetic frames). A14 awaits complete OBS geometry integration; A25 awaits launcher M8. These rows intentionally remain NOT RUN for full requirement scope.
