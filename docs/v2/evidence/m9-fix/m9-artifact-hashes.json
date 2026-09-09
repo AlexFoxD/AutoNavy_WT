@@ -1,0 +1,27 @@
+{
+  ".output\\m9-fixed\\AutoNavy_WT-win64.zip": {
+    "sha256": "6f08b22b9c93c4d902edcfaa08720319c0d9f6b78c5cff42ad171660a2c03d9e",
+    "bytes": 69006665
+  },
+  ".output\\m9-fixed\\verified-package\\AutoNavy_WT.exe": {
+    "sha256": "fbe585a2abfc31757fa985095ca196311c1549c5d5f6c66f709cb016d243014c",
+    "bytes": 30566400
+  },
+  ".output\\m9-fixed\\verified-package\\scripts\\launcher.ps1": {
+    "sha256": "4806147086fd5d5d1b4a74df73c87ec15bd4fe16d3771b93c45e427c25b6f45e",
+    "bytes": 8958
+  },
+  "scripts\\launcher.ps1": {
+    "sha256": "4806147086fd5d5d1b4a74df73c87ec15bd4fe16d3771b93c45e427c25b6f45e",
+    "bytes": 8958
+  },
+  "tests\\test_launcher.py": {
+    "sha256": "052d22e6d308bb8ea98e5dfb30d6cdfdf8933b38e86422c3e30fa3bba4c2434b",
+    "bytes": 13679
+  },
+  "scripts\\build.ps1": {
+    "sha256": "9d2517284a9e2098d0b70f807f947dd0a33ac8fd2010a7b6a9efd07a2c000eac",
+    "bytes": 8782
+  },
+  "historical_m8_zip_unchanged": true
+}

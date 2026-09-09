@@ -1,0 +1,29 @@
+Nine final extracted-package commands passed.
+Extracted wrapper guards: 74 passed; legacy processes never executed.
+{
+  ".output\\m9-final\\AutoNavy_WT-win64.zip": {
+    "sha256": "75b364a596df4c7d8a9f2302f4acd58fd1166a8505baf28ba1f05a99f669e4a8",
+    "bytes": 69007274
+  },
+  ".output\\m9-final\\verified-package\\AutoNavy_WT.exe": {
+    "sha256": "fbe585a2abfc31757fa985095ca196311c1549c5d5f6c66f709cb016d243014c",
+    "bytes": 30566400
+  },
+  ".output\\m9-final\\verified-package\\scripts\\launcher.ps1": {
+    "sha256": "c8258a26ee0900b04037aace4f2043d7fa519f0f327ed120cdb05f6f4a47b69b",
+    "bytes": 9738
+  },
+  "scripts\\launcher.ps1": {
+    "sha256": "c8258a26ee0900b04037aace4f2043d7fa519f0f327ed120cdb05f6f4a47b69b",
+    "bytes": 9738
+  },
+  "tests\\test_launcher.py": {
+    "sha256": "b299468df3aa06bc0600316f1a70ba1a920aabf103ecd335eb54b832e0c742b3",
+    "bytes": 16730
+  },
+  "scripts\\build.ps1": {
+    "sha256": "9d2517284a9e2098d0b70f807f947dd0a33ac8fd2010a7b6a9efd07a2c000eac",
+    "bytes": 8782
+  },
+  "historical_m8_zip_unchanged": true
+}

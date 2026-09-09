@@ -1,0 +1,14 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+______ test_package_version_does_not_use_powershell_type_coercion[True] _______
+tests\test_launcher.py:350: in test_package_version_does_not_use_powershell_type_coercion
+    assert payload['Ok'] is False
+E   assert True is False
+____ test_package_version_does_not_use_powershell_type_coercion[version1] _____
+tests\test_launcher.py:350: in test_package_version_does_not_use_powershell_type_coercion
+    assert payload['Ok'] is False
+E   assert True is False
+=========================== short test summary info ===========================
+FAILED tests/test_launcher.py::test_package_version_does_not_use_powershell_type_coercion[True]
+FAILED tests/test_launcher.py::test_package_version_does_not_use_powershell_type_coercion[version1]
+2 failed, 93 deselected in 0.74s

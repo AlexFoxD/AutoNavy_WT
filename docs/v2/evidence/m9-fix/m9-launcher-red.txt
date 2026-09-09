@@ -1,0 +1,220 @@
+FFFFFFFFFFFFFFFFFFFFFFFF                                                 [100%]
+================================== FAILURES ===================================
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...gacy_candi0\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...gacy_candi1\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-start_prog.dist/start_prog.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...legacy_candi2\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-start_prog.dist/start_prog.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...legacy_candi3\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...gacy_candi4\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...gacy_candi5\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-start_prog.dist/start_prog.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...legacy_candi6\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-start_prog.dist/start_prog.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...legacy_candi7\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...gacy_candi8\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...gacy_candi9\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-start_prog.dist/start_prog.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...egacy_candi10\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-start_prog.dist/start_prog.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...egacy_candi11\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...acy_candi12\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...acy_candi13\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-start_prog.dist/start_prog.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...egacy_candi14\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-start_prog.dist/start_prog.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--check-config'], 'File': 'C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-...egacy_candi15\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...acy_candi16\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...acy_candi17\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-start_prog.dist/start_prog.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...egacy_candi18\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-start_prog.dist/start_prog.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...egacy_candi19\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Refused'
+E     
+E     - Refused
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...acy_candi20\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...acy_candi21\\launcher safety fixture\\AutoNavy_WT.dist\\AutoNavy_WT.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-start_prog.dist/start_prog.exe-powershell.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...egacy_candi22\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+_ test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-start_prog.dist/start_prog.exe-pwsh.exe] _
+tests\test_launcher.py:288: in test_manifestless_legacy_candidates_never_execute
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+E   AssertionError: {'Calls': [{'Arguments': ['--dry-run', '--capture', 'replay', '--fixture', 'fixtures/smoke', '--max-frames', ...], 'Fi...egacy_candi23\\launcher safety fixture\\start_prog.dist\\start_prog.exe'}], 'Code': 0, 'Mode': 'StandaloneDevelopment'}
+E   assert 'StandaloneDevelopment' == 'Source'
+E     
+E     - Source
+E     + StandaloneDevelopment
+=========================== short test summary info ===========================
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-start_prog.dist/start_prog.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-False-start_prog.dist/start_prog.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-start_prog.dist/start_prog.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments0-expected0-True-start_prog.dist/start_prog.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-start_prog.dist/start_prog.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-False-start_prog.dist/start_prog.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-start_prog.dist/start_prog.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments1-expected1-True-start_prog.dist/start_prog.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-start_prog.dist/start_prog.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-False-start_prog.dist/start_prog.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-AutoNavy_WT.dist/AutoNavy_WT.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-AutoNavy_WT.dist/AutoNavy_WT.exe-pwsh.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-start_prog.dist/start_prog.exe-powershell.exe]
+FAILED tests/test_launcher.py::test_manifestless_legacy_candidates_never_execute[arguments2-expected2-True-start_prog.dist/start_prog.exe-pwsh.exe]
+24 failed, 21 deselected in 12.80s

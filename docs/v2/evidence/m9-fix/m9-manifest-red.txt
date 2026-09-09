@@ -1,0 +1,532 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                         [100%]
+================================== FAILURES ===================================
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata0-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta0\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta0\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata0-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta1\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta1\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata1-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta2\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta2\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata1-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta3\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta3\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata2-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta4\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta4\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata2-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta5\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta5\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata3-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta6\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta6\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata3-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta7\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta7\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata4-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta8\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta8\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata4-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta9\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta9\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata5-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta10\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta10\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments0-metadata5-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta11\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta11\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata0-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta12\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta12\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata0-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta13\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta13\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata1-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta14\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta14\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata1-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta15\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta15\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata2-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta16\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta16\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata2-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta17\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta17\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata3-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta18\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta18\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata3-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta19\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta19\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata4-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta20\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta20\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata4-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta21\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta21\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata5-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta22\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta22\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments1-metadata5-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta23\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta23\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata0-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta24\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta24\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata0-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta25\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta25\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata1-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta26\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta26\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata1-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta27\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta27\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata2-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta28\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta28\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata2-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta29\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta29\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata3-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta30\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta30\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata3-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta31\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta31\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata4-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta32\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta32\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata4-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta33\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta33\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata5-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta34\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta34\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments2-metadata5-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta35\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta35\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata0-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta36\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta36\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata0-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta37\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta37\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata1-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta38\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta38\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata1-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta39\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta39\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata2-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta40\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta40\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata2-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta41\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta41\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata3-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta42\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta42\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata3-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta43\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta43\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata4-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta44\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta44\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata4-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta45\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta45\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata5-powershell.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta46\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta46\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+_ test_incompatible_package_metadata_never_reaches_process[arguments3-metadata5-pwsh.exe] _
+tests\test_launcher.py:333: in test_incompatible_package_metadata_never_reaches_process
+    assert payload == {'Code': 3, 'Calls': []}, payload
+E   AssertionError: {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta47\\incompatible package\\AutoNavy_WT.exe'], 'Code': 0}
+E   assert {'Calls': ['C...'], 'Code': 0} == {'Calls': [], 'Code': 3}
+E     
+E     Differing items:
+E     {'Code': 0} != {'Code': 3}
+E     {'Calls': ['C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-155\\test_incompatible_package_meta47\\incompatible package\\AutoNavy_WT.exe']} != {'Calls': []}
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata0-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata0-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata1-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata1-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata2-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata2-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata3-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata3-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata4-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata4-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata5-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments0-metadata5-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata0-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata0-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata1-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata1-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata2-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata2-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata3-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata3-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata4-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata4-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata5-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments1-metadata5-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata0-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata0-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata1-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata1-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata2-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata2-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata3-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata3-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata4-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata4-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata5-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments2-metadata5-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata0-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata0-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata1-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata1-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata2-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata2-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata3-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata3-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata4-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata4-pwsh.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata5-powershell.exe]
+FAILED tests/test_launcher.py::test_incompatible_package_metadata_never_reaches_process[arguments3-metadata5-pwsh.exe]
+48 failed, 45 deselected in 26.44s

@@ -20,7 +20,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run.ps1 -CheckOn
 
 Core installation is sufficient for configuration, replay and tests. `-Mode Dev` adds pinned pytest/Ruff; `-Mode Runtime` installs the preserved Windows runtime requirements; `-Mode Build` also installs pinned compiler support packages. Install writes only the local `.venv` and project pip cache and refuses to delete an incompatible existing environment. A C++ compiler and any live drivers require separate manual preparation.
 
-Double-clicking `ЗАПУСТИТЬ.bat`, running it with `-CheckOnly`, or running `scripts/run.ps1` without arguments validates configuration and exits. Wrappers never auto-install, repair, launch a game or offer driver configuration. Explicit CLI arguments pass through unchanged, including paths containing spaces. Process-scoped `-ExecutionPolicy Bypass` does not change persistent execution policy.
+Double-clicking `ЗАПУСТИТЬ.bat`, running it with `-CheckOnly`, or running `scripts/run.ps1` without arguments validates configuration and exits. Wrappers never auto-install, repair, launch a game or offer driver configuration. Manifestless development `.dist` executables are never selected automatically; use a complete source checkout or an extracted release with its manifest. This launcher requires manifest `schema_version = 1` and `launcher_version = "2.0.0"`; incompatible or missing versions are refused before process launch. Explicit CLI arguments pass through unchanged, including paths containing spaces. Process-scoped `-ExecutionPolicy Bypass` does not change persistent execution policy.
 
 For a built ZIP, extract the entire archive, then run from its root:
 

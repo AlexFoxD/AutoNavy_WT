@@ -1,0 +1,944 @@
+[
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": false,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": false,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": false,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": true,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": true,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": true,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": false,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": false,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": false,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": true,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": true,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "powershell.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": true,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "powershell.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": false,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": false,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": false,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": true,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": true,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "AutoNavy_WT.dist/AutoNavy_WT.exe",
+    "source": true,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": false,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": false,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": false,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": true,
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": true,
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifestless",
+    "shell": "pwsh.exe",
+    "candidate": "start_prog.dist/start_prog.exe",
+    "source": true,
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "1.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 1,
+      "launcher_version": "3.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": 2,
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "-CheckOnly"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "manifest-version",
+    "shell": "pwsh.exe",
+    "metadata": {
+      "schema_version": "1",
+      "launcher_version": "2.0.0"
+    },
+    "arguments": [
+      "--run"
+    ],
+    "result": "PASS",
+    "all_child_calls_trapped": true
+  },
+  {
+    "boundary": "version-type",
+    "version": true,
+    "result": "PASS",
+    "resolver_only": true
+  },
+  {
+    "boundary": "version-type",
+    "version": [
+      "2.0.0"
+    ],
+    "result": "PASS",
+    "resolver_only": true
+  }
+]

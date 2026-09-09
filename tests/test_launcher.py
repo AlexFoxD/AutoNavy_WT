@@ -44,7 +44,8 @@ def ps_literal(path: Path) -> str:
 class LauncherLayoutTests(unittest.TestCase):
     def make_release(self, root: Path, required_files: list[dict]):
         manifest = {
-            "launcher_version": "1.0",
+            "schema_version": 1,
+            "launcher_version": "2.0.0",
             "executable": "AutoNavy_WT.exe",
             "required_files": required_files,
         }
@@ -241,8 +242,110 @@ def test_installer_refuses_to_delete_incomplete_environment(tmp_path):
 
 def test_release_manifest_cannot_select_executable_outside_package(tmp_path):
     manifest = tmp_path / 'release-manifest.json'
-    manifest.write_text(json.dumps({'executable': '../outside.exe', 'required_files': []}))
+    manifest.write_text(json.dumps({'schema_version': 1, 'launcher_version': '2.0.0',
+                                    'executable': '../outside.exe', 'required_files': []}))
     code, out, err = run_powershell(
         f". {ps_literal(LAUNCHER_SCRIPT)}; Test-ReleasePackage -Root {ps_literal(tmp_path)} -ManifestPath {ps_literal(manifest)} | ConvertTo-Json -Compress")
     assert code == 0, err
     assert json.loads(out)['Ok'] is False
+
+
+@pytest.mark.parametrize("shell", ["powershell.exe"] + (["pwsh.exe"] if shutil.which("pwsh.exe") else []))
+@pytest.mark.parametrize("candidate", ["AutoNavy_WT.dist/AutoNavy_WT.exe", "start_prog.dist/start_prog.exe"])
+@pytest.mark.parametrize("has_source", [False, True])
+@pytest.mark.parametrize("arguments, expected", [
+    ([], ["--check-config"]),
+    (["-CheckOnly"], ["--check-config"]),
+    (["--dry-run", "--capture", "replay", "--fixture", "fixtures/smoke", "--max-frames", "3"],
+     ["--dry-run", "--capture", "replay", "--fixture", "fixtures/smoke", "--max-frames", "3"]),
+])
+def test_manifestless_legacy_candidates_never_execute(tmp_path, shell, candidate, has_source, arguments, expected):
+    root = tmp_path / 'launcher safety fixture'
+    (root / 'scripts').mkdir(parents=True)
+    shutil.copy(LAUNCHER_SCRIPT, root / 'scripts/launcher.ps1')
+    executable = root / candidate
+    executable.parent.mkdir()
+    executable.write_bytes(b'INERT PLACEHOLDER: NEVER EXECUTE')
+    if has_source:
+        (root / 'autonavy.py').write_text('# inert source layout marker')
+        (root / 'requirements.txt').write_text('')
+        (root / 'scripts/install.ps1').write_text("throw 'INSTALL FORBIDDEN'")
+        (root / '.venv/Scripts').mkdir(parents=True)
+        (root / '.venv/Scripts/python.exe').write_bytes(b'INERT PLACEHOLDER: NEVER EXECUTE')
+    ps_args = ', '.join("'" + value.replace("'", "''") + "'" for value in arguments)
+    # Trap every possible child boundary, including the defective legacy path.
+    # Neither placeholder executable nor the source entrypoint is ever invoked.
+    command = (
+        f". {ps_literal(root/'scripts/launcher.ps1')}; "
+        "$script:Calls = @(); "
+        "function Invoke-LoggedProcess { param([string]$FilePath, [string[]]$Arguments) "
+        "$script:Calls += [PSCustomObject]@{ File = $FilePath; Arguments = @($Arguments) }; return 0 }; "
+        f"try {{ $mode = (Resolve-LaunchLayout -Root {ps_literal(root)}).Mode }} catch {{ $mode = 'Refused' }}; "
+        f"$result = Invoke-Launcher -CliArguments @({ps_args}); "
+        "[PSCustomObject]@{ Mode = $mode; Code = $result; Calls = @($script:Calls) } | ConvertTo-Json -Depth 6 -Compress"
+    )
+    code, stdout, stderr = run_powershell(command, cwd=tmp_path, shell=shell)
+    assert code == 0, stdout + stderr
+    payload = json.loads(stdout.strip().splitlines()[-1])
+    assert payload['Mode'] == ('Source' if has_source else 'Refused'), payload
+    assert payload['Code'] == (0 if has_source else 3), payload
+    if has_source:
+        assert payload['Calls'] == [{
+            'File': str(root/'.venv/Scripts/python.exe'),
+            'Arguments': [str(root/'autonavy.py'), *expected],
+        }]
+    else:
+        assert payload['Calls'] == []
+
+
+@pytest.mark.parametrize("shell", ["powershell.exe"] + (["pwsh.exe"] if shutil.which("pwsh.exe") else []))
+@pytest.mark.parametrize("metadata", [
+    {"schema_version": 1, "launcher_version": "1.0.0"},
+    {"schema_version": 1},
+    {"schema_version": 1, "launcher_version": "3.0.0"},
+    {"launcher_version": "2.0.0"},
+    {"schema_version": 2, "launcher_version": "2.0.0"},
+    {"schema_version": "1", "launcher_version": "2.0.0"},
+])
+@pytest.mark.parametrize("arguments", [[], ["-CheckOnly"], ["--dry-run", "--capture", "replay", "--fixture", "fixtures/smoke"], ["--run"]])
+def test_incompatible_package_metadata_never_reaches_process(tmp_path, shell, metadata, arguments):
+    root = tmp_path / 'incompatible package'
+    (root / 'scripts').mkdir(parents=True)
+    launcher = root / 'scripts/launcher.ps1'
+    shutil.copy(LAUNCHER_SCRIPT, launcher)
+    executable = root / 'AutoNavy_WT.exe'
+    executable.write_bytes(b'INERT PLACEHOLDER: NEVER EXECUTE')
+    manifest = dict(metadata, executable='AutoNavy_WT.exe', required_files=[
+        {'path': 'AutoNavy_WT.exe', 'size': executable.stat().st_size},
+        {'path': 'scripts/launcher.ps1', 'size': launcher.stat().st_size},
+    ])
+    (root / 'release-manifest.json').write_text(json.dumps(manifest))
+    ps_args = ', '.join("'" + value.replace("'", "''") + "'" for value in arguments)
+    command = (
+        f". {ps_literal(launcher)}; $script:Calls = @(); "
+        "function Invoke-LoggedProcess { param([string]$FilePath, [string[]]$Arguments) "
+        "$script:Calls += $FilePath; return 0 }; "
+        f"$result = Invoke-Launcher -CliArguments @({ps_args}); "
+        "[PSCustomObject]@{ Code = $result; Calls = @($script:Calls) } | ConvertTo-Json -Compress"
+    )
+    code, stdout, stderr = run_powershell(command, cwd=tmp_path, shell=shell)
+    assert code == 0, stdout + stderr
+    payload = json.loads(stdout.strip().splitlines()[-1])
+    assert payload == {'Code': 3, 'Calls': []}, payload
+    assert 'Incompatible package' in stdout
+
+
+@pytest.mark.parametrize("version", [True, ["2.0.0"]])
+def test_package_version_does_not_use_powershell_type_coercion(tmp_path, version):
+    executable = tmp_path / 'AutoNavy_WT.exe'
+    executable.write_bytes(b'INERT')
+    manifest = tmp_path / 'release-manifest.json'
+    manifest.write_text(json.dumps({'schema_version': 1, 'launcher_version': version,
+                                    'executable': 'AutoNavy_WT.exe',
+                                    'required_files': [{'path': 'AutoNavy_WT.exe', 'size': 5}]}))
+    code, out, err = run_powershell(
+        f". {ps_literal(LAUNCHER_SCRIPT)}; Test-ReleasePackage -Root {ps_literal(tmp_path)} -ManifestPath {ps_literal(manifest)} | ConvertTo-Json -Compress")
+    assert code == 0, err
+    payload = json.loads(out)
+    assert payload['Ok'] is False
+    assert 'Incompatible package' in payload['Message']

@@ -38,6 +38,18 @@ function Test-ReleasePackage {
 
     try {
         $Manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $Properties = @($Manifest.PSObject.Properties.Name)
+        if ('schema_version' -notin $Properties -or 'launcher_version' -notin $Properties -or
+            -not ($Manifest.schema_version -is [int] -or $Manifest.schema_version -is [long]) -or
+            $Manifest.schema_version -ne 1 -or $Manifest.launcher_version -isnot [string] -or
+            $Manifest.launcher_version -cne $script:LauncherVersion) {
+            return [PSCustomObject]@{
+                Ok = $false
+                Missing = @('release-manifest.json (incompatible CLI contract)')
+                Message = "Incompatible package: requires schema_version 1 and launcher_version $script:LauncherVersion. Extract a complete v2 release."
+                ExecutablePath = $null
+            }
+        }
         $Prefix = $Root.TrimEnd('\') + '\'
         foreach ($Relative in @([string]$Manifest.executable) + @($Manifest.required_files | ForEach-Object { [string]$_.path })) {
             $Candidate = Resolve-FullPath (Join-Path $Root $Relative)
@@ -103,22 +115,6 @@ function Resolve-LaunchLayout {
             ManifestPath = $ManifestPath
             ExecutablePath = Join-Path $Root ([string]$Manifest.executable -replace '/', '\')
             PythonPath = $null
-        }
-    }
-
-    $DevelopmentCandidates = @(
-        (Join-Path $Root "AutoNavy_WT.dist\AutoNavy_WT.exe"),
-        (Join-Path $Root "start_prog.dist\start_prog.exe")
-    )
-    foreach ($ExecutablePath in $DevelopmentCandidates) {
-        if (Test-Path -LiteralPath $ExecutablePath -PathType Leaf) {
-            return [PSCustomObject]@{
-                Mode = "StandaloneDevelopment"
-                Root = Split-Path -Parent $ExecutablePath
-                ManifestPath = $null
-                ExecutablePath = $ExecutablePath
-                PythonPath = $null
-            }
         }
     }
 
