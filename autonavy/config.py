@@ -110,10 +110,10 @@ class ControlSettings:
     heading_ki: float = 0.1
     heading_kd: float = 0.1
     heading_limit: float = 100.0
-    search_kp: float = 3.0
-    search_ki: float = 1.0
-    search_kd: float = 1.0
-    search_limit: float = 50.0
+    search_kp: float = 0.6
+    search_ki: float = 0.0
+    search_kd: float = 0.02
+    search_limit: float = 30.0
     integral_limit: float = 100.0
     max_dt_s: float = 1.0
     arrival_distance: float = 0.01

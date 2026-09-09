@@ -173,7 +173,7 @@ class VisionPipeline:
         self._ammo_registry = registry
         self._ammo_identity = packet.source_generation, packet.geometry_id
 
-    def observe(self, packet):
+    def observe(self, packet, *, selection=None):
         ctx = FrameContext(packet)
         v = self.settings.vision
         if self._ammo_identity is not None and self._ammo_identity != (packet.source_generation,packet.geometry_id):
@@ -186,6 +186,7 @@ class VisionPipeline:
                           research=v.research_threshold, research1=.6, purchase_confirm=.6, data=.7, wtlogo=.6)
         variants = {'confirm1_queue':'confirm1', 'confirm2_queue':'confirm2', 'start_battle_end':'start'}
         names = (*thresholds, *variants, 'aim','lock','fire','crash_warning','crashed','ammo')
+        selected = set(names) | {'degree'} if selection is None else set(selection)
         configured = self.settings.geometry
         supported = (packet.geometry is not None and packet.geometry.recognition_supported
                      and packet.geometry.profile_id == configured.profile_id
@@ -196,20 +197,27 @@ class VisionPipeline:
             matches = {name:MatchObservation(*identity(packet), reason=reason) for name in names}
             return VisionObservations(packet, MappingProxyType(matches), DegreeObservation(*identity(packet),reason=reason), False, reason)
         full = ctx.profile_roi((0,0,self.settings.geometry.width,self.settings.geometry.height))
-        matches = {name:match_template(ctx,self.registry,name,full,threshold,settings=v) for name,threshold in thresholds.items()}
+        matches = {name:MatchObservation(*identity(packet),reason='Detector not selected for current state') for name in names}
+        matches.update({name:match_template(ctx,self.registry,name,full,threshold,settings=v)
+                        for name,threshold in thresholds.items() if name in selected})
         # Threshold variants reuse preprocessing; scores are never retained across packets.
         for name, template in variants.items():
+            if name not in selected: continue
             matches[name] = match_template(ctx,self.registry,template,full,.8 if name == 'start_battle_end' else .6,settings=v)
-        matches['aim'] = match_template(ctx,self.registry,'aim',ctx.profile_roi(v.fire_roi),v.aim_threshold,settings=v,
-                                       mask=(v.fire_hsv_lower,v.fire_hsv_upper,1))
-        matches['lock'] = match_template(ctx,self.registry,'lock',ctx.profile_roi((890,380,960,420)),v.aim_threshold,
-                                        settings=v,mask=((0,0,0),(180,255,46),1))
-        matches['fire'] = match_template(ctx,self.registry,'fire',full,v.template_threshold,settings=v)
+        if 'aim' in selected:
+            matches['aim'] = match_template(ctx,self.registry,'aim',ctx.profile_roi(v.fire_roi),v.aim_threshold,settings=v,
+                                           mask=(v.fire_hsv_lower,v.fire_hsv_upper,1))
+        if 'lock' in selected:
+            matches['lock'] = match_template(ctx,self.registry,'lock',ctx.profile_roi((890,380,960,420)),v.aim_threshold,
+                                            settings=v,mask=((0,0,0),(180,255,46),1))
+        if 'fire' in selected:
+            matches['fire'] = match_template(ctx,self.registry,'fire',full,v.template_threshold,settings=v)
         collision_roi = ctx.profile_roi((self.settings.geometry.width//3,0,self.settings.geometry.width//3*2,self.settings.geometry.height))
         for name, threshold in (('crash_warning',v.collision_threshold),('crashed',.3)):
+            if name not in selected: continue
             matches[name] = match_template(ctx,self.registry,name,collision_roi,threshold,settings=v,
                                           mask=((0,43,46),(10,255,255),1))
-        if self._ammo_registry is not None and self._ammo_identity == (packet.source_generation,packet.geometry_id):
+        if 'ammo' in selected and self._ammo_registry is not None and self._ammo_identity == (packet.source_generation,packet.geometry_id):
             matches['ammo'] = match_template(ctx,self._ammo_registry,'ammo',ctx.profile_roi(v.ammo_roi),.9,settings=v)
         else:
             matches['ammo'] = MatchObservation(*identity(packet),reason=self._ammo_error if self._ammo_registry is None else 'Ammo baseline belongs to another generation or geometry')
@@ -220,7 +228,8 @@ class VisionPipeline:
                 debug = ctx.debug_image()
                 # Schedule from this observation; delayed ticks never accumulate previews.
                 self._next_preview_at = now + 1 / self.settings.diagnostics.preview_fps
-        degree = detect_degree(ctx,settings=v,debug_image=debug)
+        degree = (detect_degree(ctx,settings=v,debug_image=debug) if 'degree' in selected else
+                  DegreeObservation(*identity(packet),reason='Detector not selected for current state'))
         if debug is not None:
             for observation in matches.values():
                 if observation.matched:

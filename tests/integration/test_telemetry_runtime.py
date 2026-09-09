@@ -36,7 +36,7 @@ def setup_app(monkeypatch, *, fail_capture=False, fail_telemetry=False):
     closed = []
     class Capture:
         def start(self): pass
-        def read(self):
+        def read(self, timeout=None):
             until(lambda: service.snapshot().valid)
             # Application evaluates one real snapshot before deciding on this frame.
             from autonavy.capture.replay import ReplayCapture
@@ -107,7 +107,7 @@ def test_default_live_selection_and_actual_runtime_stale_recovery(monkeypatch):
         def start(self):
             assert factories == [], 'transport was constructed before capture startup'
             replay.start()
-        def read(self):
+        def read(self, timeout=None):
             self.count += 1
             if self.count == 1:
                 until(lambda: app.telemetry.snapshot().valid)
@@ -144,7 +144,7 @@ def test_stop_at_telemetry_start_boundary_never_constructs_session(monkeypatch):
     class Capture:
         def start(self): pass
         def close(self): pass
-        def read(self): raise AssertionError('read after cancellation')
+        def read(self, timeout=None): raise AssertionError('read after cancellation')
     monkeypatch.setattr('autonavy.capture.factory.create_capture', lambda settings: Capture())
     app = Application(load_settings(), telemetry=service)
     results = []
@@ -186,7 +186,7 @@ def test_application_consumes_metadata_invalidation_before_blocked_object_poll_f
     class Capture:
         count = 0
         def start(self): replay.start()
-        def read(self):
+        def read(self, timeout=None):
             self.count += 1
             if self.count == 1:
                 until(lambda: service.snapshot().valid)

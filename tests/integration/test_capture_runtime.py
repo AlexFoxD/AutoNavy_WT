@@ -21,7 +21,7 @@ class SyntheticSource:
         if self.mode == 2: raise RuntimeError('synthetic startup failed')
         if self.mode == 5:
             while True: time.sleep(0.1)
-    def read(self):
+    def read(self, timeout=None):
         if self.mode == 1:
             while True: time.sleep(0.1)
         if self.mode == 3: raise RuntimeError('synthetic read failed')
@@ -456,7 +456,7 @@ class GatedCleanupCapture:
         self.close_calls = 0
     def start(self): pass
     def request_stop(self): pass
-    def read(self):
+    def read(self, timeout=None):
         self.read_entered.set()
         assert self.read_resume.wait(4)
         return None

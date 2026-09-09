@@ -135,7 +135,7 @@ def test_application_failure_and_ctrl_c_cleanup(monkeypatch):
     original = source_type.read
     for failure, expected, state in [(ValueError('broken replay'), 3, RuntimeState.ERROR),
                                      (KeyboardInterrupt(), 0, RuntimeState.STOPPED)]:
-        def failing_read(self):
+        def failing_read(self, timeout=None):
             raise failure
         monkeypatch.setattr(source_type, 'read', failing_read)
         app = Application(settings)

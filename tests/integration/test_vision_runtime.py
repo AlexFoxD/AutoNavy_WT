@@ -25,7 +25,7 @@ def test_runtime_observes_the_packet_delivered_by_its_only_reader(monkeypatch):
     p = FramePacket(image,'BGR',1,4,10,g.geometry_id,geometry=g)
     class Capture:
         def start(self): pass
-        def read(self): return p
+        def read(self, timeout=None): return p
         def close(self): pass
     monkeypatch.setattr('autonavy.capture.factory.create_capture', lambda settings: Capture())
     app = Application(load_settings(overrides={'capture': {'max_frames':1}}), telemetry=OfflineTelemetry())
