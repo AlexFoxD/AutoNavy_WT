@@ -31,16 +31,35 @@ class RouteCursor:
         object.__setattr__(cursor,'index',index)
         return cursor
 
-    def target(self, lookahead):
+    def target(self, lookahead, *, arrival_distance=None):
+        """Look ahead on the current straight section, never beyond its turn.
+
+        Runtime callers provide the arrival radius: the target then stays within
+        half that radius of the next required point. Reaching the target must
+        advance the cursor even after an off-route approach; the margin avoids
+        stranding on floating-point equality at the arrival boundary. The original
+        target(lookahead) call remains supported with the geometric turn cap.
+        """
         if self.done: return None
         point=self.points[self.index]
+        if self.index==0: return point
+        if arrival_distance is not None:
+            lookahead=min(lookahead,arrival_distance/2)
+        previous=self.points[self.index-1]
         for index in range(self.index+1,len(self.points)):
             following=self.points[index]
+            ax,ay=point[0]-previous[0],point[1]-previous[1]
+            bx,by=following[0]-point[0],following[1]-point[1]
+            # Stop at the required corner/reversal instead of asking the boat to
+            # follow a target that the forward-only cursor cannot consume.
+            if ax*bx+ay*by<=0 or not math.isclose(ax*by-ay*bx,0,abs_tol=1e-12):
+                return point
             distance=math.dist(point,following)
             if distance>lookahead:
                 ratio=lookahead/distance
                 return tuple(a+(b-a)*ratio for a,b in zip(point,following))
             lookahead-=distance
+            previous=point
             point=following
         return point
 

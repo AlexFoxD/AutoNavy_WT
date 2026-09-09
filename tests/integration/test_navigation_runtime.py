@@ -193,3 +193,47 @@ def test_player_moved_during_planning_rejects_departed_origin_before_steering():
         step(.1)
         assert len(p.requests)==2 and p.requests[-1].origin==(.5,.8)
     finally: app.close()
+
+
+@pytest.mark.parametrize('off_route',[False,True])
+def test_following_dense_route_targets_reaches_turn_and_arrival_without_replan(off_route,monkeypatch):
+    from autonavy.navigation.route import RouteCursor
+    original_target=RouteCursor.target
+    latest_target=[None]
+    def observed_target(cursor,*args,**kwargs):
+        target=original_target(cursor,*args,**kwargs)
+        latest_target[0]=target
+        return target
+    # Observe the exact target used by real Navigation steering, without replacing
+    # its selection, controller, application scheduling or input recording.
+    monkeypatch.setattr(RouteCursor,'target',observed_target)
+    app,b,clock,t,v,step,p=navigation_rig()
+    try:
+        if off_route:
+            route=tuple((.5+i/128,.5) for i in range(25))
+        else:
+            route=tuple((.5+i/128,.5) for i in range(5))+tuple((.53125,.5+i/128) for i in range(1,9))
+        t.zones=(route[-1],)
+        step(.1); complete(p,route); step(.1)
+        navigation=app.policy.navigation
+        if off_route:
+            # Within replan tolerance, but approaching a later straight lookahead
+            # target from here used to miss the next required waypoint's radius.
+            t.position=(.515625,.54)
+            step(.01)
+        previous=navigation.cursor.index
+        for _ in range(1000):
+            if navigation.cursor.done: break
+            target=latest_target[0]
+            distance=math.dist(t.position,target)
+            if distance:
+                ratio=min(1,.0005/distance)
+                t.position=tuple(a+(z-a)*ratio for a,z in zip(t.position,target))
+            step(.01)
+            assert navigation.cursor.index>=previous
+            previous=navigation.cursor.index
+        assert navigation.cursor.done
+        assert math.dist(t.position,route[-1])<=app.settings.control.arrival_distance
+        assert len(p.requests)==1
+        assert not app.input.held.get(('axis','Z'))
+    finally: app.close()

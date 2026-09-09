@@ -88,7 +88,8 @@ class Navigation:
         if self.cursor.deviation(current.player.position)>self.settings.replan_deviation:
             self._replan(app)
             return
-        target=self.cursor.target(self.settings.lookahead_distance)
+        target=self.cursor.target(self.settings.lookahead_distance,
+                                  arrival_distance=self.settings.arrival_distance)
         if self._waypoint!=self.cursor.index:
             self.controllers.heading_pid.reset(); self._last_time=None
             self._waypoint=self.cursor.index

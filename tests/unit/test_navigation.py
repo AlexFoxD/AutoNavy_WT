@@ -12,7 +12,7 @@ def test_cursor_immutable_and_crossing_cannot_skip_contiguous_waypoints():
     cursor = RouteCursor(points)
     points.append((9,9))
     progressed = cursor.advance((0,0), .1)
-    assert progressed.index == 1 and progressed.target(.5) == (1,.5)
+    assert progressed.index == 1 and progressed.target(.5) == (1,0)
     assert cursor.index == 0 and len(cursor.points) == 5
     assert progressed.points is cursor.points
     assert progressed.advance((0,0), .1).index == 1
@@ -20,6 +20,21 @@ def test_cursor_immutable_and_crossing_cannot_skip_contiguous_waypoints():
     with pytest.raises(FrozenInstanceError): cursor.index = 3
     assert RouteCursor([]).target(.1) is None
     assert RouteCursor([(0,0)]).advance((0,0),.1).done
+
+
+def test_lookahead_stops_at_unreached_turn_and_stays_inside_arrival_radius():
+    from autonavy.navigation.route import RouteCursor
+    corner=(.53125,.5)
+    points=tuple((.5+i/128,.5) for i in range(5))+tuple((corner[0],.5+i/128) for i in range(1,5))
+    cursor=RouteCursor(points,index=3)
+    assert cursor.target(.02)==corner
+    assert RouteCursor(points,index=4).target(.02)==corner
+    straight=RouteCursor(tuple((.5+i/128,.5) for i in range(10)),index=2)
+    target=straight.target(.02,arrival_distance=.01)
+    assert math.dist(target,straight.points[2])<.01
+    assert straight.advance(target,.01).index>2
+    # Configured lookahead remains a maximum, including small configured values.
+    assert straight.target(.001,arrival_distance=.01)==pytest.approx((.516625,.5))
 
 
 @pytest.mark.parametrize('target,current,expected', [(1,359,2),(359,1,-2),(180,0,-180),(0,180,-180),(3,3,0),(-1,1,-2)])
