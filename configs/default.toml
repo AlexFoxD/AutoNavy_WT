@@ -119,6 +119,8 @@ log_max_bytes = 2000000
 log_backups = 3
 fault_interval_s = 5.0
 per_frame = false
+# Retained numeric samples per stage; lifetime counts remain available.
+metrics_samples = 512
 
 [paths]
 templates = "src/game_image"

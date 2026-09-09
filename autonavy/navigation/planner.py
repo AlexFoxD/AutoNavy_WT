@@ -36,7 +36,8 @@ def _native_worker(request,points,count,error):
         for i,(x,y) in enumerate(route): points[2*i],points[2*i+1]=x,y
         count.value=len(route)
     except BaseException as exc:
-        error.value=f'{type(exc).__name__}: {exc}'.encode('utf-8',errors='replace')[:511]
+        from autonavy.diagnostics import exception_text
+        error.value=exception_text(exc,511)
         count.value=-2
 
 
@@ -148,7 +149,8 @@ class PlanningService:
                             with self._condition:
                                 if self._current(serial): self._condition.wait(.02)
                     except Exception as exc:
-                        result=PlanResult(request.key,None,f'{type(exc).__name__}: {exc}')
+                        from autonavy.diagnostics import exception_text
+                        result=PlanResult(request.key,None,exception_text(exc).decode('utf-8',errors='replace'))
                     finally:
                         # Failure to reclaim is fatal; never spawn another child.
                         if job is not None: job.close()

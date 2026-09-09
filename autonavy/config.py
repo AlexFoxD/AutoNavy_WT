@@ -149,6 +149,7 @@ class DiagnosticsSettings:
     log_backups: int = 3
     fault_interval_s: float = 5.0
     per_frame: bool = False
+    metrics_samples: int = 512
 
 
 @dataclass(frozen=True)
@@ -276,6 +277,7 @@ def validate_settings(settings: Settings) -> Settings:
     for key, value in asdict(v).items():
         if key.endswith('_threshold'):
             _require(0 <= value <= 1, f'vision.{key} must be between 0 and 1')
+    _require(1 <= settings.diagnostics.metrics_samples <= 100000, 'diagnostics.metrics_samples must be between 1 and 100000')
     _require(settings.diagnostics.log_level in {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}, 'Invalid diagnostics.log_level')
     root = resource_root()
     def resolve(path):

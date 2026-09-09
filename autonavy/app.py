@@ -15,9 +15,14 @@ LOG = logging.getLogger(__name__)
 
 class Application:
     def __init__(self, settings: Settings, *, telemetry=None, clock_ns=time.monotonic_ns,
-                 input_backend=None, window_guard=None, vision=None, navigation=None, rng=None, wait=None):
+                 input_backend=None, window_guard=None, vision=None, navigation=None, rng=None, wait=None, metrics=None, display=None):
         self.settings = validate_settings(settings)
         self._clock_ns = clock_ns
+        from autonavy.metrics import Metrics
+        from autonavy.diagnostics import FaultThrottle, Preview
+        self.metrics = metrics if metrics is not None else Metrics(max_samples=self.settings.diagnostics.metrics_samples)
+        self._faults = FaultThrottle(self.settings.diagnostics.fault_interval_s, clock=lambda: clock_ns()/1e9)
+        self.display = display if display is not None else Preview()
         self.telemetry = telemetry if telemetry is not None else (
             OfflineTelemetry() if self.settings.capture.backend == 'replay' else
             TelemetryService(self.settings.telemetry, clock_ns=clock_ns,
@@ -45,7 +50,7 @@ class Application:
             WindowsBackend(self.settings.input) if self.settings.input.enable_input else RecordingBackend())
         self.window_guard = window_guard if window_guard is not None else LiveWindowGuard(self.settings)
         self.input = InputController(backend, guard=self._input_guard, clock_ns=clock_ns,
-                                     max_pending=self.settings.input.max_pending)
+                                     max_pending=self.settings.input.max_pending, metrics=self.metrics)
         self.policy = BattlePolicy(self, navigation=navigation, rng=rng)
         self.pause_event = threading.Event()
         self.hotkeys = None
@@ -84,6 +89,15 @@ class Application:
         self.stop_event.set()
 
     def tick(self, packet=None):
+        """Measure actual new-frame decisions separately from idle ticks."""
+        started = time.perf_counter_ns()
+        try:
+            return self._tick(packet)
+        finally:
+            self.metrics.observe('decision_ns' if packet is not None else 'idle_tick_ns',
+                                 time.perf_counter_ns()-started)
+
+    def _tick(self, packet=None):
         """One actual decision tick, also used when capture has no new publication."""
         self._last_snapshot = self.telemetry.snapshot()
         if packet is not None and not self.stop_event.is_set():
@@ -94,7 +108,10 @@ class Application:
                 if diagnostic is not None:
                     LOG.info('capture_source=%s', diagnostic)
             self.last_frame = packet
+            self.metrics.observe('receive_age_ns', max(0, self._clock_ns()-packet.received_at_ns))
+            started = time.perf_counter_ns()
             self.last_observations = self.vision.observe(packet, selection=self.policy.detectors)
+            self.metrics.observe('vision_ns', time.perf_counter_ns()-started)
             self.frames_processed += 1
         self._last_snapshot = self.telemetry.snapshot()
         self.input.tick()
@@ -103,11 +120,29 @@ class Application:
             self.policy._reset()
             return
         self._consume_pause()
+        started = time.perf_counter_ns()
         self.policy.tick(packet is not None)
+        self.metrics.observe('policy_ns', time.perf_counter_ns()-started)
+        error = getattr(self.policy.navigation, 'last_error', None)
+        if error and self._faults.allow('navigation'):
+            LOG.warning('navigation_failed state=%s frame=%s error=%s', self.state.value,
+                        self.last_frame.publication_id if self.last_frame else None, error)
         self.input.tick()
         # A signal raised inside a late dispatch guard also releases existing holds
         # before this tick returns. Callbacks themselves remain signal-only.
         self._consume_pause()
+        if packet is not None:
+            if self.settings.diagnostics.per_frame:
+                LOG.info('frame=%s generation=%s backend=%s state=%s receive_age_ns=%s',
+                         packet.publication_id, packet.source_generation, self.settings.capture.backend,
+                         self.state.value, max(0, self._clock_ns()-packet.received_at_ns))
+            debug = getattr(self.last_observations, 'debug_image', None)
+            if self.settings.diagnostics.preview and debug is not None:
+                try:
+                    self.display.show(debug)
+                except Exception:
+                    if self._faults.allow('preview'):
+                        LOG.exception('Preview display failed frame=%s', packet.publication_id)
 
     def _consume_pause(self):
         if self.pause_event.is_set():
@@ -182,6 +217,7 @@ class Application:
                 try:
                     packet = self.capture.read(timeout=1/self.settings.runtime.tick_hz)
                 except CaptureTimeout:
+                    self.metrics.increment('capture_idle_reads')
                     self.tick()
                     # A bounded capture wait already supplied the decision interval.
                     next_tick=self._clock_ns()
@@ -210,6 +246,8 @@ class Application:
                 failed = True
                 result = 3
             self._transition(RuntimeState.ERROR if failed else RuntimeState.STOPPED)
+            LOG.info('runtime_metrics=%s capture_statistics=%s source_render_latency=unknown',
+                     self.metrics.snapshot(), getattr(self.capture, 'statistics', None))
         return result
 
     def stop(self) -> None:
@@ -235,7 +273,7 @@ class Application:
             try:
                 # Input release is always first, before any service join or native wait.
                 failures.extend(self._stop_errors)
-                for resource in (self.input, self.hotkeys, capture, self.telemetry, self.policy):
+                for resource in (self.input, self.hotkeys, capture, self.telemetry, self.policy, self.display):
                     if resource is not None and hasattr(resource,'close'):
                         try:
                             resource.close()

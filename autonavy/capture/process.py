@@ -88,7 +88,8 @@ def _native_owner(settings, source_factory, shared):
 
 def _write_error(shared, exc, *, cleanup=False):
     # A single child writes bounded error bytes, then publishes length last.
-    encoded = f'{type(exc).__name__}: {exc}'.encode('utf-8', errors='replace')[:4096]
+    from autonavy.diagnostics import exception_text
+    encoded = exception_text(exc)
     size = shared.cleanup_size if cleanup else shared.error_size
     destination = shared.cleanup_text if cleanup else shared.error_text
     if not size.value:
@@ -102,6 +103,10 @@ class _Progress:
     started: bool = False
     publication_id: int = 0
     diagnostic: dict | None = None
+    delivered: int = 0
+    publication_gaps: int = 0
+    idle_reads: int = 0
+    failures: int = 0
 
 
 @dataclass(frozen=True)
@@ -162,6 +167,13 @@ class ProcessCapture:
         session = self._session
         return deepcopy(session.progress.diagnostic) if session is not None else None
 
+    @property
+    def statistics(self):
+        with self._lifecycle:
+            progress = self._session.progress if self._session is not None else _Progress()
+            return {name: getattr(progress, name) for name in
+                    ('delivered', 'publication_gaps', 'idle_reads', 'failures')}
+
     @staticmethod
     def _error(shared):
         size = shared.error_size.value
@@ -206,6 +218,7 @@ class ProcessCapture:
                     raise CaptureTimeout('Capture startup deadline exceeded')
                 session.cancel.wait(min(0.01, max(0, deadline-time.monotonic())))
         except BaseException:
+            session.progress.failures += 1
             self._signal(session)
             # Only reclaim this attempt; a late failure cannot stop a newer generation.
             with self._lifecycle:
@@ -213,12 +226,22 @@ class ProcessCapture:
             raise
 
     def read(self, timeout: float | None = None) -> FramePacket | None:
+        session = self._session
+        try:
+            return self._read(session, timeout)
+        except CaptureTimeout:
+            if session is not None: session.progress.idle_reads += 1
+            raise
+        except CaptureError:
+            if session is not None: session.progress.failures += 1
+            raise
+
+    def _read(self, session, timeout: float | None = None) -> FramePacket | None:
         """Wait for a newer publication; healthy no-frame raises CaptureTimeout.
 
         Runtime tick consumers can pass a short timeout, or zero for a poll.
         Only one runtime reader drains transport; consumers share latest packets.
         """
-        session = self._session
         if session is None:
             if self._stop_requested.is_set():
                 return None
@@ -262,6 +285,8 @@ class ProcessCapture:
                                     if cancel.is_set():
                                         return None
                                     raise
+                                session.progress.delivered += 1
+                                session.progress.publication_gaps += max(0, packet.publication_id-after-1)
                                 session.progress.publication_id = packet.publication_id
                                 session.progress.diagnostic = metadata.get('diagnostic')
                                 return packet

@@ -59,8 +59,9 @@ class RecordingBackend:
 
 class InputController:
     """All dispatch and release paths serialize here, including error cleanup."""
-    def __init__(self, backend, *, guard, clock_ns=time.monotonic_ns, max_pending=64):
+    def __init__(self, backend, *, guard, clock_ns=time.monotonic_ns, max_pending=64, metrics=None):
         self.backend, self.guard, self.clock_ns = backend, guard, clock_ns
+        self.metrics = metrics
         self._pending = Pending(max_pending)
         self._generations = {}
         self._epoch = 0
@@ -198,5 +199,9 @@ class InputController:
                     self._token += 1
                     # A failed OS call is uncertain: retain it for retryable cleanup.
                     self.held[resource] = Hold(intent, self.clock_ns()+intent.duration_ns, self._token)
+                dispatched_at = self.clock_ns()
                 self.backend.dispatch(intent.action,intent.resource,intent.value)
+                if self.metrics is not None:
+                    self.metrics.observe('intent_to_dispatch_ns', max(0, dispatched_at-intent.created_at_ns))
+                    self.metrics.increment('input_dispatches')
                 if pointer: pointer_owner = intent.owner

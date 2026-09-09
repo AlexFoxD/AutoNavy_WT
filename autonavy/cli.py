@@ -73,15 +73,16 @@ def main(argv: list[str] | None = None) -> int:
         if args.check_config:
             print(f'Configuration valid: {resolved}')
             return 0
-        logging.basicConfig(level=getattr(logging, settings.diagnostics.log_level), format='%(levelname)s %(name)s %(message)s')
-        LOG.info('resolved_settings=%s', resolved)
-        from autonavy.app import Application
-        app = Application(settings)
-        result = app.run()
-        if app.last_error:
-            print(f'Application error: {app.last_error}', file=sys.stderr)
-        print(f'AutoNavy_WT stopped: backend={settings.capture.backend} frames={app.frames_processed} state={app.state.value}')
-        return result
+        from autonavy.diagnostics import runtime_logging
+        with runtime_logging(settings):
+            LOG.info('resolved_settings=%s', resolved)
+            from autonavy.app import Application
+            app = Application(settings)
+            result = app.run()
+            if app.last_error:
+                print(f'Application error: {app.last_error}', file=sys.stderr)
+            print(f'AutoNavy_WT stopped: backend={settings.capture.backend} frames={app.frames_processed} state={app.state.value}')
+            return result
     except SystemExit as exc:
         # argparse help is successful; reusable main never terminates its caller.
         return int(exc.code or 0)
