@@ -80,6 +80,9 @@ def runtime_logging(settings):
         logger.setLevel(settings.diagnostics.log_level)
         logger.propagate = False
         yield
+    except Exception:
+        logger.exception("Runtime startup or execution failed")
+        raise
     finally:
         for handler in handlers:
             logger.removeHandler(handler)

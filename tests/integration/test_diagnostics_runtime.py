@@ -201,3 +201,32 @@ def test_explicit_per_frame_logging_connects_publication_and_tick_timing(caplog)
     assert len(frame_logs) == 1 and "tick_ns=" in frame_logs[0]
     assert "receive_age_ns=" in frame_logs[0]
     app.close()
+
+
+def test_cli_constructor_failure_is_logged_before_handlers_close(tmp_path, monkeypatch):
+    from autonavy.cli import main
+    import autonavy.app
+
+    config = tmp_path / "diagnostics.toml"
+    logs = tmp_path / "output"
+    config.write_text('[paths]\nlogs = "' + logs.as_posix() + '"\n')
+
+    def broken(*args, **kwargs):
+        raise RuntimeError("constructor sentinel")
+
+    monkeypatch.setattr(autonavy.app, "Application", broken)
+    assert (
+        main(
+            [
+                "--config",
+                str(config),
+                "--capture",
+                "replay",
+                "--fixture",
+                "tests/fixtures/smoke",
+            ]
+        )
+        == 3
+    )
+    text = (logs / "autonavy.log").read_text(encoding="utf-8")
+    assert "Traceback" in text and "constructor sentinel" in text
