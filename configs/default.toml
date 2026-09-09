@@ -94,6 +94,7 @@ lookahead_distance = 0.02
 replan_deviation = 0.1
 replan_attempts = 3
 replan_backoff_s = 1.0
+plan_timeout_s = 10.0
 
 [runtime]
 tick_hz = 30.0

@@ -4,6 +4,7 @@ import math
 import random
 from autonavy.input.controller import InputIntent
 from autonavy.models import RuntimeState
+from autonavy.navigation.control import Controllers, angular_error
 
 PURCHASE = frozenset({'buy','_purchase','purchase_confirm','autobuyparts'})
 END = frozenset({'back','base','start_battle_end','cart','data'})
@@ -22,11 +23,16 @@ class Step:
 
 
 class BattlePolicy:
-    """M6 may supply navigation.tick(app, observations, snapshot) and reset()."""
+    """Current-frame decisions with independent controllers and owned navigation."""
     def __init__(self, app, *, rng=None, navigation=None):
         self.app = app
         self.rng = rng if rng is not None else random.Random()
-        self.navigation = navigation
+        from autonavy.navigation.pilot import Navigation
+        self.navigation = navigation if navigation is not None else Navigation(app.settings.control,
+            join_timeout_s=app.settings.runtime.join_timeout_s,rng=self.rng)
+        self.controllers = Controllers(app.settings.control)
+        self._control_mode = None
+        self._control_time = None
         self.stage = 'hangar'
         self.deadline = None
         self.next_action = 0
@@ -74,7 +80,13 @@ class BattlePolicy:
         self.sequence=[]; self.sequence_owner=None; self.sequence_done=None
         self.next_action=0
         self.fire_due=None; self.zoom=False; self.identity=None
+        self.controllers.reset(); self._control_mode=None; self._control_time=None
         if self.navigation is not None: self.navigation.reset()
+
+    def close(self):
+        """Application invokes this after the input owner has neutralized."""
+        self.controllers.reset(); self._control_mode=None; self._control_time=None
+        if self.navigation is not None and hasattr(self.navigation,'close'): self.navigation.close()
 
     def _state(self, state, stage, timeout=None):
         self.app._transition(state)
@@ -233,6 +245,7 @@ class BattlePolicy:
             return
         if not new_frame or now<self.next_action: return
         if aim and aim.frame_center:
+            dt=self._control_dt('aim',now)
             x,y=aim.frame_center; w,h=a.last_frame.geometry.frame_size
             dx,dy=x-w//2,y-h//2
             if abs(dx)<=2 and abs(dy)<=2:
@@ -240,24 +253,39 @@ class BattlePolicy:
                     self.emit('fire','move','pointer',(self.rng.randint(-10,10),self.rng.randint(0,10)))
                     self.fire_due=now+500_000_000
             else:
-                c=a.settings.control
-                clamp=lambda x:max(-c.aim_limit_px,min(c.aim_limit_px,x*c.aim_kp))
-                self.emit('aim','move','pointer',(round(clamp(dx)),round(clamp(dy))))
+                output=self.controllers.pixel(dx,dy,dt)
+                self.emit('aim','move','pointer',tuple(round(v) for v in output))
             return
-        if self._matched('lock'): return  # Lock indicator has no calibrated target center.
+        if self._matched('lock'):
+            self._control_dt('lock',now)
+            return  # Lock indicator has no calibrated target center.
         self.set_zoom(1)
         snapshot=a.last_snapshot; player=snapshot.player
         if snapshot.enemies:
+            degree=a.last_observations.degree
+            if not degree.available or degree.degrees is None or not math.isfinite(degree.degrees):
+                self._control_dt('missing-degree',now)
+                self.controllers.search_pid.reset()
+                return
             target=min(snapshot.enemies,key=lambda e:(e.position[0]-player.position[0])**2+(e.position[1]-player.position[1])**2)
+            # The protocol has no target ID. A changed selected position resets
+            # conservatively instead of carrying an integral into another target.
+            dt=self._control_dt(('search',target.position),now)
             target_deg=math.degrees(math.atan2(target.position[0]-player.position[0],-(target.position[1]-player.position[1])))
             hull=math.degrees(math.atan2(player.dx,-player.dy))
-            degree=a.last_observations.degree
-            current=hull+(degree.degrees if degree.available else 0)
-            error=(target_deg-current+180)%360-180
+            current=hull+degree.degrees
+            error=angular_error(target_deg,current)
             if abs(error)<30: self._tap('search','x')
-            c=a.settings.control
-            # Legacy PID(target setpoint, current measurement) yields +target-current.
-            output=max(-c.search_limit,min(c.search_limit,error*c.search_kp))
+            output=self.controllers.search(target_deg,current,dt)
             self.emit('search','move','pointer',(round(output),0))
-        else: self._tap('search','x')
+        else:
+            self._control_dt('no-target',now)
+            self._tap('search','x')
         self.next_action=now+100_000_000
+
+    def _control_dt(self,mode,now):
+        if mode!=self._control_mode:
+            self.controllers.reset(); self._control_time=None; self._control_mode=mode
+        dt=1/self.app.settings.runtime.tick_hz if self._control_time is None else (now-self._control_time)/1e9
+        self._control_time=now
+        return dt

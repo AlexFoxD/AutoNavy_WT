@@ -96,6 +96,7 @@ class Application:
         self.input.tick()
         if self.stop_event.is_set():
             self.input.release_all()
+            self.policy._reset()
             return
         self._consume_pause()
         self.policy.tick(packet is not None)
@@ -212,7 +213,7 @@ class Application:
         self.input.emergency.set()
         with self._capture_lifecycle:
             capture = self.capture
-        for resource in (capture,self.telemetry):
+        for resource in (capture,self.telemetry,self.policy.navigation):
             if resource is not None and hasattr(resource,'request_stop'):
                 try: resource.request_stop()
                 except Exception as exc: self._stop_errors.append(exc)
@@ -230,8 +231,8 @@ class Application:
             try:
                 # Input release is always first, before any service join or native wait.
                 failures.extend(self._stop_errors)
-                for resource in (self.input, self.hotkeys, capture, self.telemetry):
-                    if resource is not None:
+                for resource in (self.input, self.hotkeys, capture, self.telemetry, self.policy):
+                    if resource is not None and hasattr(resource,'close'):
                         try:
                             resource.close()
                         except BaseException as exc:
@@ -247,7 +248,7 @@ class Application:
         else:
             # The resource owner has its own bounded cleanup. Concurrent callers
             # allow that budget plus the runtime join allowance, then fail explicitly.
-            budget = self.settings.capture.stop_timeout_s + 2 * self.settings.runtime.join_timeout_s
+            budget = self.settings.capture.stop_timeout_s + 3 * self.settings.runtime.join_timeout_s + .25
             if not self._close_complete.wait(budget):
                 raise RuntimeError('Application cleanup did not complete within the concurrent wait budget')
         with self._capture_lifecycle:

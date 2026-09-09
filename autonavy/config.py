@@ -121,6 +121,7 @@ class ControlSettings:
     replan_deviation: float = 0.1
     replan_attempts: int = 3
     replan_backoff_s: float = 1.0
+    plan_timeout_s: float = 10.0
 
 
 @dataclass(frozen=True)
