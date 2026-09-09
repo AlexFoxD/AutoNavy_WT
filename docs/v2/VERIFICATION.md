@@ -2,9 +2,9 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0-M7 and M8a independently reviewed; M8b launcher/build work next. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M8 independently reviewed; M9 whole-branch and final verification active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
-Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
+Hardware capture, OBS identity, vJoy actuation, matchmaking and source-to-input latency: NOT RUN. Actual packaged executable/resource/replay/worker checks passed in M8b. The test-isolation incident below is an explicit exception to device-free verification claims.
 
 ## M0 executed baseline
 
@@ -43,7 +43,7 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A22 / INPUT-01/02 | PASS | M5 owner generations/global epochs and bounded coalescing; test_input.py::test_mode_round_trip_invalidates_issued_but_not_yet_submitted_intents and four review_pointer regressions. Scoped re-review20142e0 PASS; evidence/M5.md. |
 | A23 / INPUT-02 | PASS | M5 SequenceScheduler and real policy fake-clock recovery/UI cycles; test_battle_cycle.py::test_review_persistent_start_retries_keep_original_queue_deadline and ::test_review_cancelled_recovery_deadline_never_delays_fresh_menu; bounded pending/history in test_input.py. evidence/M5.md. |
 | A24 / APP-01 | PASS | M5 ::test_full_scripted_cycle_uses_real_application_run executes actual Application/Policy/Input with synthetic capture double, observations and immutable telemetry through full states. 168 covering tests passed; evidence/M5.md. This is a scripted offline scenario, not recorded gameplay. |
-| A25 / APP-01 | NOT RUN | Implementation/validation pending |
+| A25 / APP-01 | PASS | M8b scripts/launcher.ps1 delegates source/frozen CLI, defaults to config check and preserves exact argv/status in both PowerShell versions and batch. Legacy Python shims delegate v2/freeze_support; README/MIGRATION document retirements and purchase pause. test_launcher.py and actual nine packaged commands passed; evidence/M8b.md. |
 | A26 / NAV-01 | PASS | M6 RouteCursor/Navigation/PlanningService actual runtime; test_navigation.py route immutability/intersections/order and test_navigation_runtime.py dense-turn/off-route target tracking regressions. c4c3810 scoped review PASS;86covering tests. Bounded retries, stale results/deviation and arrival covered. evidence/M6.md. |
 | A27 / NAV-01 | PASS | M6 native.py lazy exact ABI adapter and supervised planner real production caller; tests/unit/test_navigation_planner.py::test_native_adapter_and_supervised_encoded_route_on_exact_supported_host passed onCPython3.11.9 Windows x64. Four8x8 cases and encoded128grid route17points via actual native child. Pure tests inject fake adapter. evidence/M6.md. |
 | A28 / CTRL-01 | PASS | M6 separate PID states with units/wrapped errors/dt/integral/output bounds and mode/target/waypoint/session/stop resets. test_navigation.py and test_navigation_runtime.py plus source signs characterized in AUDIT; full371pass1excluded then86covering route fix. Physical sign calibration NOT RUN. evidence/M6.md. |
@@ -54,9 +54,9 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A33 / OBSERVE-01 | PASS | M8a metrics.py/diagnostics.py integrated into actual Application, InputController, ProcessCapture and planner/telemetry faults; test_metrics.py and test_diagnostics_runtime.py cover bounds, throttle, explicit preview and startup logging. 440 full tests passed, 1 launcher exclusion. Independent review PASS; evidence/M8a.md. |
 | A34 / PERF-01 | PASS | M8a benchmark_pipeline.py executes correctness-gated paired cold/warm arithmetic and separate fresh menu/battle ticks. Repeated measured JSON/CSV and raw samples in evidence/benchmarks; reviewer independently recomputed summaries. BENCHMARKS.md records exact scope and the decision-rate shortfall. |
 | A35 / PERF-01 | PASS | M8a benchmark_capture.py has real backend-selectable non-actuating capture and bounded duration/frame budget. Executed replay only: 600 publications, 290.76/s, receive p50 0/p95 16ms with 15.625ms clock resolution, upstream/child scope explicitly unknown. Retain DXcam default and 0.0.5 pin without a live ranking; BENCHMARKS.md and evidence/DXcam-upgrade-assessment.md. Live comparison NOT RUN. |
-| A36 / BUILD-01 | NOT RUN | Implementation/validation pending |
-| A37 / BUILD-01 | NOT RUN | Implementation/validation pending |
-| A38 / HANDOFF | NOT RUN | Implementation/validation pending |
+| A36 / BUILD-01 | PASS | requirements-core/dev retain pins; static metadata readiness avoids hardware imports; real platform tests narrowly guarded. Fresh Windows core-only full454 passed, final core-focused26 passed, main full463 passed and scoped Ruff passed. core.yml/build_prog.yml authored, external/Linux CI NOT RUN. evidence/M8b.md and evidence/m8b. |
+| A37 / BUILD-01 | PASS | M8b real Nuitka4.2.1/MSVC14.5 build3 succeeded, actual final ZIP extracted and nine unrelated-cwd commands passed. Production capture child exit0/publication1, native planner child exit0/91points, config/replay/argv/resources/native/SDK byte checks passed. Final ZIP/exe hashes in evidence/m8b/m8b-artifact-hashes.json. Build1 failure and config failure/fix/rebuild retained in evidence/M8b.md. |
+| A38 / HANDOFF | PASS | English README.md and MIGRATION.md document exact source/packaged commands, DXcam/OBS calibration and identity limits, explicit live opt-in/hotkeys, logs, compatibility retirements, rollback and manual checklist. Independent M8b review PASS; executed examples and separate NOT RUN hardware scope in evidence/M8b.md. Final handoff reconciliation remains M9. |
 | A39 / HANDOFF | NOT RUN | Implementation/validation pending |
 
 ## Preservation baseline

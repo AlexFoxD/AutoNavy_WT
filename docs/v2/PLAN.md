@@ -79,10 +79,10 @@ Files: autonavy/capture/obs.py, autonavy/capture/factory.py, autonavy/geometry.p
 
 ### Task 8: M8 tooling and packaging
 Files: scripts/benchmark_{pipeline,capture}.py, autonavy/metrics.py, requirements-{core,dev}.txt, scripts/{install,run,launcher,build}.ps1, scripts/check_environment.py, .github/workflows/*.yml, README.md, docs/v2/{BENCHMARKS,MIGRATION}.md.
-- [ ] RED: metrics bounded, benchmark schema correctness and finite sample counts, CLI flag forwarding, core preflight and packaged resource resolution.
-- [ ] Implement finite warm/cold JSON/CSV timings, capture delivery/freshness metrics with explicit unknown source latency; run offline measurements without timing assertions.
-- [ ] Keep dependency ABI pins; primary-source DXcam update assessment; Linux/Windows 3.11 core CI, Windows packaging resources and no automatic publishing.
-- [ ] Execute available script/build smoke checks, classify true hardware/build checks; GREEN/review/commit.
+- [x] RED: metrics bounded, benchmark schema correctness and finite sample counts, CLI flag forwarding, core preflight and packaged resource resolution.
+- [x] Implement finite warm/cold JSON/CSV timings, capture delivery/freshness metrics with explicit unknown source latency; run offline measurements without timing assertions.
+- [x] Keep dependency ABI pins; primary-source DXcam update assessment; Linux/Windows 3.11 core CI, Windows packaging resources and no automatic publishing.
+- [x] Execute available script/build smoke checks, classify true hardware/build checks; GREEN/review/commit.
 
 M8 execution subdivision: M8a benchmarks and runtime diagnostics (including actual measurements) → independent review/fixes → M8b dependency/CI, launcher/preflight/build and English operation docs (including actual available compile) → independent review/fixes. One production writer; each subtask gets a concrete plan and scoped commits. M8 closes only when both pass. This preserves the approved milestone order while avoiding a single oversized tooling change.
 ### Task 9: M9 final review and handoff
