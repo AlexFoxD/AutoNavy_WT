@@ -90,7 +90,7 @@ class VJoyPreflightTests(unittest.TestCase):
         self.assertEqual("vjoy_buttons_missing", result.code)
         self.assertIn("не менее 8 кнопок", result.message)
 
-    def test_acquires_and_relinquishes_configured_device_without_sending_input(self):
+    def test_checks_configured_device_without_acquiring_or_relinquishing(self):
         api = FakeVJoyApi()
 
         result = runtime_preflight.check_vjoy(api)
@@ -98,8 +98,8 @@ class VJoyPreflightTests(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertEqual("vjoy_ready", result.code)
         self.assertEqual(1, api.requested_device_id)
-        self.assertTrue(api.acquired)
-        self.assertTrue(api.relinquished)
+        self.assertFalse(api.acquired)
+        self.assertFalse(api.relinquished)
 
 
 class PyVJoyApiTests(unittest.TestCase):
@@ -271,3 +271,8 @@ class PreflightSummaryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_runtime_preflight_checks_only_retained_runtime_dependencies():
+    assert not {'scipy', 'matplotlib', 'simple_pid'} & set(runtime_preflight.REQUIRED_IMPORTS)
+    assert {'cv2', 'numpy', 'dxcam', 'pyvjoy', 'toolkit.way_search'} <= set(runtime_preflight.REQUIRED_IMPORTS)

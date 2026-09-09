@@ -111,3 +111,22 @@ class EnvironmentCheckTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_core_readiness_never_imports_hardware_and_runs_on_linux():
+    checker = load_checker()
+    root = CHECKER_PATH.parents[1]
+    real_import = checker.importlib.import_module
+    def guarded(name, *args, **kwargs):
+        assert name.split('.')[0] not in {'dxcam', 'pyvjoy', 'win32api', 'win32gui', 'keyboard', 'pydirectinput', 'runtime_preflight'}
+        return real_import(name, *args, **kwargs)
+    with mock.patch.object(checker.sys, 'platform', 'linux'), mock.patch.object(checker.importlib, 'import_module', side_effect=guarded):
+        results = checker.run_checks(root)
+    assert all(r.ok for r in results), results
+
+
+def test_static_readiness_reports_missing_pinned_dependency_without_import():
+    checker = load_checker()
+    with mock.patch('importlib.metadata.version', side_effect=__import__('importlib.metadata', fromlist=['PackageNotFoundError']).PackageNotFoundError), mock.patch.object(checker, 'check_import', side_effect=AssertionError('Native imports forbidden')), mock.patch.object(checker, 'check_vjoy_driver', side_effect=AssertionError('Driver access forbidden')):
+        results = checker.run_checks(CHECKER_PATH.parents[1])
+    assert any(not r.ok and 'numpy' in r.message for r in results), results

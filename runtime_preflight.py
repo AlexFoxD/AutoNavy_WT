@@ -22,13 +22,10 @@ REQUIRED_IMPORTS = (
     "cv2",
     "dxcam",
     "keyboard",
-    "matplotlib",
     "numpy",
     "pydirectinput",
     "pyvjoy",
     "requests",
-    "scipy",
-    "simple_pid",
     "win32api",
     "win32gui",
     "toolkit.way_search",
@@ -113,7 +110,7 @@ def check_runtime_imports(import_module) -> CheckResult:
 
 
 def check_vjoy(api) -> CheckResult:
-    """Validate and briefly acquire vJoy device 1 without changing its state."""
+    """Query vJoy capabilities without acquiring or changing device ownership."""
     try:
         if not api.is_enabled():
             return CheckResult(False, "vjoy_not_installed", "vJoy не установлен или драйвер отключён.")
@@ -152,11 +149,6 @@ def check_vjoy(api) -> CheckResult:
                 "vjoy_buttons_missing",
                 f"Устройство vJoy № 1 должно иметь не менее 8 кнопок; сейчас доступно: {buttons}.",
             )
-
-        if status == 1:
-            if not api.acquire(VJOY_DEVICE_ID):
-                return CheckResult(False, "vjoy_acquire_failed", "Не удалось получить доступ к устройству vJoy № 1.")
-            api.relinquish(VJOY_DEVICE_ID)
 
         return CheckResult(True, "vjoy_ready", "vJoy: устройство № 1, оси X/Y/Z/RY и кнопки 1–8 доступны.")
     except BaseException as exc:

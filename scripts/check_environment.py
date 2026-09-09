@@ -56,28 +56,28 @@ def configure_utf8_output(stream) -> None:
 
 def check_platform(platform_name: str) -> CheckResult:
     if platform_name != "win32":
-        return CheckResult(False, "Поддерживается только Windows (win32).")
-    return CheckResult(True, "Операционная система: Windows.")
+        return CheckResult(False, "Windows (win32) is required for this mode.")
+    return CheckResult(True, "Operating system: Windows.")
 
 
 def check_python_version(version_info) -> CheckResult:
     actual = tuple(version_info[:2])
     if actual != SUPPORTED_PYTHON:
-        return CheckResult(False, f"Требуется CPython 3.11, обнаружен Python {actual[0]}.{actual[1]}.")
-    return CheckResult(True, "Версия Python: CPython 3.11.")
+        return CheckResult(False, f"CPython 3.11 required; detected Python {actual[0]}.{actual[1]}.")
+    return CheckResult(True, "Python version: CPython 3.11.")
 
 
 def check_python_architecture(pointer_size: int) -> CheckResult:
     bits = pointer_size * 8
     if bits != 64:
-        return CheckResult(False, f"Требуется 64-битный Python, обнаружен {bits}-битный.")
-    return CheckResult(True, "Архитектура Python: 64 бита.")
+        return CheckResult(False, f"64-bit Python required; detected {bits}-bit.")
+    return CheckResult(True, "Python architecture: 64-bit.")
 
 
 def check_required_file(repo_root: Path, relative_path: str) -> CheckResult:
     if not (repo_root / relative_path).is_file():
-        return CheckResult(False, f"Отсутствует обязательный файл: {relative_path}")
-    return CheckResult(True, f"Файл найден: {relative_path}")
+        return CheckResult(False, f"Missing required file: {relative_path}")
+    return CheckResult(True, f"File found: {relative_path}")
 
 
 def check_image_resources(repo_root: Path) -> CheckResult:
@@ -126,47 +126,63 @@ def check_vjoy_driver() -> CheckResult:
     return CheckResult(result.ok, result.message)
 
 
-def run_checks(repo_root: Path, installation_only: bool = False) -> list[CheckResult]:
-    repo_root_string = str(repo_root)
-    if repo_root_string not in sys.path:
-        sys.path.insert(0, repo_root_string)
-    results = [
-        check_platform(sys.platform),
-        check_python_version(sys.version_info),
-        check_python_architecture(struct.calcsize("P")),
-    ]
+def check_pins(requirements: Path) -> list[CheckResult]:
+    """Read installed metadata only; importing DXcam enumerates native adapters."""
+    from importlib import metadata
+    results = []
+    for line in requirements.read_text(encoding="utf-8-sig").splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if line.startswith('-r '):
+            results.extend(check_pins(requirements.parent / line[3:].strip()))
+            continue
+        name, expected = line.split('==')
+        try:
+            actual = metadata.version(name)
+        except metadata.PackageNotFoundError:
+            actual = 'missing'
+        results.append(CheckResult(actual == expected, f'{name}: expected {expected}, installed {actual}'))
+    return results
+
+
+def run_checks(repo_root: Path, installation_only: bool = False, *, mode: str = 'core') -> list[CheckResult]:
+    """Device-free source readiness; hardware diagnostics are a separate command."""
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    if installation_only:
+        mode = 'runtime'  # Legacy alias now checks metadata, never native imports.
+    results = [check_python_version(sys.version_info), check_python_architecture(struct.calcsize('P'))]
+    if mode != 'core':
+        results.append(check_platform(sys.platform))
+    requirements = {'core': 'requirements-core.txt', 'runtime': 'requirements.txt', 'build': 'requirements-build.txt'}[mode]
+    results.extend(check_pins(repo_root / requirements))
     results.extend(check_required_file(repo_root, path) for path in REQUIRED_FILES)
-    results.extend(check_import(module, package) for module, package in REQUIRED_IMPORTS)
-    results.append(check_image_resources(repo_root))
-    if not installation_only:
-        results.append(check_vjoy_driver())
+    results.append(check_required_file(repo_root, 'configs/default.toml'))
+    try:
+        from autonavy.config import load_settings
+        load_settings(repo_root / 'configs/default.toml')
+        results.append(CheckResult(True, 'Default configuration and resources valid (no devices opened).'))
+    except Exception as exc:
+        results.append(CheckResult(False, f'Default configuration invalid: {exc}'))
+    if mode != 'core':
+        results.append(check_required_file(repo_root, 'third_party/vjoy/2.1.9.1/x64/vJoyInterface.dll'))
     return results
 
 
 def main() -> int:
     configure_utf8_output(sys.stdout)
     configure_utf8_output(sys.stderr)
-    parser = argparse.ArgumentParser(description="Проверка среды AutoNavy_WT")
-    parser.add_argument(
-        "--installation-only",
-        action="store_true",
-        help="не проверять системный драйвер и устройство vJoy",
-    )
+    parser = argparse.ArgumentParser(description='Device-free source dependency/resource readiness')
+    parser.add_argument('--mode', choices=('core', 'runtime', 'build'), default='core')
+    parser.add_argument('--installation-only', action='store_true', help='Legacy alias for static runtime readiness')
     args = parser.parse_args()
-
-    repo_root = Path(__file__).resolve().parents[1]
-    results = run_checks(repo_root, installation_only=args.installation_only)
+    results = run_checks(Path(__file__).resolve().parents[1], args.installation_only, mode=args.mode)
     for result in results:
-        marker = "OK" if result.ok else "ОШИБКА"
-        print(f"[{marker}] {result.message}")
-
-    failures = sum(not result.ok for result in results)
-    if failures:
-        print(f"\nПроверка завершена: ошибок — {failures}.")
-        return 1
-    print("\nПроверка завершена успешно.")
-    return 0
+        print(f"[{'OK' if result.ok else 'ERROR'}] {result.message}")
+    print('Full hardware diagnostics are manual: python -m autonavy --preflight')
+    return int(any(not result.ok for result in results))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     raise SystemExit(main())
