@@ -1,0 +1,49 @@
+........FFF.FFFF                                                         [100%]
+================================== FAILURES ===================================
+________ test_core_readiness_never_imports_hardware_and_runs_on_linux _________
+tests\test_check_environment.py:125: in test_core_readiness_never_imports_hardware_and_runs_on_linux
+    assert all(r.ok for r in results), results
+E   AssertionError: [CheckResult(ok=False, message='\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044f \u0442\u043e\u043b\u044c\u043a\u043e Windows (win32).'), CheckResult(ok=True, message='\u0412\u0435\u0440\u0441\u0438\u044f Python:...ok=True, message='\u0424\u0430\u0439\u043b \u043d\u0430\u0439\u0434\u0435\u043d: runtime_preflight.py'), CheckResult(ok=True, message='\u0424\u0430\u0439\u043b \u043d\u0430\u0439\u0434\u0435\u043d: start_prog.py'), ...]
+E   assert False
+E    +  where False = all(<generator object test_core_readiness_never_imports_hardware_and_runs_on_linux.<locals>.<genexpr> at 0x000001E5DB494C70>)
+___ test_static_readiness_reports_missing_pinned_dependency_without_import ____
+tests\test_check_environment.py:132: in test_static_readiness_reports_missing_pinned_dependency_without_import
+    assert any(not r.ok and 'numpy' in r.message for r in results), results
+E   AssertionError: [CheckResult(ok=True, message='\u041e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u0430\u044f \u0441\u0438\u0441\u0442\u0435\u043c\u0430: Windows.'), CheckResult(ok=True, message='\u0412\u0435\u0440\u0441\u0438\u044f Python: CPython ...ok=True, message='\u0424\u0430\u0439\u043b \u043d\u0430\u0439\u0434\u0435\u043d: runtime_preflight.py'), CheckResult(ok=True, message='\u0424\u0430\u0439\u043b \u043d\u0430\u0439\u0434\u0435\u043d: start_prog.py'), ...]
+E   assert False
+E    +  where False = any(<generator object test_static_readiness_reports_missing_pinned_dependency_without_import.<locals>.<genexpr> at 0x000001E5DB9E01E0>)
+_ ReleasePackagingTests.test_package_contains_one_click_runtime_without_development_files _
+tests\test_build_release.py:84: in test_package_contains_one_click_runtime_without_development_files
+    self.assertTrue(expected.issubset(names), expected - names)
+E   AssertionError: False is not true : {'toolkit/way_search.cp311-win_amd64.pyd', 'configs/default.toml', 'fixtures/smoke/manifest.json'}
+_____________ test_offline_smoke_rejects_live_options[arguments0] _____________
+tests\integration\test_packaging_smoke.py:14: in test_offline_smoke_rejects_live_options
+    assert 'standalone' in result.stderr
+E   AssertionError: assert 'standalone' in 'Configuration error: unrecognized arguments: --offline-smoke\n'
+E    +  where 'Configuration error: unrecognized arguments: --offline-smoke\n' = CompletedProcess(args=['C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.venv\\Scripts\\python.exe', 'C:\\Develop\\game\\WT\\Au...', '--enable-input'], returncode=2, stdout='', stderr='Configuration error: unrecognized arguments: --offline-smoke\n').stderr
+_____________ test_offline_smoke_rejects_live_options[arguments1] _____________
+tests\integration\test_packaging_smoke.py:14: in test_offline_smoke_rejects_live_options
+    assert 'standalone' in result.stderr
+E   AssertionError: assert 'standalone' in 'Configuration error: unrecognized arguments: --offline-smoke\n'
+E    +  where 'Configuration error: unrecognized arguments: --offline-smoke\n' = CompletedProcess(args=['C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.venv\\Scripts\\python.exe', 'C:\\Develop\\game\\WT\\Au...--capture', 'dxcam'], returncode=2, stdout='', stderr='Configuration error: unrecognized arguments: --offline-smoke\n').stderr
+_____________ test_offline_smoke_rejects_live_options[arguments2] _____________
+tests\integration\test_packaging_smoke.py:14: in test_offline_smoke_rejects_live_options
+    assert 'standalone' in result.stderr
+E   AssertionError: assert 'standalone' in 'Configuration error: unrecognized arguments: --offline-smoke\n'
+E    +  where 'Configuration error: unrecognized arguments: --offline-smoke\n' = CompletedProcess(args=['C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.venv\\Scripts\\python.exe', 'C:\\Develop\\game\\WT\\Au...oke', '--preflight'], returncode=2, stdout='', stderr='Configuration error: unrecognized arguments: --offline-smoke\n').stderr
+__________ test_offline_smoke_spawns_real_capture_and_native_planner __________
+tests\integration\test_packaging_smoke.py:19: in test_offline_smoke_spawns_real_capture_and_native_planner
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: Configuration error: unrecognized arguments: --offline-smoke
+E     
+E   assert 2 == 0
+E    +  where 2 = CompletedProcess(args=['C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.venv\\Scripts\\python.exe', 'C:\\Develop\\game\\WT\\Au..., '--offline-smoke'], returncode=2, stdout='', stderr='Configuration error: unrecognized arguments: --offline-smoke\n').returncode
+=========================== short test summary info ===========================
+FAILED tests/test_check_environment.py::test_core_readiness_never_imports_hardware_and_runs_on_linux
+FAILED tests/test_check_environment.py::test_static_readiness_reports_missing_pinned_dependency_without_import
+FAILED tests/test_build_release.py::ReleasePackagingTests::test_package_contains_one_click_runtime_without_development_files
+FAILED tests/integration/test_packaging_smoke.py::test_offline_smoke_rejects_live_options[arguments0]
+FAILED tests/integration/test_packaging_smoke.py::test_offline_smoke_rejects_live_options[arguments1]
+FAILED tests/integration/test_packaging_smoke.py::test_offline_smoke_rejects_live_options[arguments2]
+FAILED tests/integration/test_packaging_smoke.py::test_offline_smoke_spawns_real_capture_and_native_planner
+7 failed, 9 passed in 4.37s

@@ -1,0 +1,47 @@
+[OK] Версия Python: CPython 3.11.
+[OK] Архитектура Python: 64 бита.
+[OK] Операционная система: Windows.
+[OK] certifi: expected 2025.1.31, installed 2025.1.31
+[OK] charset-normalizer: expected 3.4.1, installed 3.4.1
+[OK] comtypes: expected 1.4.10, installed 1.4.10
+[OK] contourpy: expected 1.3.1, installed 1.3.1
+[OK] cycler: expected 0.12.1, installed 0.12.1
+[OK] dxcam: expected 0.0.5, installed 0.0.5
+[OK] fonttools: expected 4.56.0, installed 4.56.0
+[OK] idna: expected 3.10, installed 3.10
+[OK] keyboard: expected 0.13.5, installed 0.13.5
+[OK] kiwisolver: expected 1.4.8, installed 1.4.8
+[OK] matplotlib: expected 3.10.0, installed 3.10.0
+[OK] numpy: expected 1.26.0, installed 1.26.0
+[OK] opencv-python: expected 4.8.0.74, installed 4.8.0.74
+[OK] packaging: expected 24.2, installed 24.2
+[OK] pillow: expected 11.1.0, installed 11.1.0
+[OK] PyDirectInput: expected 1.0.4, installed 1.0.4
+[OK] pyparsing: expected 3.2.1, installed 3.2.1
+[OK] python-dateutil: expected 2.9.0.post0, installed 2.9.0.post0
+[OK] pyvjoy: expected 1.0.1, installed 1.0.1
+[OK] pywin32: expected 308, installed 308
+[OK] requests: expected 2.32.3, installed 2.32.3
+[OK] scipy: expected 1.15.1, installed 1.15.1
+[OK] simple-pid: expected 2.0.1, installed 2.0.1
+[OK] six: expected 1.17.0, installed 1.17.0
+[OK] urllib3: expected 2.3.0, installed 2.3.0
+[OK] Nuitka: expected 4.2.1, installed 4.2.1
+[OK] ordered-set: expected 4.1.0, installed 4.1.0
+[OK] zstandard: expected 0.23.0, installed 0.23.0
+[OK] Файл найден: autonavy.py
+[OK] Файл найден: runtime_preflight.py
+[OK] Файл найден: start_prog.py
+[OK] Файл найден: path.json
+[OK] Файл найден: ЗАПУСТИТЬ.bat
+[OK] Файл найден: scripts/launcher.ps1
+[OK] Файл найден: toolkit/way_search.cp311-win_amd64.pyd
+[OK] Файл найден: src/origin_map.png
+[OK] Файл найден: src/cir.png
+[OK] Файл найден: src/crash_warning.png
+[OK] Файл найден: src/crashed.png
+[OK] Файл найден: src/game_image/start.png
+[OK] Файл найден: configs/default.toml
+[OK] Default configuration and resources valid (no devices opened).
+[OK] Файл найден: third_party/vjoy/2.1.9.1/x64/vJoyInterface.dll
+Full hardware diagnostics are manual: python -m autonavy --preflight

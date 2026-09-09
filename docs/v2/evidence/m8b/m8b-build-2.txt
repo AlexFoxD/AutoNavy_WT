@@ -1,0 +1,67 @@
+[OK] Python version: CPython 3.11.
+[OK] Python architecture: 64-bit.
+[OK] Operating system: Windows.
+[OK] certifi: expected 2025.1.31, installed 2025.1.31
+[OK] charset-normalizer: expected 3.4.1, installed 3.4.1
+[OK] comtypes: expected 1.4.10, installed 1.4.10
+[OK] contourpy: expected 1.3.1, installed 1.3.1
+[OK] cycler: expected 0.12.1, installed 0.12.1
+[OK] dxcam: expected 0.0.5, installed 0.0.5
+[OK] fonttools: expected 4.56.0, installed 4.56.0
+[OK] idna: expected 3.10, installed 3.10
+[OK] keyboard: expected 0.13.5, installed 0.13.5
+[OK] kiwisolver: expected 1.4.8, installed 1.4.8
+[OK] matplotlib: expected 3.10.0, installed 3.10.0
+[OK] numpy: expected 1.26.0, installed 1.26.0
+[OK] opencv-python: expected 4.8.0.74, installed 4.8.0.74
+[OK] packaging: expected 24.2, installed 24.2
+[OK] pillow: expected 11.1.0, installed 11.1.0
+[OK] PyDirectInput: expected 1.0.4, installed 1.0.4
+[OK] pyparsing: expected 3.2.1, installed 3.2.1
+[OK] python-dateutil: expected 2.9.0.post0, installed 2.9.0.post0
+[OK] pyvjoy: expected 1.0.1, installed 1.0.1
+[OK] pywin32: expected 308, installed 308
+[OK] requests: expected 2.32.3, installed 2.32.3
+[OK] scipy: expected 1.15.1, installed 1.15.1
+[OK] simple-pid: expected 2.0.1, installed 2.0.1
+[OK] six: expected 1.17.0, installed 1.17.0
+[OK] urllib3: expected 2.3.0, installed 2.3.0
+[OK] Nuitka: expected 4.2.1, installed 4.2.1
+[OK] ordered-set: expected 4.1.0, installed 4.1.0
+[OK] zstandard: expected 0.23.0, installed 0.23.0
+[OK] File found: autonavy.py
+[OK] File found: runtime_preflight.py
+[OK] File found: start_prog.py
+[OK] File found: path.json
+[OK] File found: ЗАПУСТИТЬ.bat
+[OK] File found: scripts/launcher.ps1
+[OK] File found: toolkit/way_search.cp311-win_amd64.pyd
+[OK] File found: src/origin_map.png
+[OK] File found: src/cir.png
+[OK] File found: src/crash_warning.png
+[OK] File found: src/crashed.png
+[OK] File found: src/game_image/start.png
+[OK] File found: configs/default.toml
+[OK] Default configuration and resources valid (no devices opened).
+[OK] File found: third_party/vjoy/2.1.9.1/x64/vJoyInterface.dll
+Full hardware diagnostics are manual: python -m autonavy --preflight
+Nuitka-Options: Used command line options:
+Nuitka-Options:   --standalone --msvc=latest --experimental=force-dependencies-pefile --windows-console-mode=force --output-filename=AutoNavy_WT.exe --output-dir=C:\Develop\game\WT\AutoNavy_WT-v2\.output\nuitka --jobs=4 --include-package=autonavy --include-module=runtime_preflight --include-module=toolkit.resources --include-module=toolkit.way_search --include-package=dxcam --include-module=keyboard --include-module=pydirectinput --include-module=win32api --include-module=win32gui --include-module=win32con --nofollow-import-to=matplotlib,scipy,pytest --report=C:\Develop\game\WT\AutoNavy_WT-v2\.output/nuitka-report.xml --include-package=pyvjoy --include-package-data=pyvjoy C:\Develop\game\WT\AutoNavy_WT-v2\autonavy.py
+Nuitka: Starting Python compilation with:
+Nuitka:   Version '4.2.1' on Python 3.11 (flavor 'CPython Official') commercial grade 'not installed'.
+Nuitka-Plugins:anti-bloat: Not including 'PIL.ImageQt' automatically in order to avoid bloat, but this may cause: PIL will not be able to create Qt image objects.
+Nuitka-Plugins:dll-files: Found 1 file DLLs from cv2 installation.
+Nuitka: Completed Python level compilation and optimization.
+Nuitka: Generating source code for C backend compiler.
+Nuitka: Running data composer tool for optimal constant value handling.
+Nuitka: Running C compilation via Scons.
+Nuitka-Scons: MSVC version resolved to 14.5.
+Nuitka-Scons: Backend C compiler: cl (cl 14.5).
+Nuitka-Scons: Backend C linking with 388 files (no progress information available for this stage).
+Nuitka-Scons: Compiled 388 C files using clcache with 0 cache hits and 388 cache misses.
+Nuitka-Plugins:data-files: Included data file 'certifi\cacert.pem' due to package data for 'certifi'.
+Nuitka: Keeping build directory 'C:\Develop\game\WT\AutoNavy_WT-v2\.output\nuitka\autonavy.build'.
+Nuitka: Successfully created 'C:\Develop\game\WT\AutoNavy_WT-v2\.output\nuitka\autonavy.dist\AutoNavy_WT.exe'.
+Nuitka-Reports: Compilation report written to file 'C:\Develop\game\WT\AutoNavy_WT-v2\.output/nuitka-report.xml'.
+Release archive created: C:\Develop\game\WT\AutoNavy_WT-v2\.output\AutoNavy_WT-win64.zip
+Release staging directory: C:\Develop\game\WT\AutoNavy_WT-v2\.output\AutoNavy_WT-release-stage

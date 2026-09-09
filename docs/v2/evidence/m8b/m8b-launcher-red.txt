@@ -1,0 +1,92 @@
+FFFFFF                                                                   [100%]
+================================== FAILURES ===================================
+_ test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments0-expected0-0-launcher.ps1] _
+tests\test_launcher.py:224: in test_isolated_wrapper_is_offline_and_forwards_exact_argv
+    assert code == expected_code, stdout + stderr
+E   AssertionError: AutoNavy_WT \u2014 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0433\u043e\u0442\u043e\u0432\u043d\u043e\u0441\u0442\u0438
+E     \u0416\u0443\u0440\u043d\u0430\u043b: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli0\\source \u0422\u0435\u0441\u0442 with spaces\\logs\\launcher-20260909-221218.log
+E     [OK] \u0412\u044b\u0431\u0440\u0430\u043d \u0440\u0435\u0436\u0438\u043c: \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442.
+E     \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 Python-\u0441\u0440\u0435\u0434\u044b \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430...
+E     Traceback (most recent call last):
+E       File "C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli0\\source \u0422\u0435\u0441\u0442 with spaces\\scripts\\check_environment.py", line 1, in <module>
+E         raise RuntimeError('CHECKER IS FORBIDDEN')
+E     RuntimeError: CHECKER IS FORBIDDEN
+E     \u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 Python-\u0441\u0440\u0435\u0434\u044b \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430...
+E     [\u041e\u0428\u0418\u0411\u041a\u0410] INSTALL IS FORBIDDEN
+E     \u0417\u0430\u043f\u0443\u0441\u043a \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d. \u041f\u043e\u0434\u0440\u043e\u0431\u043d\u043e\u0441\u0442\u0438: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli0\\source \u0422\u0435\u0441\u0442 with spaces\\logs\\launcher-20260909-221218.log
+E     
+E   assert 3 == 0
+_ test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments0-expected0-0-run.ps1] _
+tests\test_launcher.py:225: in test_isolated_wrapper_is_offline_and_forwards_exact_argv
+    assert json.loads(record.read_text()) == expected
+C:\Program Files\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Program Files\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\ForkN\\\\AppData\\\\Local\\\\Temp\\\\pytest-of-ForkN\\\\pytest-136\\\\test_isolated_wrapper_is_offli1\\\\source \u0422\u0435\u0441\u0442 with spaces\\\\argv.json'
+_ test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments1-expected1-0-launcher.ps1] _
+tests\test_launcher.py:224: in test_isolated_wrapper_is_offline_and_forwards_exact_argv
+    assert code == expected_code, stdout + stderr
+E   AssertionError: AutoNavy_WT \u2014 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0433\u043e\u0442\u043e\u0432\u043d\u043e\u0441\u0442\u0438
+E     \u0416\u0443\u0440\u043d\u0430\u043b: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli2\\source \u0422\u0435\u0441\u0442 with spaces\\logs\\launcher-20260909-221220.log
+E     [OK] \u0412\u044b\u0431\u0440\u0430\u043d \u0440\u0435\u0436\u0438\u043c: \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442.
+E     \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 Python-\u0441\u0440\u0435\u0434\u044b \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430...
+E     Traceback (most recent call last):
+E       File "C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli2\\source \u0422\u0435\u0441\u0442 with spaces\\scripts\\check_environment.py", line 1, in <module>
+E         raise RuntimeError('CHECKER IS FORBIDDEN')
+E     RuntimeError: CHECKER IS FORBIDDEN
+E     \u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 Python-\u0441\u0440\u0435\u0434\u044b \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430...
+E     [\u041e\u0428\u0418\u0411\u041a\u0410] INSTALL IS FORBIDDEN
+E     \u0417\u0430\u043f\u0443\u0441\u043a \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d. \u041f\u043e\u0434\u0440\u043e\u0431\u043d\u043e\u0441\u0442\u0438: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli2\\source \u0422\u0435\u0441\u0442 with spaces\\logs\\launcher-20260909-221220.log
+E     
+E   assert 3 == 0
+_ test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments1-expected1-0-run.ps1] _
+tests\test_launcher.py:224: in test_isolated_wrapper_is_offline_and_forwards_exact_argv
+    assert code == expected_code, stdout + stderr
+E   AssertionError: AutoNavy_WT \u2014 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0433\u043e\u0442\u043e\u0432\u043d\u043e\u0441\u0442\u0438
+E     \u0416\u0443\u0440\u043d\u0430\u043b: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli3\\source \u0422\u0435\u0441\u0442 with spaces\\logs\\launcher-20260909-221220.log
+E     [OK] \u0412\u044b\u0431\u0440\u0430\u043d \u0440\u0435\u0436\u0438\u043c: \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442.
+E     \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 Python-\u0441\u0440\u0435\u0434\u044b \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430...
+E     Traceback (most recent call last):
+E       File "C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli3\\source \u0422\u0435\u0441\u0442 with spaces\\scripts\\check_environment.py", line 1, in <module>
+E         raise RuntimeError('CHECKER IS FORBIDDEN')
+E     RuntimeError: CHECKER IS FORBIDDEN
+E     \u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 Python-\u0441\u0440\u0435\u0434\u044b \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430...
+E     [\u041e\u0428\u0418\u0411\u041a\u0410] INSTALL IS FORBIDDEN
+E     \u0417\u0430\u043f\u0443\u0441\u043a \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d. \u041f\u043e\u0434\u0440\u043e\u0431\u043d\u043e\u0441\u0442\u0438: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli3\\source \u0422\u0435\u0441\u0442 with spaces\\logs\\launcher-20260909-221220.log
+E     
+E   assert 3 == 0
+_ test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments2-expected2-17-launcher.ps1] _
+tests\test_launcher.py:224: in test_isolated_wrapper_is_offline_and_forwards_exact_argv
+    assert code == expected_code, stdout + stderr
+E   AssertionError: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli4\\source \u0422\u0435\u0441\u0442 with \r
+E     spaces\scripts\launcher.ps1 : A positional parameter cannot be found that accepts argument '--config'.
+E     At line:1 char:1
+E     + & 'C:\Users\ForkN\AppData\Local\Temp\pytest-of-ForkN\pytest-136\test_ ...
+E     + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E         + CategoryInfo          : InvalidArgument: (:) [launcher.ps1], ParameterBindingException
+E         + FullyQualifiedErrorId : PositionalParameterNotFound,launcher.ps1
+E      
+E     
+E   assert 0 == 17
+_ test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments2-expected2-17-run.ps1] _
+tests\test_launcher.py:224: in test_isolated_wrapper_is_offline_and_forwards_exact_argv
+    assert code == expected_code, stdout + stderr
+E   AssertionError: C:\\Users\\ForkN\\AppData\\Local\\Temp\\pytest-of-ForkN\\pytest-136\\test_isolated_wrapper_is_offli5\\source \u0422\u0435\u0441\u0442 with \r
+E     spaces\scripts\run.ps1 : A positional parameter cannot be found that accepts argument '--config'.
+E     At line:1 char:1
+E     + & 'C:\Users\ForkN\AppData\Local\Temp\pytest-of-ForkN\pytest-136\test_ ...
+E     + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+E         + CategoryInfo          : InvalidArgument: (:) [run.ps1], ParameterBindingException
+E         + FullyQualifiedErrorId : PositionalParameterNotFound,run.ps1
+E      
+E     
+E   assert 0 == 17
+=========================== short test summary info ===========================
+FAILED tests/test_launcher.py::test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments0-expected0-0-launcher.ps1]
+FAILED tests/test_launcher.py::test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments0-expected0-0-run.ps1]
+FAILED tests/test_launcher.py::test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments1-expected1-0-launcher.ps1]
+FAILED tests/test_launcher.py::test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments1-expected1-0-run.ps1]
+FAILED tests/test_launcher.py::test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments2-expected2-17-launcher.ps1]
+FAILED tests/test_launcher.py::test_isolated_wrapper_is_offline_and_forwards_exact_argv[arguments2-expected2-17-run.ps1]
+6 failed, 7 deselected in 3.53s

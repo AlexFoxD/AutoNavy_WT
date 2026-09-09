@@ -1,138 +1,96 @@
-# AutoNavy_WT
+# AutoNavy_WT v2
 
-AutoNavy_WT — экспериментальный Windows-скрипт автоматизации морских боёв War Thunder. Он захватывает изображение окна игры, распознаёт элементы интерфейса по шаблонам, получает данные локального игрового HTTP-интерфейса, строит маршрут и имитирует ввод с клавиатуры, мыши и виртуального джойстика.
+Experimental Windows automation for War Thunder naval battles: template recognition, local game telemetry, navigation and coordinated keyboard/mouse/vJoy input. V2 uses bounded capture and planning workers, validated configuration and a finite offline replay mode. It is not a universal or production-validated game bot.
 
-Проект давно не получал существенных функциональных изменений и содержит жёсткие предположения о разрешении, интерфейсе и управлении. Рассматривайте его как экспериментальный/legacy-проект, а не как готовый универсальный продукт.
+**Game automation may violate War Thunder rules and lead to account bans, lost game data or other sanctions.** This project is for education and technical experiments. Authors and contributors accept no responsibility for direct or indirect damage. Review the game's rules and applicable law; do not run it if you cannot accept these risks. Modernization provides no protection from sanctions.
 
-## Важное предупреждение
+## Start safely
 
-Проект предназначен только для обучения и технических экспериментов. Его использование в реальной игре может нарушать правила и условия War Thunder и привести к блокировке учётной записи, потере игровых данных или другим санкциям. Авторы и участники проекта не отвечают за прямой или косвенный ущерб. Перед использованием изучите правила игры и применимое законодательство; если вы не готовы принять все риски, не запускайте программу.
+Windows runtime/build compatibility is **CPython 3.11 x64**, NumPy **1.26.0**, OpenCV **4.8.0.74** and the unchanged `toolkit/way_search.cp311-win_amd64.pyd`. Do not rename the extension. A complete standalone ZIP includes Python; source installation needs Python 3.11 x64. No driver is installed automatically.
 
-## Обычный пользователь / готовая сборка
-
-1. Скачайте архив **AutoNavy_WT-win64.zip** со страницы Release.
-2. Полностью распакуйте архив в обычную папку. Не запускайте файлы прямо из окна ZIP.
-3. Дважды щёлкните **`ЗАПУСТИТЬ.bat`**.
-4. Следуйте сообщениям на русском языке, если требуется установить или настроить vJoy либо подготовить War Thunder.
-
-Готовая сборка уже содержит Python и все Python-зависимости. Обычному пользователю **не нужны Python, pip, Git, Visual Studio, Nuitka или исходный код**.
-
-При запуске создаётся журнал `logs\launcher-ГГГГММДД-ЧЧММСС.log`. Безопасная диагностика без ввода с клавиатуры, мыши и vJoy запускается командой `ЗАПУСТИТЬ.bat -CheckOnly`.
-
-Лаунчер проверяет целостность распакованной сборки, загрузку DLL/PYD и модулей, `path.json`, все используемые изображения, DXcam, vJoy, окно War Thunder и локальный API. Если vJoy отсутствует, обычный запуск предлагает установить точный пакет `ShaulEizikovich.vJoyDeviceDriver` через WinGet и заранее предупреждает о запросе UAC. Установка и изменение конфигурации выполняются только после явного подтверждения пользователя. После установки драйвера Windows может потребовать перезагрузку.
-
-## Требования к игре и системе
-
-- Windows 10/11 x64 и Windows PowerShell 5.1 или новее.
-- Установленный и запущенный War Thunder.
-- Драйвер [vJoy](https://sourceforge.net/projects/vjoystick/) с включённым устройством № 1. Устройство должно предоставлять оси X, Y, Z и RY и не менее восьми кнопок.
-- Основной монитор и DXGI-совместимый графический адаптер; окно игры должно быть доступно как `DagorWClass`.
-
-## Критические настройки War Thunder
-
-Код и шаблоны рассчитаны на оконный режим, клиентскую область **1280×720**, масштаб интерфейса **100 %**, основной монитор и масштаб Windows/DPI, не изменяющий пиксельные размеры окна. Нужны стандартные назначения `Esc`, `Enter`, стрелок, `W`, `S`, `Shift`, `X` и `Space`, а также стандартные действия кнопок мыши. В настройках управления кораблём привяжите ось Z устройства vJoy № 1 к рулению; реализация также обращается к осям X, Y, RY и кнопкам 1–8, поэтому они должны быть включены в vJoy Configure.
-
-Локальный интерфейс War Thunder должен отвечать на `http://127.0.0.1:8111` (`map_obj.json`, `map_info.json`, `map.img`). Обычно он доступен во время активного боя.
-
-### Язык интерфейса игры и распознавание изображений
-
-Пользовательские сообщения AutoNavy_WT локализованы на русский, но изображения в `src/game_image/` — оригинальные шаблоны **упрощённого китайского интерфейса War Thunder**. Например, `start.png` содержит кнопку «加入战斗», а `joingame4.png` — китайские подписи послебоевого окна. Эти файлы намеренно не переименованы и не изменены: распознавание сравнивает пиксели.
-
-Русский интерфейс War Thunder штатно не поддерживается существующим набором шаблонов. Для его поддержки требуется получить собственные снимки каждого состояния при тех же разрешении, масштабе, теме и графических настройках, обрезать их с теми же границами и заново подобрать пороги совпадения. Простого перевода имён файлов недостаточно.
-
-## Запуск из исходников
-
-Для исходного проекта нужен Windows x64, Git и **64-битный CPython 3.11**. Другие версии Python несовместимы с `toolkit/way_search.cp311-win_amd64.pyd`.
-
-После клонирования репозитория также дважды щёлкните `ЗАПУСТИТЬ.bat`. Если готовый исполняемый файл отсутствует, лаунчер распознает исходный проект, создаст или восстановит `.venv`, установит закреплённые зависимости из `requirements.txt`, выполнит проверки и запустит приложение через проверенный интерпретатор проекта.
-
-Ручная подготовка для разработчика:
+From the source root in Windows PowerShell:
 
 ```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe .\scripts\check_environment.py --installation-only
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1 -Mode Core
+.venv/Scripts/python.exe -m autonavy --help
+.venv/Scripts/python.exe -m autonavy --check-config --config configs/default.toml
+.venv/Scripts/python.exe -m autonavy --dry-run --capture replay --fixture fixtures/smoke --max-frames 3
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run.ps1 -CheckOnly
 ```
 
-Команда `py -3.11` должна выбирать 64-разрядную сборку. Проверка:
+Core installation is sufficient for configuration, replay and tests. `-Mode Dev` adds pinned pytest/Ruff; `-Mode Runtime` installs the preserved Windows runtime requirements; `-Mode Build` also installs pinned compiler support packages. Install writes only the local `.venv` and project pip cache and refuses to delete an incompatible existing environment. A C++ compiler and any live drivers require separate manual preparation.
+
+Double-clicking `ЗАПУСТИТЬ.bat`, running it with `-CheckOnly`, or running `scripts/run.ps1` without arguments validates configuration and exits. Wrappers never auto-install, repair, launch a game or offer driver configuration. Explicit CLI arguments pass through unchanged, including paths containing spaces. Process-scoped `-ExecutionPolicy Bypass` does not change persistent execution policy.
+
+For a built ZIP, extract the entire archive, then run from its root:
 
 ```powershell
-py -3.11 -c "import struct,sys; print(sys.version); print(struct.calcsize('P') * 8)"
+./AutoNavy_WT.exe --check-config --config configs/default.toml
+./AutoNavy_WT.exe --dry-run --capture replay --fixture fixtures/smoke --max-frames 3
+./AutoNavy_WT.exe --offline-smoke
 ```
 
-Ожидаются Python 3.11 и значение `64`.
+The fixture has three generated color frames, no screenshots, and always finishes. `--offline-smoke` is a separate diagnostic: it checks packaged files, transfers generated pixels through the production capture child and runs the real bundled pathfinder on a generated image in its planner child. It does not open a camera, vJoy, global hooks or telemetry. It rejects all other runtime flags and requires the Windows native ABI. Source equivalent: `.venv/Scripts/python.exe -m autonavy --offline-smoke`.
 
-Рекомендуемая точка входа всегда одна:
+For any source or packaged executable, relative resource/config/fixture paths resolve from the distribution root, independently of the caller's directory. Use an absolute executable path when calling from another directory. Settings precedence is built-in defaults, explicit TOML, then CLI overrides. Unknown keys and incompatible options fail before devices open. Keep personal config outside template directories; default `configs/default.toml` is an example. Configuration alone cannot enable physical input.
+
+## Manual capture and live input
+
+These commands are **manual acceptance only**; they have not been validated against a live game, DXcam desktop, OBS or physical input during modernization. First install `-Mode Runtime`, prepare the game/capture profile and inspect the chosen config. Stop dry-run capture with **Ctrl+C**.
 
 ```powershell
-.\ЗАПУСТИТЬ.bat
+.venv/Scripts/python.exe -m autonavy --dry-run --capture dxcam --config configs/default.toml
+.venv/Scripts/python.exe -m autonavy --dry-run --capture obs --config configs/default.toml
 ```
 
-`scripts\run.ps1` оставлен как совместимый вспомогательный вход для разработчиков и передаёт управление тому же лаунчеру. Сценарий остановит запуск с понятной диагностикой, если обязательные условия не выполнены. После успешной проверки приложение обрабатывает окна ангара и очереди, ожидает бой, запускает навигацию и управление огнём, а после окончания возвращается к следующему циклу. Остановить процесс можно сочетанием `Ctrl+C` в консоли.
+DXcam remains **0.0.5**. `capture.device_index` and `output_index` select its adapter/output. The implementation supports translated windows and negative desktop origins when the configured DXGI output contains the client rectangle. Multiple monitors do not remove calibration requirements. No DXcam-versus-OBS speed ranking has been measured; the [upgrade assessment](docs/v2/evidence/DXcam-upgrade-assessment.md) explains retention.
 
-`main.py` — устаревшая альтернативная точка входа с файлами-флагами `skip1`, `skip2` и `skip3`; для обычного запуска она не рекомендуется. `dxin.py` и часть утилит в `toolkit/` также являются вспомогательным или экспериментальным кодом.
+For OBS, manually start Virtual Camera and select its OpenCV `capture.device_index` (numeric camera indices may change). `capture.obs_api` is `auto`, `dshow` or `msmf`. An index alone cannot prove that a device is OBS. The operator must verify the source identity and composition. Set `geometry.obs_content_rect` to the exact game-content rectangle within the delivered frame. Black bars, cropping, overlays, scene changes, scaled content and other windows invalidate matching or input mapping. OpenCV reports negotiated dimensions/FPS; receive time cannot prove when OBS rendered the original frame. No OBS scene or device is configured automatically.
 
-## Как это устроено
+The bundled templates target **Simplified Chinese War Thunder UI**, native game content **1280×720**, game UI scale **100%**, Windows **DPI 96** and the `legacy-1280x720` profile. English program documentation does not add English or Russian game-UI support. Keep template pixels/names unchanged. Different languages, dimensions, scaling or themes require separate manual template calibration. Geometry translation works; arbitrary image scaling is not a calibrated recognition profile.
 
-- `toolkit/scn.py` захватывает кадры окна через DXCam/DXGI.
-- `toolkit/img_map.py` загружает шаблоны OpenCV; `toolkit/scn.py` сравнивает их с кадром.
-- `info.py` и `toolkit/map.py` читают локальный HTTP-интерфейс War Thunder на порту 8111.
-- `pilot.py`, `toolkit/process_path.py` и бинарный `toolkit/way_search...pyd` строят маршрут (JPS) и управляют движением через vJoy/клавиши.
-- `firesystem.py` распознаёт цель, поворачивает прицел и имитирует огонь.
-- `toolkit/th_pool.py` запускает навигацию, огневую систему и контроль столкновений в отдельных потоках.
+The live target uses `DagorWClass` and must be foreground before actuation. Keep default bindings for Esc, Enter, arrows, W, S, Shift, X, Space and mouse actions. vJoy device 1 must expose X/Y/Z/RY and at least eight buttons; bind its Z axis to steering. Install/configure a compatible vJoy 2.1.9.1 driver manually; the included SDK DLL is not a driver. Live telemetry uses only `http://127.0.0.1:8111` (`map_obj.json`, `map_info.json`, `map.img`).
 
-## Структура проекта
-
-- `start_prog.py` — рекомендуемая точка входа и основной цикл.
-- `main.py` — legacy/экспериментальный сценарий.
-- `pilot.py` — навигация и управление движением.
-- `firesystem.py` — система наведения и огня.
-- `info.py` — чтение игровых данных с localhost:8111.
-- `toolkit/` — захват экрана, ввод, обработка карты, JPS и служебные функции.
-- `src/` — шаблоны распознавания и изображения; `origin_map.png` может обновляться во время работы.
-- `path.json` — данные маршрута текущей реализации.
-- `scripts/` — установка, запуск и диагностика среды.
-- `requirements.txt` — зависимости времени выполнения.
-- `requirements-build.txt` — зависимости сборки Nuitka поверх runtime-зависимостей.
-- `.github/workflows/build_prog.yml` — сборка Windows-архива.
-
-## Устранение неполадок
-
-**Неверная версия Python или ошибка импорта `.pyd`.** Установите CPython 3.11 x64 и снова запустите `ЗАПУСТИТЬ.bat`: лаунчер восстановит `.venv`. Не переименовывайте `.pyd`: имя содержит обязательный ABI-тег.
-
-**Устройство vJoy № 1 недоступно.** Установите официальный драйвер vJoy, включите первое устройство и перезапустите PowerShell/Windows при необходимости. Одного `pip install pyvjoy` недостаточно.
-
-**Не найдено окно или не срабатывают клавиши.** Запустите игру, проверьте оконный режим и имя окна, закройте программы, блокирующие перехват/инъекцию ввода. Игра и сценарий должны иметь совместимый уровень прав.
-
-**Шаблоны не распознаются.** Проверьте 1280×720, масштаб UI 100 %, DPI Windows, основной монитор и упрощённый китайский язык интерфейса игры. Русская локализация игры требует нового комплекта шаблонов.
-
-**Нет данных `127.0.0.1:8111`.** Убедитесь, что идёт бой и локальный интерфейс игры отвечает в браузере. Брандмауэр или изменения клиента могут сделать интерфейс недоступным.
-
-**OpenCV сообщает о пустом изображении.** Запускайте приложение через `ЗАПУСТИТЬ.bat`; проверьте целостность каталога `src` или распакуйте ZIP заново.
-
-**Установка пакета завершилась ошибкой.** Убедитесь, что используется CPython 3.11 x64 и доступен PyPI. Точные используемые версии закреплены в `requirements.txt`.
-
-## Сборка для разработчика
-
-Для локальной сборки нужен поддерживаемый Nuitka C-компилятор: Visual Studio Build Tools с компонентами C++ либо исправно загружаемый Nuitka MinGW64. Сам Python-пакет Nuitka не заменяет системный toolchain.
+After manual dry-run validation, these explicitly enable real input and **can click menus, join a queue and automate battle**:
 
 ```powershell
-.\scripts\build.ps1
+.venv/Scripts/python.exe -m autonavy --capture dxcam --config configs/default.toml --enable-input
+.venv/Scripts/python.exe -m autonavy --capture obs --config configs/default.toml --enable-input
 ```
 
-Сценарий устанавливает закреплённые зависимости сборки, выполняет проверку среды, создаёт свежую standalone-сборку Nuitka и архив `.output\AutoNavy_WT-win64.zip`. В корне архива находятся `ЗАПУСТИТЬ.bat`, `AutoNavy_WT.exe`, `release-manifest.json`, `path.json`, `README.md`, каталог `src` и необходимые DLL/PYD. В архив не попадают `.venv`, тесты, журналы и промежуточные каталоги Nuitka.
+**F8 stops; F9 pauses/resumes only in explicit live-input mode**, where global hotkeys are registered. Dry-run/replay do not register them. Focus loss, pause, stop or stale context invalidates queued intentions and releases owned input; resuming requires fresh observations. Replays reject `--enable-input`. Hardware behavior, cleanup and game mappings still require manual acceptance.
 
-GitHub Actions вызывает тот же `scripts\build.ps1` на `windows-latest` при ручном запуске и создании Release. Ручной запуск сохраняет artifact; событие Release дополнительно прикрепляет архив к релизу.
+Optional full hardware diagnosis remains separate:
 
-## Ограничения
+```powershell
+.venv/Scripts/python.exe -m autonavy --preflight --status-file logs/manual-preflight.json
+```
 
-- Запуск из исходников поддерживает только Windows и CPython 3.11 x64 из-за бинарного модуля без исходников/процедуры пересборки; готовый Nuitka-архив не требует отдельно установленного Python.
-- Жёсткие экранные координаты, разрешение 1280×720 и китайские шаблоны делают распознавание чувствительным к обновлениям игры, DPI и языку.
-- Нет калибратора, GUI, формальной схемы настроек или штатного выбора языка шаблонов.
-- Управление и распознавание зависят от активного окна, стандартных клавиш и локального API игры.
-- Некоторые ошибки игрового интерфейса подавляются существующим кодом; живой бой не входит в автоматические тесты.
-- Запуск автоматизации может нарушать правила War Thunder и привести к санкциям.
+This command imports/enumerates hardware adapters, queries vJoy capabilities, checks the game window/resources and local telemetry. It does not acquire vJoy ownership, actuate, install drivers or change settings. It is not a headless readiness command. Some retained legacy diagnostic messages remain localized. Static source/build readiness is `.venv/Scripts/python.exe scripts/check_environment.py --mode core` (or `runtime`/`build`); those modes inspect pinned metadata and resources without hardware imports.
 
-## Разработка
+## Logs, tests and measurements
 
-Редактируемые текстовые файлы хранятся в UTF-8. Пользовательские сообщения и документация пишутся по-русски; идентификаторы, протокольные значения, имена ресурсов, комментарии и developer-docstrings — по-английски. Не переводите значения `Player`, `Ship`, `DagorWClass`, JSON-ключи или имена изображений: они связаны с внешними интерфейсами и кодом распознавания.
+Normal completion, finite replay and deliberate Ctrl+C return **0**; invalid CLI/config returns **2**; startup/runtime failures return **3**. Wrappers preserve child codes. Full legacy preflight has its own result summary/status JSON. Runtime logs rotate under `logs/v2/autonavy.log` (2 MB, three backups by default); launcher process logs are under `logs/launcher-*.log`. Delete old launcher logs manually when appropriate. Runtime metrics/history are bounded, recurring faults throttled, preview and per-frame output off by default. No screenshots or typed text are recorded automatically. Explicit preview frequency is configured separately with `diagnostics.preview_fps`.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1 -Mode Dev
+.venv/Scripts/python.exe -m pytest tests -q
+.venv/Scripts/python.exe scripts/benchmark_pipeline.py --samples 20 --warmups 3 --repetitions 3 --seed 42 --output logs/v2/pipeline
+```
+
+Headless Linux: create a Python 3.11 venv, install `requirements-dev.txt`, run `python -m pytest tests -q`. Only real Windows PowerShell/registry/DLL/native-ABI checks skip there; fake Windows adapters still run. CI definitions cover Linux/Windows core tests and an explicit Windows packaging workflow; authoring these workflows does not mean CI executed.
+
+[Executed benchmarks](docs/v2/BENCHMARKS.md) show localized preprocessing/matching gains on deterministic pixels. Real offline menu decisions took **376–394 ms** median and battle decisions **167–170 ms** median. Both exceed the configured 30 Hz target. These are not whole-project speedups or measured game-render-to-input latency. Synthetic replay timings cannot rank live backends; parent-only CPU/memory excludes isolated children.
+
+## Build and migration
+
+With existing Visual Studio C++ Build Tools, run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1 -Mode Build
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build.ps1
+```
+
+Build uses the local `.venv`, installed MSVC and project `.output/nuitka-cache`; it does not install compilers/packages or download optional tools. Nuitka **4.2.1** uses its bundled PE dependency scanner (`--experimental=force-dependencies-pefile`) to avoid external Dependency Walker. Missing prerequisites fail clearly. Build output is `.output/AutoNavy_WT-win64.zip` and `.output/AutoNavy_WT-release-stage`. Output cleanup validates bounded paths and rejects redirected directories. The package includes runtime modules, exact native extension, default config, templates, the small synthetic fixture and `pyvjoy/utils/x64/vJoyInterface.dll`; tests/venvs/logs/compiler intermediates are excluded. `-SkipCompile` only assembles an existing distribution and never proves compilation succeeded. No release is published automatically.
+
+See [migration and rollback](docs/v2/MIGRATION.md) and [verification records](docs/v2/VERIFICATION.md) for executed build/test evidence and remaining acceptance checks. V2 production code is original implementation; csgobot was an architectural reference, not copied source/models/dependencies. Preserve third-party notices and external protocol literals. New development prose, identifiers, comments and messages use English.

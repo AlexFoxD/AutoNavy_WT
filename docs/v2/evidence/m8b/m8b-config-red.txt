@@ -1,0 +1,12 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_relative_config_uses_distribution_root_from_unrelated_cwd ________
+tests\integration\test_packaging_smoke.py:33: in test_relative_config_uses_distribution_root_from_unrelated_cwd
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: Configuration error: Cannot load configuration configs\default.toml: Expected '=' after a key in a key/value pair (at line 1, column 9)
+E     
+E   assert 2 == 0
+E    +  where 2 = CompletedProcess(args=['C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.venv\\Scripts\\python.exe', 'C:\\Develop\\game\\WT\\Au...Cannot load configuration configs\\default.toml: Expected '=' after a key in a key/value pair (at line 1, column 9)\n").returncode
+=========================== short test summary info ===========================
+FAILED tests/integration/test_packaging_smoke.py::test_relative_config_uses_distribution_root_from_unrelated_cwd
+1 failed, 4 deselected in 0.21s

@@ -1,0 +1,55 @@
+[
+  {
+    "command": [
+      "C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.output\\AutoNavy_WT-release-stage\\AutoNavy_WT.exe",
+      "--check-config",
+      "--config",
+      "C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.output\\AutoNavy_WT-release-stage\\configs\\default.toml"
+    ],
+    "cwd": "C:\\Users\\ForkN\\AppData\\Local\\Temp\\M8b compiled unrelated cwd q4b58ug1",
+    "expected": 0,
+    "exit": 0,
+    "stdout": "Configuration valid: {\"capture\": {\"backend\": \"dxcam\", \"device_index\": 0, \"fixture\": null, \"fps\": 60, \"frame_timeout_s\": 1.0, \"height\": 720, \"max_frames\": null, \"obs_api\": \"auto\", \"output_index\": 0, \"pixel_format\": \"BGR\", \"read_failure_limit\": 3, \"repeated_frames\": false, \"startup_timeout_s\": 10.0, \"stop_timeout_s\": 2.0, \"width\": 1280}, \"control\": {\"aim_kd\": 0.02, \"aim_ki\": 0.0, \"aim_kp\": 0.6, \"aim_limit_px\": 30.0, \"arrival_distance\": 0.01, \"heading_kd\": 0.1, \"heading_ki\": 0.1, \"heading_kp\": 0.5, \"heading_limit\": 100.0, \"integral_limit\": 100.0, \"lookahead_distance\": 0.02, \"max_dt_s\": 1.0, \"plan_timeout_s\": 10.0, \"replan_attempts\": 3, \"replan_backoff_s\": 1.0, \"replan_deviation\": 0.1, \"search_kd\": 0.02, \"search_ki\": 0.0, \"search_kp\": 0.6, \"search_limit\": 30.0}, \"diagnostics\": {\"fault_interval_s\": 5.0, \"log_backups\": 3, \"log_level\": \"INFO\", \"log_max_bytes\": 2000000, \"metrics_samples\": 512, \"per_frame\": false, \"preview\": false, \"preview_fps\": 5.0}, \"geometry\": {\"height\": 720, \"obs_content_rect\": [0, 0, 1280, 720], \"profile_id\": \"legacy-1280x720\", \"ui_scale\": 1.0, \"width\": 1280, \"window_class\": \"DagorWClass\", \"window_title\": \"\"}, \"input\": {\"click_duration_s\": 0.1, \"emergency_stop_key\": \"f8\", \"enable_input\": false, \"intent_ttl_s\": 0.25, \"max_pending\": 64, \"pause_key\": \"f9\", \"press_duration_s\": 0.05, \"require_focus\": true, \"throttle_interval_s\": 0.1, \"vjoy_device_id\": 1, \"vjoy_neutral\": 16384}, \"paths\": {\"aim_template\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\src\\\\cir.png\", \"cache\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\logs\\\\v2\\\\cache\", \"logs\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\logs\\\\v2\", \"route\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\path.json\", \"templates\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\src\\\\game_image\"}, \"runtime\": {\"battle_settle_s\": 15.0, \"frame_ttl_s\": 0.5, \"join_timeout_s\": 2.0, \"menu_timeout_s\": 120.0, \"player_timeout_s\": 30.0, \"queue_timeout_s\": 540.0, \"recovery_forward_s\": 10.0, \"recovery_reverse_s\": 60.0, \"recovery_settle_s\": 3.0, \"recovery_turn_s\": 5.0, \"spawn_delay_s\": 20.0, \"tick_hz\": 30.0}, \"schema_version\": 1, \"telemetry\": {\"base_url\": \"http://127.0.0.1:8111\", \"connect_timeout_s\": 0.5, \"max_backoff_s\": 5.0, \"metadata_ttl_s\": 30.0, \"object_ttl_s\": 1.0, \"poll_hz\": 10.0, \"read_timeout_s\": 0.5, \"retry_backoff_s\": 0.5}, \"vision\": {\"aim_threshold\": 0.3, \"ammo_roi\": [480, 660, 520, 690], \"canny_high\": 200, \"canny_input\": \"color\", \"canny_low\": 100, \"collision_threshold\": 0.2, \"confirm_threshold\": 0.95, \"fire_hsv_lower\": [33, 109, 149], \"fire_hsv_upper\": [137, 255, 255], \"fire_roi\": [370, 200, 910, 510], \"heading_hsv_lower\": [35, 43, 46], \"heading_hsv_upper\": [77, 255, 255], \"heading_roi\": [85, 545, 145, 615], \"join_threshold\": 0.9, \"morphology_size\": 1, \"preprocess_version\": 1, \"research_threshold\": 0.7, \"start_threshold\": 0.9, \"template_threshold\": 0.8}}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.output\\AutoNavy_WT-release-stage\\AutoNavy_WT.exe",
+      "--dry-run",
+      "--capture",
+      "replay",
+      "--fixture",
+      "fixtures/smoke",
+      "--max-frames",
+      "3"
+    ],
+    "cwd": "C:\\Users\\ForkN\\AppData\\Local\\Temp\\M8b compiled unrelated cwd q4b58ug1",
+    "expected": 0,
+    "exit": 0,
+    "stdout": "AutoNavy_WT stopped: backend=replay frames=3 state=stopped\n",
+    "stderr": "2026-09-09 22:32:32,709 INFO autonavy.cli resolved_settings={\"capture\": {\"backend\": \"replay\", \"device_index\": 0, \"fixture\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\fixtures\\\\smoke\", \"fps\": 60, \"frame_timeout_s\": 1.0, \"height\": 720, \"max_frames\": 3, \"obs_api\": \"auto\", \"output_index\": 0, \"pixel_format\": \"BGR\", \"read_failure_limit\": 3, \"repeated_frames\": false, \"startup_timeout_s\": 10.0, \"stop_timeout_s\": 2.0, \"width\": 1280}, \"control\": {\"aim_kd\": 0.02, \"aim_ki\": 0.0, \"aim_kp\": 0.6, \"aim_limit_px\": 30.0, \"arrival_distance\": 0.01, \"heading_kd\": 0.1, \"heading_ki\": 0.1, \"heading_kp\": 0.5, \"heading_limit\": 100.0, \"integral_limit\": 100.0, \"lookahead_distance\": 0.02, \"max_dt_s\": 1.0, \"plan_timeout_s\": 10.0, \"replan_attempts\": 3, \"replan_backoff_s\": 1.0, \"replan_deviation\": 0.1, \"search_kd\": 0.02, \"search_ki\": 0.0, \"search_kp\": 0.6, \"search_limit\": 30.0}, \"diagnostics\": {\"fault_interval_s\": 5.0, \"log_backups\": 3, \"log_level\": \"INFO\", \"log_max_bytes\": 2000000, \"metrics_samples\": 512, \"per_frame\": false, \"preview\": false, \"preview_fps\": 5.0}, \"geometry\": {\"height\": 720, \"obs_content_rect\": [0, 0, 1280, 720], \"profile_id\": \"legacy-1280x720\", \"ui_scale\": 1.0, \"width\": 1280, \"window_class\": \"DagorWClass\", \"window_title\": \"\"}, \"input\": {\"click_duration_s\": 0.1, \"emergency_stop_key\": \"f8\", \"enable_input\": false, \"intent_ttl_s\": 0.25, \"max_pending\": 64, \"pause_key\": \"f9\", \"press_duration_s\": 0.05, \"require_focus\": true, \"throttle_interval_s\": 0.1, \"vjoy_device_id\": 1, \"vjoy_neutral\": 16384}, \"paths\": {\"aim_template\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\src\\\\cir.png\", \"cache\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\logs\\\\v2\\\\cache\", \"logs\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\logs\\\\v2\", \"route\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\path.json\", \"templates\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\\\\src\\\\game_image\"}, \"runtime\": {\"battle_settle_s\": 15.0, \"frame_ttl_s\": 0.5, \"join_timeout_s\": 2.0, \"menu_timeout_s\": 120.0, \"player_timeout_s\": 30.0, \"queue_timeout_s\": 540.0, \"recovery_forward_s\": 10.0, \"recovery_reverse_s\": 60.0, \"recovery_settle_s\": 3.0, \"recovery_turn_s\": 5.0, \"spawn_delay_s\": 20.0, \"tick_hz\": 30.0}, \"schema_version\": 1, \"telemetry\": {\"base_url\": \"http://127.0.0.1:8111\", \"connect_timeout_s\": 0.5, \"max_backoff_s\": 5.0, \"metadata_ttl_s\": 30.0, \"object_ttl_s\": 1.0, \"poll_hz\": 10.0, \"read_timeout_s\": 0.5, \"retry_backoff_s\": 0.5}, \"vision\": {\"aim_threshold\": 0.3, \"ammo_roi\": [480, 660, 520, 690], \"canny_high\": 200, \"canny_input\": \"color\", \"canny_low\": 100, \"collision_threshold\": 0.2, \"confirm_threshold\": 0.95, \"fire_hsv_lower\": [33, 109, 149], \"fire_hsv_upper\": [137, 255, 255], \"fire_roi\": [370, 200, 910, 510], \"heading_hsv_lower\": [35, 43, 46], \"heading_hsv_upper\": [77, 255, 255], \"heading_roi\": [85, 545, 145, 615], \"join_threshold\": 0.9, \"morphology_size\": 1, \"preprocess_version\": 1, \"research_threshold\": 0.7, \"start_threshold\": 0.9, \"template_threshold\": 0.8}}\n2026-09-09 22:32:32,734 INFO autonavy.app state=starting previous=stopped\n2026-09-09 22:32:32,817 INFO autonavy.app state=waiting previous=starting\n2026-09-09 22:32:32,906 INFO autonavy.app state=stopping previous=waiting\n2026-09-09 22:32:32,907 INFO autonavy.app state=stopped previous=stopping\n2026-09-09 22:32:32,907 INFO autonavy.app runtime_metrics={'samples': {'receive_age_ns': {'count': 3, 'retained': 3, 'p50': 0.0, 'p95': 0.0, 'mean': 0.0}, 'vision_ns': {'count': 3, 'retained': 3, 'p50': 160100.0, 'p95': 176480.0, 'mean': 144666.66666666666}, 'policy_ns': {'count': 3, 'retained': 3, 'p50': 62800.0, 'p95': 63430.0, 'mean': 58266.666666666664}, 'decision_ns': {'count': 3, 'retained': 3, 'p50': 251300.0, 'p95': 292070.0, 'mean': 251900.0}}, 'counters': {}} capture_statistics=None source_render_latency=unknown\n"
+  },
+  {
+    "command": [
+      "C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.output\\AutoNavy_WT-release-stage\\AutoNavy_WT.exe",
+      "--offline-smoke"
+    ],
+    "cwd": "C:\\Users\\ForkN\\AppData\\Local\\Temp\\M8b compiled unrelated cwd q4b58ug1",
+    "expected": 0,
+    "exit": 0,
+    "stdout": "{\"capture_child_exit\": 0, \"capture_publication\": 1, \"hardware_opened\": false, \"planner_child_exit\": 0, \"resource_root\": \"C:\\\\Develop\\\\game\\\\WT\\\\AutoNavy_WT-v2\\\\.output\\\\AutoNavy_WT-release-stage\", \"resources\": 4, \"route_points\": 91}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.output\\AutoNavy_WT-release-stage\\AutoNavy_WT.exe",
+      "--offline-smoke",
+      "--enable-input"
+    ],
+    "cwd": "C:\\Users\\ForkN\\AppData\\Local\\Temp\\M8b compiled unrelated cwd q4b58ug1",
+    "expected": 2,
+    "exit": 2,
+    "stdout": "",
+    "stderr": "Configuration error: --offline-smoke is a standalone offline diagnostic\n"
+  }
+]

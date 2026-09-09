@@ -1,0 +1,18 @@
+{
+  ".output\\AutoNavy_WT-win64.zip": {
+    "sha256": "0a5417badd91c608b0cbcf8dc4f085101cc3379a6b76fefedaf7ff0a5013ea61",
+    "bytes": 68896167
+  },
+  ".output\\verified-package\\AutoNavy_WT.exe": {
+    "sha256": "fbe585a2abfc31757fa985095ca196311c1549c5d5f6c66f709cb016d243014c",
+    "bytes": 30566400
+  },
+  ".output\\verified-package\\toolkit\\way_search.cp311-win_amd64.pyd": {
+    "sha256": "abe3ef91491c5c53eda3bc16c63843545942079dea80e80c8a139671fbedf721",
+    "bytes": 416768
+  },
+  ".output\\verified-package\\pyvjoy\\utils\\x64\\vJoyInterface.dll": {
+    "sha256": "4a48db89c3158cf54aca298d77f9a14579ab11acc648199e474c1092e7ee5944",
+    "bytes": 179200
+  }
+}

@@ -1,0 +1,2 @@
+Release archive created: C:\Develop\game\WT\AutoNavy_WT-v2\.output\AutoNavy_WT-win64.zip
+Release staging directory: C:\Develop\game\WT\AutoNavy_WT-v2\.output\AutoNavy_WT-release-stage

@@ -1,0 +1,16 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_ VJoyPreflightTests.test_checks_configured_device_without_acquiring_or_relinquishing _
+tests\test_runtime_preflight.py:101: in test_checks_configured_device_without_acquiring_or_relinquishing
+    self.assertFalse(api.acquired)
+E   AssertionError: True is not false
+______ test_runtime_preflight_checks_only_retained_runtime_dependencies _______
+tests\test_runtime_preflight.py:277: in test_runtime_preflight_checks_only_retained_runtime_dependencies
+    assert not {'scipy', 'matplotlib', 'simple_pid'} & set(runtime_preflight.REQUIRED_IMPORTS)
+E   AssertionError: assert not ({'matplotlib', 'scipy', 'simple_pid'} & {'cv2', 'dxcam', 'keyboard', 'matplotlib', 'numpy', 'pydirectinput', ...})
+E    +  where {'cv2', 'dxcam', 'keyboard', 'matplotlib', 'numpy', 'pydirectinput', ...} = set(('cv2', 'dxcam', 'keyboard', 'matplotlib', 'numpy', 'pydirectinput', ...))
+E    +    where ('cv2', 'dxcam', 'keyboard', 'matplotlib', 'numpy', 'pydirectinput', ...) = runtime_preflight.REQUIRED_IMPORTS
+=========================== short test summary info ===========================
+FAILED tests/test_runtime_preflight.py::VJoyPreflightTests::test_checks_configured_device_without_acquiring_or_relinquishing
+FAILED tests/test_runtime_preflight.py::test_runtime_preflight_checks_only_retained_runtime_dependencies
+2 failed, 18 deselected in 0.06s

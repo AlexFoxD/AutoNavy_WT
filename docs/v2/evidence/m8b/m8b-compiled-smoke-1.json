@@ -1,0 +1,15 @@
+[
+  {
+    "command": [
+      "C:\\Develop\\game\\WT\\AutoNavy_WT-v2\\.output\\AutoNavy_WT-release-stage\\AutoNavy_WT.exe",
+      "--check-config",
+      "--config",
+      "configs/default.toml"
+    ],
+    "cwd": "C:\\Users\\ForkN\\AppData\\Local\\Temp\\M8b compiled unrelated cwd ob947w84",
+    "expected": 0,
+    "exit": 2,
+    "stdout": "",
+    "stderr": "Configuration error: Cannot load configuration configs\\default.toml: [Errno 2] No such file or directory: 'configs\\\\default.toml'\n"
+  }
+]
