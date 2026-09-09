@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0 audit/baseline complete with record corrections pending re-review; M1 foundations implementation active. A01/A02 below pass for the current M0 checkpoint. Downstream acceptance remains NOT RUN until concrete implementation and verification evidence exists. A01 requires another preservation check at final handoff.
+Current stage: M0 and M1 reviewed; M2 capture/geometry implementation active. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -21,7 +21,7 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 |---|---|---|
 | A01 / GIT-01 | PASS | M0 scope: isolated `feature/v2-modernization` worktree from exact source 45fc36c; source checkout clean and HEAD/master/default refs unchanged; recorded src/native tree/blob/hash match. Commands and identifiers in Preservation baseline below. Local commit 021f575; no push/merge/release. Final preservation recheck still required at M9. |
 | A02 / AUDIT-01 | PASS | M0 scope: AUDIT.md exact-symbol reconciliation and behavior inventory, three bounded native-only probes, environment constraints and executed 42-test baseline plus 3-test characterization recheck above; characterization at tests/unit/test_legacy_characterization.py, committed in 021f575. Hardware accuracy explicitly unverified. |
-| A03 / ARCH-01 | NOT RUN | Implementation/validation pending |
+| A03 / ARCH-01 | PASS | autonavy/{__init__,cli,app}.py and three Python shims; tests/integration/test_replay.py::test_all_supported_imports_are_side_effect_free and ::test_entrypoints_use_safe_cli_from_unrelated_cwd; M1 regression command/results in evidence/M1.md; recheck extended modules at M9 |
 | A04 / CAP-01 | NOT RUN | Implementation/validation pending |
 | A05 / FRAME-01 | NOT RUN | Implementation/validation pending |
 | A06 / FRAME-01 | NOT RUN | Implementation/validation pending |
@@ -49,8 +49,8 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A28 / CTRL-01 | NOT RUN | Implementation/validation pending |
 | A29 / CAP-02 | NOT RUN | Implementation/validation pending |
 | A30 / CAP-02/03 | NOT RUN | Implementation/validation pending |
-| A31 / CFG-01 | NOT RUN | Implementation/validation pending |
-| A32 / CLI-01 | NOT RUN | Implementation/validation pending |
+| A31 / CFG-01 | PASS | autonavy/config.py + configs/default.toml; tests/unit/test_foundations.py::test_config_precedence_and_default_resource_resolution, ::test_invalid_config_is_rejected_before_startup, ::test_cli_input_requires_explicit_flag_and_replay_rejects_it; evidence/M1.md commands/results; final schema recheck at M9 |
+| A32 / CLI-01 | PASS | autonavy/cli.py + capture/replay.py; tests/integration/test_replay.py::test_entrypoints_use_safe_cli_from_unrelated_cwd, ::test_finite_replay_budget_restart_and_packet_identity; tests/unit/test_foundations.py::test_preflight_conflicts_are_rejected_before_diagnostic_dispatch; evidence/M1.md commands/results and coordinator smoke below |
 | A33 / OBSERVE-01 | NOT RUN | Implementation/validation pending |
 | A34 / PERF-01 | NOT RUN | Implementation/validation pending |
 | A35 / PERF-01 | NOT RUN | Implementation/validation pending |
@@ -75,3 +75,6 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 Code commit 43aa40e7f3485dda9de807448d3a5b742ebbffad. See [M1 test-first report](evidence/M1.md) for 66 focused and 107 regression passes (one known side-effecting policy test excluded), import guards, actual launcher calls and explicit later-milestone limitations.
 
 Coordinator executed at that commit: `.venv\Scripts\python.exe -m autonavy --check-config --config configs/default.toml` => exit0; `.venv\Scripts\python.exe -m autonavy --dry-run --capture replay --fixture tests/fixtures/smoke --max-frames 120` => exit0, 3 synthetic frames, stopped. Frame budget caps the finite three-frame sequence; this is not a recorded battle or a performance measurement.
+
+
+Environment package snapshot after the legacy baseline repair and M1: evidence/environment-after-M1.txt (`.venv\Scripts\python.exe -m pip freeze`). It records the actual local venv; it is not a new dependency requirement or a claim that hardware was tested.

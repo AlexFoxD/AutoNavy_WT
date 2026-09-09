@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-Implementation task reviews and final A01-A39 caller/evidence review are pending. No independent implementation review has passed yet.
+M0 and M1 independent reviews passed. M2 review found two lifecycle issues; fixes and re-review are pending. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
@@ -15,3 +15,6 @@ Validation for these corrections: documentation consistency checks and scoped `g
 M0 independent re-review of df8cd8f: all three record findings ADDRESSED, spec PASS, quality PASS; no new actionable issues. M1 implementation at 43aa40e is now under independent review; see evidence/M1.md for executed test-first workflow. No final implementation approval is claimed.
 
 M1 fix round1 at0c9a5d8: preflight/offline conflicts and Unicode config errors addressed with RED/GREEN evidence (89 focused,130 regression pass/1 excluded). Independent scoped re-review: SPEC PASS, QUALITY PASS, no new findings. Reviewer used stubbed diagnostics only. M1 gate complete; live runtime work proceeds in M2-M7.
+
+
+M2 review at e7119e0: SPEC FAIL, QUALITY FAIL pending P1 atomic generation transport snapshot (a paused reader returned generation-1 pixels/geometry tagged generation 2 after restart) and P2 application startup cancellation (stop during factory construction was lost, then startup timed out with ERROR). Reviewer reproduced both with device-free in-memory process doubles. Original implementer resumed for deterministic regressions and scoped fixes; no hardware ran.

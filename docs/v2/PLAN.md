@@ -32,9 +32,9 @@ Files: docs/v2/*.md, tests/unit/test_legacy_characterization.py.
 ### Task 1: M1 safe foundations
 Files: autonavy/{__init__,__main__,cli,config,models,app}.py, autonavy/capture/replay.py, configs/default.toml, start_prog.py, main.py, autonavy.py, tests/unit/test_foundations.py, tests/integration/test_replay.py, tests/fixtures/smoke/manifest.json.
 Interfaces: `Settings`, `load_settings(path=None, overrides=None) -> Settings`; `FramePacket`; `RuntimeState`; `main(argv=None) -> int`; `Application(settings).run() -> int`.
-- [ ] First test import safety, config precedence/unknown keys, bounded replay and replay/input rejection. Assert `main(['--capture','replay','--enable-input']) == 2`; subprocess help/check/replay must avoid hardware imports/network.
-- [ ] Run focused tests RED, implement safe configuration, finite synthetic replay and minimal cleanup; migrate supported Python entrypoints to same CLI.
-- [ ] Run GREEN/regression, review and commit. Later milestones extend live runtime; no temporary live fallback.
+- [x] First test import safety, config precedence/unknown keys, bounded replay and replay/input rejection. Assert `main(['--capture','replay','--enable-input']) == 2`; subprocess help/check/replay must avoid hardware imports/network.
+- [x] Run focused tests RED, implement safe configuration, finite synthetic replay and minimal cleanup; migrate supported Python entrypoints to same CLI.
+- [x] Run GREEN/regression, review and commit (43aa40e, reviewed fixes 0c9a5d8; evidence/M1.md). Later milestones extend live runtime; no temporary live fallback.
 
 ### Task 2: M2 capture ownership and geometry
 Files: autonavy/capture/{base,dxcam,latest,factory}.py, autonavy/geometry.py, autonavy/windows.py, autonavy/app.py, toolkit/scn.py, tests/unit/test_capture.py, tests/unit/test_geometry.py.
