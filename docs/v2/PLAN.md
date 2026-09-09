@@ -67,9 +67,9 @@ Interfaces: `InputIntent`; `InputController.submit/tick/cancel/release_all`; own
 ### Task 6: M6 navigation and controllers
 Files: autonavy/navigation/{route,native,control,planner}.py, pilot.py, toolkit/process_path.py, autonavy/behavior.py, tests/unit/test_navigation.py.
 Interfaces: immutable ordered `RouteCursor`; lazy `NativePathfinder`; bounded replanning service; `angular_error(target,current)`; separate pixel/heading controllers with reset.
-- [ ] RED: immutable paths, intersections cannot jump, adjacent endpoints, no route, bounded retries, cancellation, 359->1=+2, 1->359=-2, tie=-180, invalid/large elapsed times and reset.
-- [ ] Native audit shows GOAL->ORIGIN interior path, endpoints excluded; reverse once, add requested endpoints, do not concatenate jump points. Handle same-point before native; empty interior can mean adjacent valid path.
-- [ ] Integrate route planning into real battle navigation and verify actuator sign from legacy mappings. GREEN/review/commit.
+- [x] RED: immutable paths, intersections cannot jump, adjacent endpoints, no route, bounded retries, cancellation, 359->1=+2, 1->359=-2, tie=-180, invalid/large elapsed times and reset.
+- [x] Native audit shows GOAL->ORIGIN interior path, endpoints excluded; reverse once, add requested endpoints, do not concatenate jump points. Handle same-point before native; empty interior can mean adjacent valid path.
+- [x] Integrate route planning into real battle navigation and verify actuator sign from legacy mappings. GREEN/review/commit.
 
 ### Task 7: M7 optional OBS and geometry
 Files: autonavy/capture/obs.py, autonavy/capture/factory.py, autonavy/geometry.py, autonavy/app.py, tests/unit/test_obs.py.
@@ -84,6 +84,7 @@ Files: scripts/benchmark_{pipeline,capture}.py, autonavy/metrics.py, requirement
 - [ ] Keep dependency ABI pins; primary-source DXcam update assessment; Linux/Windows 3.11 core CI, Windows packaging resources and no automatic publishing.
 - [ ] Execute available script/build smoke checks, classify true hardware/build checks; GREEN/review/commit.
 
+M8 execution subdivision: M8a benchmarks and runtime diagnostics (including actual measurements) → independent review/fixes → M8b dependency/CI, launcher/preflight/build and English operation docs (including actual available compile) → independent review/fixes. One production writer; each subtask gets a concrete plan and scoped commits. M8 closes only when both pass. This preserves the approved milestone order while avoiding a single oversized tooling change.
 ### Task 9: M9 final review and handoff
 Files: docs/v2/{STATUS,VERIFICATION,REVIEW,DECISIONS,BENCHMARKS,MIGRATION}.md.
 - [ ] Full suite and scoped lint; finite replay through supported launchers; requirements A01-A39 mapped to real implementation/callers/evidence.

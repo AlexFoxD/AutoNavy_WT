@@ -2,7 +2,7 @@
 
 M0 design self-review: supplied spec covers scope, safety, delivery and acceptance; source inspection drives concrete replacements. No additional user design decision is required.
 
-M0-M5 independent reviews passed, including lifecycle, preview, telemetry publication and input dispatch corrections. M6 implementation is next. Final A01-A39 caller/evidence review remains pending.
+M0-M6 independent reviews passed, including lifecycle, vision, telemetry, input and route-progress corrections. M7 implementation is next. Final A01-A39 caller/evidence review remains pending.
 
 ## M0 record review and corrections
 
@@ -34,3 +34,7 @@ M4 scoped re-review0c44df0: P1 ADDRESSED, SPEC PASS, QUALITY PASS; immediate sna
 M5 independent review12c6379: SPEC FAIL/QUALITY FAIL pending P1 pause signaled during slow guard is not checked before dispatch; P2 persistent Start retries extend total queue deadline; P2 canceled recovery next_action delays resumed menu; P2 competing pointer owners both dispatch despite priorities. Reviewer used device-free deterministic reproductions. Original implementer fix round1 active; focused regressions reproduced before corrections. Current geometry-first/foreground-last ordering and SDK release ownership accepted. M6 remains gated.
 
 M5 scoped re-review20142e0: all four findings ADDRESSED, SPEC PASS, QUALITY PASS. Guard now checks pending pause at both boundaries and tick consumes late pause; queue retries preserve original deadline; reset clears canceled recovery cooldown; pointer batch chooses one eligible owner while preserving same-owner clicks and releases. Reviewer verified16new/168covering/326full1excluded evidence against five-file diff, no redundant rerun and no new blocking findings. M5 complete.
+
+M6 independent review9ca0e57: SPEC FAIL/QUALITY FAIL, sole P2 route lookahead can bypass a required corner while advance waits for the smaller arrival radius. Dense128-grid east-then-south route with defaults .02lookahead/.01arrival stalls cursor at corner although target reaches .02beyond; deviation below.1 prevents replan, actualApplication continues steering. Reviewer reproduced pure and realApplication/RecordingBackend, no suite/hardware. Original /root/m6 fixround1 active: consistent ordered target/progress plus dense-turn runtime regression; retain intersection order. Other scoped native/lifecycle/telemetry/controller integration accepted.
+
+M6 scoped re-reviewc4c3810: P2 ADDRESSED, SPEC PASS, QUALITY PASS. Navigation passes arrival radius; lookahead bounded within half-radius of next required waypoint and stops at turns/reversals/unconsumed origin. ActualApplication dense-turn/off-route tests arrive on one plan with monotonic progress and neutralized steering.3new/86covering evidence accepted, no redundant rerun, no new issues. M6 complete.

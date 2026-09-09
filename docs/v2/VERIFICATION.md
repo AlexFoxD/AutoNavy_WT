@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: M0-M5 independently reviewed; M6 navigation/controllers next. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
+Current stage: M0-M6 independently reviewed; M7 OBS/source geometry next. PASS rows identify their concrete milestone scope and evidence. Downstream acceptance remains NOT RUN until implemented and verified. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -44,9 +44,9 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A23 / INPUT-02 | PASS | M5 SequenceScheduler and real policy fake-clock recovery/UI cycles; test_battle_cycle.py::test_review_persistent_start_retries_keep_original_queue_deadline and ::test_review_cancelled_recovery_deadline_never_delays_fresh_menu; bounded pending/history in test_input.py. evidence/M5.md. |
 | A24 / APP-01 | PASS | M5 ::test_full_scripted_cycle_uses_real_application_run executes actual Application/Policy/Input with synthetic capture double, observations and immutable telemetry through full states. 168 covering tests passed; evidence/M5.md. This is a scripted offline scenario, not recorded gameplay. |
 | A25 / APP-01 | NOT RUN | Implementation/validation pending |
-| A26 / NAV-01 | NOT RUN | Implementation/validation pending |
-| A27 / NAV-01 | NOT RUN | Implementation/validation pending |
-| A28 / CTRL-01 | NOT RUN | Implementation/validation pending |
+| A26 / NAV-01 | PASS | M6 RouteCursor/Navigation/PlanningService actual runtime; test_navigation.py route immutability/intersections/order and test_navigation_runtime.py dense-turn/off-route target tracking regressions. c4c3810 scoped review PASS;86covering tests. Bounded retries, stale results/deviation and arrival covered. evidence/M6.md. |
+| A27 / NAV-01 | PASS | M6 native.py lazy exact ABI adapter and supervised planner real production caller; tests/unit/test_navigation_planner.py::test_native_adapter_and_supervised_encoded_route_on_exact_supported_host passed onCPython3.11.9 Windows x64. Four8x8 cases and encoded128grid route17points via actual native child. Pure tests inject fake adapter. evidence/M6.md. |
+| A28 / CTRL-01 | PASS | M6 separate PID states with units/wrapped errors/dt/integral/output bounds and mode/target/waypoint/session/stop resets. test_navigation.py and test_navigation_runtime.py plus source signs characterized in AUDIT; full371pass1excluded then86covering route fix. Physical sign calibration NOT RUN. evidence/M6.md. |
 | A29 / CAP-02 | NOT RUN | Implementation/validation pending |
 | A30 / CAP-02/03 | NOT RUN | Implementation/validation pending |
 | A31 / CFG-01 | PASS | autonavy/config.py + configs/default.toml; tests/unit/test_foundations.py::test_config_precedence_and_default_resource_resolution, ::test_invalid_config_is_rejected_before_startup, ::test_cli_input_requires_explicit_flag_and_replay_rejects_it; evidence/M1.md commands/results; final schema recheck at M9 |
@@ -82,3 +82,5 @@ Environment package snapshot after the legacy baseline repair and M1: evidence/e
 M2-close/M3-active preservation recheck at987dc61: source status --porcelain=v1 -uall empty; source HEAD/master/origin/master/upstream/master unchanged at recorded identifiers. Target HEAD:src and native blob match baseline; native file SHA256 matches ABE3EF91491C5C53EDA3BC16C63843545942079DEA80E80C8A139671FBEDF721. No asset/native/source changes. Final M9 recheck still required.
 
 M5 current code20142e0 independently reviewed PASS. Exact new16/covering168/full326pass1excluded commands and RED evidence in evidence/M5.md. Source shim config/replay smoke at12c6379 exited0 (3synthetic frames). A14 awaits complete OBS geometry integration; A25 awaits launcher M8. These rows intentionally remain NOT RUN for full requirement scope.
+
+M6 accepted code c4c3810. Native algorithm/route validation is offline synthetic, not real-battle navigability or physical steering calibration. Narrow native planner isolation and OS failure limits in DECISIONS/evidence/M6.md. Existing source refs/assets remain protected; final M9 preservation check required.
