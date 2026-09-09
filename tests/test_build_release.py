@@ -2,6 +2,8 @@ import ctypes
 import json
 import subprocess
 import tempfile
+import sys
+import pytest
 import unittest
 import zipfile
 from pathlib import Path
@@ -13,6 +15,7 @@ VJOY_RUNTIME_DLL = PROJECT_ROOT / "third_party" / "vjoy" / "2.1.9.1" / "x64" / "
 
 
 class ReleasePackagingTests(unittest.TestCase):
+    @pytest.mark.skipif(sys.platform != "win32", reason="Real Windows SDK DLL ABI query")
     def test_vendored_vjoy_sdk_matches_winget_driver_version(self):
         self.assertTrue(VJOY_RUNTIME_DLL.is_file(), VJOY_RUNTIME_DLL)
         dll = ctypes.CDLL(str(VJOY_RUNTIME_DLL))
@@ -20,6 +23,7 @@ class ReleasePackagingTests(unittest.TestCase):
 
         self.assertEqual(0x219, dll.GetvJoyVersion())
 
+    @pytest.mark.skipif(sys.platform != "win32", reason="Real Windows PowerShell ZIP assembly")
     def test_package_contains_one_click_runtime_without_development_files(self):
         with tempfile.TemporaryDirectory(prefix="AutoNavy build test ") as directory:
             temporary = Path(directory)
@@ -69,6 +73,9 @@ class ReleasePackagingTests(unittest.TestCase):
             "python311.dll",
             "way_search.pyd",
             "pyvjoy/utils/x64/vJoyInterface.dll",
+            "configs/default.toml",
+            "fixtures/smoke/manifest.json",
+            "toolkit/way_search.cp311-win_amd64.pyd",
             "path.json",
             "README.md",
             "src/game_image/start.png",

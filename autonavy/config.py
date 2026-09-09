@@ -300,6 +300,7 @@ def validate_settings(settings: Settings) -> Settings:
 def load_settings(path: str | Path | None = None, overrides: Mapping[str, object] | None = None) -> Settings:
     settings = Settings()
     if path is not None:
+        path = (resource_root() / Path(path)).resolve()
         try:
             with Path(path).open('rb') as stream:
                 settings = _merge(settings, tomllib.load(stream))

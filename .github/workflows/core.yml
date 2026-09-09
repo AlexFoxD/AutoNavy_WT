@@ -1,0 +1,28 @@
+name: Core Python 3.11 checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  core:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          architecture: x64
+      - run: python -m venv .venv
+      - name: Install core development dependencies
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=.venv/Scripts/python.exe; else PY=.venv/bin/python; fi
+          "$PY" -m pip install -r requirements-dev.txt
+      - name: Headless suite and focused lint
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=.venv/Scripts/python.exe; else PY=.venv/bin/python; fi
+          "$PY" -m pytest tests -q
+          "$PY" -m ruff check autonavy/packaging_smoke.py scripts/check_environment.py

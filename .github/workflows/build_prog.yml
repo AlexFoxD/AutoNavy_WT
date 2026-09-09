@@ -1,45 +1,32 @@
-name: Build Windows executable
-
+name: Validate Windows standalone
 on:
-  release:
-    types: [created]
   workflow_dispatch:
-
 permissions:
-  contents: write
-
+  contents: read
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          architecture: 'x64'
-
-      - name: Install build dependencies
-        run: |
-          python -m venv .venv
-          .venv\Scripts\python.exe -m pip install --disable-pip-version-check -r requirements-build.txt
-          .venv\Scripts\python.exe scripts\check_environment.py --installation-only
-
-      - name: Build and package standalone application
+          architecture: x64
+      - name: Install local build dependencies
         shell: powershell
-        run: .\scripts\build.ps1
-
-      - name: Upload workflow artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: AutoNavy_WT-win64
-          path: .output\AutoNavy_WT-win64.zip
-          if-no-files-found: error
-
-      - name: Upload to Release
-        if: github.event_name == 'release'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" .output\AutoNavy_WT-win64.zip --clobber
+        run: ./scripts/install.ps1 -Mode Build
+      - name: Compile and stage
+        shell: powershell
+        run: ./scripts/build.ps1
+      - name: Device-free compiled checks from unrelated directory
+        shell: powershell
+        run: |
+          $Exe = Join-Path $PWD '.output/AutoNavy_WT-release-stage/AutoNavy_WT.exe'
+          Set-Location $env:TEMP
+          & $Exe --check-config --config configs/default.toml
+          if ($LASTEXITCODE -ne 0) { throw 'Compiled config failed' }
+          & $Exe --dry-run --capture replay --fixture fixtures/smoke --max-frames 3
+          if ($LASTEXITCODE -ne 0) { throw 'Compiled replay failed' }
+          & $Exe --offline-smoke
+          if ($LASTEXITCODE -ne 0) { throw 'Compiled child/resource smoke failed' }
+      # Validation only: no release publication or automatic artifact upload.

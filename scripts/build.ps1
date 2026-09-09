@@ -22,7 +22,24 @@ if (-not $PyVJoyDllPath) {
 if (-not (Test-Path -LiteralPath $PyVJoyDllPath -PathType Leaf)) {
     throw "pyvjoy SDK runtime DLL not found: $PyVJoyDllPath"
 }
-$OutputRoot = Join-Path $ProjectRoot ".output"
+$OutputRoot = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot ".output"))
+
+function Remove-BoundedDirectory {
+    param([string]$Path, [string]$Parent)
+    $Resolved = [System.IO.Path]::GetFullPath($Path)
+    $ResolvedParent = [System.IO.Path]::GetFullPath($Parent).TrimEnd('\') + '\'
+    if (-not $Resolved.StartsWith($ResolvedParent, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing recursive deletion outside output parent: $Resolved"
+    }
+    $Probe = $Resolved
+    while ($Probe.Length -ge $ResolvedParent.TrimEnd('\').Length) {
+        if ((Test-Path -LiteralPath $Probe) -and ((Get-Item -LiteralPath $Probe -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "Refusing redirected output path: $Probe"
+        }
+        $Probe = Split-Path -Parent $Probe
+    }
+    if (Test-Path -LiteralPath $Resolved) { Remove-Item -LiteralPath $Resolved -Recurse -Force }
+}
 if (-not $OutputPath) {
     $OutputPath = Join-Path $OutputRoot "AutoNavy_WT-win64.zip"
 }
@@ -41,36 +58,44 @@ if (-not $SkipCompile) {
         throw "Build interpreter is missing. Run scripts\install.ps1 first."
     }
 
-    & $Python -m pip install --disable-pip-version-check -r (Join-Path $ProjectRoot "requirements-build.txt")
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to install pinned build dependencies."
-    }
-    & $Python (Join-Path $PSScriptRoot "check_environment.py") --installation-only
+    & $Python (Join-Path $PSScriptRoot "check_environment.py") --mode build
     if ($LASTEXITCODE -ne 0) {
         throw "The source environment is not ready for a standalone build."
     }
 
     $NuitkaOutput = Join-Path $OutputRoot "nuitka"
     $env:NUITKA_CACHE_DIR = Join-Path $OutputRoot "nuitka-cache"
-    if (Test-Path -LiteralPath $NuitkaOutput) {
-        Remove-Item -LiteralPath $NuitkaOutput -Recurse -Force
-    }
+    Remove-BoundedDirectory -Path $NuitkaOutput -Parent $OutputRoot
     [System.IO.Directory]::CreateDirectory($NuitkaOutput) | Out-Null
 
     $NuitkaArguments = @(
         "-m", "nuitka",
         "--standalone",
         "--msvc=latest",
-        "--assume-yes-for-downloads",
+        # Nuitka 4.2.1 ships this PE parser; no Dependency Walker download needed.
+        "--experimental=force-dependencies-pefile",
         "--windows-console-mode=force",
         "--output-filename=AutoNavy_WT.exe",
         "--output-dir=$NuitkaOutput",
-        "--include-module=start_prog",
+        "--jobs=4",
+        "--include-package=autonavy",
+        "--include-module=runtime_preflight",
+        "--include-module=toolkit.resources",
+        "--include-module=toolkit.way_search",
+        "--include-package=dxcam",
+        "--include-module=keyboard",
+        "--include-module=pydirectinput",
+        "--include-module=win32api",
+        "--include-module=win32gui",
+        "--include-module=win32con",
+        "--nofollow-import-to=matplotlib,scipy,pytest",
+        "--report=$OutputRoot/nuitka-report.xml",
         "--include-package=pyvjoy",
         "--include-package-data=pyvjoy",
         (Join-Path $ProjectRoot "autonavy.py")
     )
-    & $Python @NuitkaArguments
+    # Empty stdin refuses optional tool downloads; use only installed tools/caches.
+    '' | & $Python @NuitkaArguments
     if ($LASTEXITCODE -ne 0) {
         throw "Nuitka build failed with exit code $LASTEXITCODE."
     }
@@ -101,9 +126,7 @@ if (-not @(Get-ChildItem -LiteralPath $DistributionPath -Recurse -File -Filter "
     throw "Standalone distribution has no PYD runtime files."
 }
 
-if (Test-Path -LiteralPath $StageRoot) {
-    Remove-Item -LiteralPath $StageRoot -Recurse -Force
-}
+Remove-BoundedDirectory -Path $StageRoot -Parent $OutputDirectory
 [System.IO.Directory]::CreateDirectory($StageRoot) | Out-Null
 
 foreach ($Item in Get-ChildItem -LiteralPath $DistributionPath -Force) {
@@ -124,18 +147,28 @@ Copy-Item -LiteralPath (Join-Path $ProjectRoot "ЗАПУСТИТЬ.bat") -Destin
 [System.IO.Directory]::CreateDirectory((Join-Path $StageRoot "scripts")) | Out-Null
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "scripts\launcher.ps1") -Destination (Join-Path $StageRoot "scripts\launcher.ps1") -Force
 
+foreach ($Directory in @('configs', 'fixtures')) {
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot $Directory) -Destination (Join-Path $StageRoot $Directory) -Recurse -Force
+}
+[System.IO.Directory]::CreateDirectory((Join-Path $StageRoot 'toolkit')) | Out-Null
+Copy-Item -LiteralPath (Join-Path $ProjectRoot 'toolkit/way_search.cp311-win_amd64.pyd') -Destination (Join-Path $StageRoot 'toolkit/way_search.cp311-win_amd64.pyd') -Force
+[System.IO.Directory]::CreateDirectory((Join-Path $StageRoot 'docs')) | Out-Null
+Copy-Item -LiteralPath (Join-Path $ProjectRoot 'docs/v2') -Destination (Join-Path $StageRoot 'docs/v2') -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $ProjectRoot 'third_party') -Destination (Join-Path $StageRoot 'third_party') -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $ProjectRoot 'scripts/run.ps1') -Destination (Join-Path $StageRoot 'scripts/run.ps1') -Force
+
 $RequiredFiles = @(
     Get-ChildItem -LiteralPath $StageRoot -Recurse -File |
         Sort-Object FullName |
         ForEach-Object {
             $Relative = $_.FullName.Substring($StageRoot.Length + 1).Replace('\', '/')
-            $Mutable = $Relative -in @("path.json", "src/origin_map.png")
+            $Mutable = $Relative -in @("path.json", "src/origin_map.png", "configs/default.toml")
             [ordered]@{ path = $Relative; size = $(if ($Mutable) { $null } else { $_.Length }) }
         }
 )
 $Manifest = [ordered]@{
     schema_version = 1
-    launcher_version = "1.0.0"
+    launcher_version = "2.0.0"
     executable = "AutoNavy_WT.exe"
     required_files = $RequiredFiles
 }

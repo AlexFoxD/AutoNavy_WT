@@ -38,6 +38,7 @@ def _preflight(status_file: Path | None) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = _Parser(description='AutoNavy_WT safe runtime and offline diagnostics')
+    parser.add_argument('--offline-smoke', action='store_true', help='Device-free packaged resource and child-process diagnostic (Windows native ABI)')
     parser.add_argument('--config', type=Path)
     parser.add_argument('--check-config', action='store_true', help='Validate settings without opening devices')
     parser.add_argument('--capture', choices=('dxcam', 'obs', 'replay'))
@@ -50,6 +51,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--run', action='store_true', help=argparse.SUPPRESS)
     try:
         args = parser.parse_args(argv)
+        if args.offline_smoke:
+            if any((args.config is not None, args.check_config, args.capture is not None,
+                    args.fixture is not None, args.max_frames is not None, args.dry_run,
+                    args.enable_input, args.preflight, args.status_file is not None, args.run)):
+                raise ConfigurationError('--offline-smoke is a standalone offline diagnostic')
+            from autonavy.packaging_smoke import run
+            print(json.dumps(run(), sort_keys=True))
+            return 0
         if args.dry_run and args.enable_input:
             raise ConfigurationError('--dry-run and --enable-input are mutually exclusive')
         if args.status_file is not None and not args.preflight:
@@ -66,15 +75,18 @@ def main(argv: list[str] | None = None) -> int:
             overrides['input'] = {'enable_input': True}
         elif args.dry_run:
             overrides['input'] = {'enable_input': False}
-        settings = load_settings(args.config, overrides)
+        config_path = (resource_root() / args.config).resolve() if args.config is not None else None
+        settings = load_settings(config_path, overrides)
         if settings.input.enable_input and not args.enable_input:
             raise ConfigurationError('Physical input requires explicit --enable-input; config alone cannot enable it')
         resolved = json.dumps(asdict(settings), default=str, sort_keys=True)
         if args.check_config:
+            print(f'Configuration source: {config_path or "built-in defaults"}')
             print(f'Configuration valid: {resolved}')
             return 0
         from autonavy.diagnostics import runtime_logging
         with runtime_logging(settings):
+            LOG.info('configuration_source=%s', config_path or 'built-in defaults')
             LOG.info('resolved_settings=%s', resolved)
             from autonavy.app import Application
             app = Application(settings)
