@@ -41,9 +41,7 @@ class GeometrySnapshot:
     def recognition_supported(self) -> bool:
         l, t, r, b = self.client_rect
         a, top, c, d = self.content_rect
-        return (self.profile_id == 'legacy-1280x720' and self.ui_scale == 1.0
-                and self.dpi == 96 and self.profile_size == (1280, 720) and (r-l, b-t) == (1280, 720)
-                and (c-a, d-top) == (1280, 720))
+        return (self.profile_id == 'legacy-1280x720' and self.ui_scale == 1.0 and self.profile_size == (1280, 720) and (r-l, b-t) == (1280, 720) and (c-a, d-top) == (1280, 720))
 
     @property
     def content_center(self) -> tuple[float, float]:

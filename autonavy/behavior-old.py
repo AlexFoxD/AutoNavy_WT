@@ -12,24 +12,6 @@ MENU = frozenset({'start','join','join_game','confirm','confirm1','confirm2','co
     'confirm2_queue','improvement','improvement_','crew_cancel','rtlg_no','research','research1','wtlogo'})
 BATTLE = frozenset({'aim','lock','fire','ammo','degree','crash_warning','crashed'})
 
-# Detector groups are intentionally aligned with the branches in tick().
-# Keeping this policy here avoids running every full-frame UI template on every
-# frame while preserving the same matching algorithms and thresholds.
-DIALOG_GUARD = PURCHASE | frozenset({'start_battle_end','cart'})
-BATTLE_END = frozenset({'back','base','data'})
-HANGAR = frozenset({
-    'start','join','join_game',
-    'confirm','confirm1','confirm2',
-    'improvement','improvement_','crew_cancel','rtlg_no',
-    'research','research1',
-})
-QUEUE = frozenset({
-    'start','join','join_game',
-    'confirm1_queue','confirm2_queue',
-    'research','research1','wtlogo',
-})
-PLAYER = frozenset({'confirm1_queue','confirm2_queue'})
-
 
 @dataclass(frozen=True)
 class Step:
@@ -64,49 +46,10 @@ class BattlePolicy:
 
     @property
     def detectors(self):
-        """Return only detectors that the current state/stage can consume.
-
-        The previous implementation returned PURCHASE | END | MENU for every
-        non-battle frame (24 template matches). Most of those observations were
-        impossible to consume in stages such as spawn/player/settle.
-
-        Safety/modal guards remain selected everywhere. Unknown stages fall back
-        to the legacy broad set rather than silently dropping recognition.
-        """
-        state = self.app.state
-        stage = self.stage
-
-        if state == RuntimeState.PAUSED:
-            return DIALOG_GUARD
-
-        if state == RuntimeState.IN_BATTLE:
-            return DIALOG_GUARD | BATTLE_END | BATTLE
-
-        if state == RuntimeState.RECOVERING:
-            return DIALOG_GUARD | BATTLE_END
-
-        # These stages execute the battle-side early branch in tick(), but do
-        # not consume aim/fire/ammo/heading observations yet.
-        if stage in {'settle','throttle'}:
-            return DIALOG_GUARD | BATTLE_END
-
-        if stage == 'spawn':
-            return DIALOG_GUARD
-
-        if stage == 'player':
-            return DIALOG_GUARD | PLAYER
-
-        if stage == 'queue':
-            return DIALOG_GUARD | QUEUE
-
-        if stage == 'hangar':
-            return DIALOG_GUARD | HANGAR
-
-        if stage == 'return' and self.sequence_done is not None:
-            return DIALOG_GUARD
-
-        # Conservative compatibility fallback for an unexpected/legacy stage.
-        return PURCHASE | END | MENU
+        common = PURCHASE | END
+        if self.app.state in (RuntimeState.IN_BATTLE,RuntimeState.RECOVERING): return common | BATTLE
+        if self.app.state == RuntimeState.PAUSED: return common
+        return common | MENU
 
     def _matched(self, name):
         observations = self.app.last_observations
