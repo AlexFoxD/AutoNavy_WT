@@ -24,10 +24,10 @@
 Files: docs/v2/*.md, tests/unit/test_legacy_characterization.py.
 - [x] Inspect source, clean status, branches, worktrees, instructions and installed workflow.
 - [x] Create isolated branch from exact source SHA and persist complete embedded specification.
-- [ ] Reconcile actual gameplay symbols and build/launcher/test constraints in AUDIT.md.
-- [ ] Run `.venv/Scripts/python.exe -m pytest tests -q` without live devices and record baseline.
-- [ ] Characterize color Canny, four-channel matching and 1x1 morphology using synthetic images; never import unsafe legacy modules.
-- [ ] Commit audit and plan after content checks.
+- [x] Reconcile actual gameplay symbols and build/launcher/test constraints in AUDIT.md.
+- [x] Run `.venv/Scripts/python.exe -m pytest tests -q` without live devices and record baseline (42 passed, 14 warnings; side-effecting launcher test subsequently excluded until M8).
+- [x] Characterize color Canny, four-channel matching and 1x1 morphology using synthetic images; never import unsafe legacy modules (3 passed on focused recheck).
+- [x] Commit audit and plan after content checks (021f575; M0 record corrections undergo separate re-review).
 
 ### Task 1: M1 safe foundations
 Files: autonavy/{__init__,__main__,cli,config,models,app}.py, autonavy/capture/replay.py, configs/default.toml, start_prog.py, main.py, autonavy.py, tests/unit/test_foundations.py, tests/integration/test_replay.py, tests/fixtures/smoke/manifest.json.

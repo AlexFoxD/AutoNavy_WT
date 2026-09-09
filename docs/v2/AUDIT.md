@@ -43,7 +43,67 @@ Every row includes a disposition and regression requirement; new test names may 
 
 ## Native path return semantics: executed characterization
 
-Interpreter: `C:\Program Files\Python311\python.exe`; bundled file `toolkit/way_search.cp311-win_amd64.pyd`, 416768 bytes. Parent subprocess used `subprocess.run([sys.executable, '-B', '-c', probe], capture_output=True, text=True, timeout=15)`; both probes exited 0 before the timeout. They imported `json` and `from toolkit.way_search import Jps, MapGrid, Point`, marked obstacles then origin/goal, and called `Jps(Point(*origin), Point(*goal), grid).Process()`. They did not import `pilot`, `process_path`, or any device-bearing module.
+Interpreter: `C:\Program Files\Python311\python.exe`; bundled file `toolkit/way_search.cp311-win_amd64.pyd`, 416768 bytes. **Three subprocess probes** were executed, each with a 15-second timeout, and each exited 0: the first ran five open/wall/identical-point cases, the second ran four rectangular/adjacent/reverse-direction cases, and the third inspected native return/point types. All imported `from toolkit.way_search import Jps, MapGrid, Point`; JSON was used only for readable case output. They did not import `pilot`, `process_path`, or any device-bearing module.
+
+Reproduction command for those same three bounded probes (PowerShell, run from the v2 worktree). This consolidates the three original shell invocations without changing case order, subprocess boundaries or timeout; it has not been rerun during the documentation correction:
+
+```powershell
+@'
+import subprocess, sys
+first = r'''
+import json
+from toolkit.way_search import Jps, MapGrid, Point
+cases = [
+    ((1,1),(6,1), []),
+    ((1,1),(6,6), []),
+    ((1,1),(6,4), [(3,y) for y in range(7)]),
+    ((1,1),(1,1), []),
+    ((1,1),(6,6), [(4,y) for y in range(8)]),
+]
+for origin, goal, obstacles in cases:
+    grid = MapGrid(8,8)
+    for x,y in obstacles:
+        grid.set_grid(x,y,'obstacle')
+    grid.set_grid(*origin,'origin')
+    grid.set_grid(*goal,'goal')
+    result = Jps(Point(*origin),Point(*goal),grid).Process()
+    print(json.dumps({'origin':origin,'goal':goal,'result':result}),flush=True)
+'''
+second = r'''
+import json
+from toolkit.way_search import Jps, MapGrid, Point
+for height,width,origin,goal in [
+    (4,9,(1,1),(7,2)), (8,8,(1,1),(2,1)),
+    (8,8,(1,1),(2,2)), (8,8,(6,6),(1,1)),
+]:
+    grid = MapGrid(height,width)
+    grid.set_grid(*origin,'origin')
+    grid.set_grid(*goal,'goal')
+    result = Jps(Point(*origin),Point(*goal),grid).Process()
+    print(json.dumps({'size':[height,width],'origin':origin,'goal':goal,
+                      'result':result}),flush=True)
+'''
+third = r'''
+from toolkit.way_search import Jps, MapGrid, Point
+grid = MapGrid(8,8)
+grid.set_grid(1,1,'origin')
+grid.set_grid(6,6,'goal')
+result = Jps(Point(1,1),Point(6,6),grid).Process()
+print(type(result).__name__, [type(x).__name__ for x in result],
+      type(result[1][0]).__name__, [type(x).__name__ for x in result[1][0]])
+'''
+for number, probe in enumerate((first, second, third), 1):
+    result = subprocess.run([sys.executable, '-B', '-c', probe],
+                            capture_output=True, text=True, timeout=15)
+    print('probe', number, 'returncode', result.returncode)
+    print(result.stdout)
+    print(result.stderr)
+    if result.returncode:
+        raise SystemExit(result.returncode)
+'@ | & 'C:\Program Files\Python311\python.exe' -B -
+```
+
+The third probe output was `tuple ['list', 'list', 'list'] tuple ['int', 'int']`. A timeout raises `subprocess.TimeoutExpired` after the child is killed and collected; it must be reported as a failed probe rather than successful shutdown evidence for a production worker.
 
 | Grid / case | `path` | `jump` / result |
 |---|---|---|

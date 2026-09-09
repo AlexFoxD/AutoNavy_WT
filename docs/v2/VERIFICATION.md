@@ -2,7 +2,7 @@
 
 Environment: Windows, project-local CPython 3.11 x64. Source 45fc36cc4d173fb1e46eac2dcd1be3338157c500. No live input or game startup is authorized for verification.
 
-Current stage: baseline setup. Acceptance rows have not yet been implemented or verified. The complete A01-A39 matrix is in SPEC.md and will be maintained here as milestones produce evidence.
+Current stage: M0 audit/baseline complete with record corrections pending re-review; M1 foundations implementation active. A01/A02 below pass for the current M0 checkpoint. Downstream acceptance remains NOT RUN until concrete implementation and verification evidence exists. A01 requires another preservation check at final handoff.
 
 Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and source-to-input latency: NOT RUN.
 
@@ -19,8 +19,8 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| A01 / GIT-01 | NOT RUN | Implementation/validation pending |
-| A02 / AUDIT-01 | NOT RUN | Implementation/validation pending |
+| A01 / GIT-01 | PASS | M0 scope: isolated `feature/v2-modernization` worktree from exact source 45fc36c; source checkout clean and HEAD/master/default refs unchanged; recorded src/native tree/blob/hash match. Commands and identifiers in Preservation baseline below. Local commit 021f575; no push/merge/release. Final preservation recheck still required at M9. |
+| A02 / AUDIT-01 | PASS | M0 scope: AUDIT.md exact-symbol reconciliation and behavior inventory, three bounded native-only probes, environment constraints and executed 42-test baseline plus 3-test characterization recheck above; characterization at tests/unit/test_legacy_characterization.py, committed in 021f575. Hardware accuracy explicitly unverified. |
 | A03 / ARCH-01 | NOT RUN | Implementation/validation pending |
 | A04 / CAP-01 | NOT RUN | Implementation/validation pending |
 | A05 / FRAME-01 | NOT RUN | Implementation/validation pending |
@@ -58,3 +58,14 @@ Hardware capture, OBS, vJoy actuation, matchmaking, packaged executable and sour
 | A37 / BUILD-01 | NOT RUN | Implementation/validation pending |
 | A38 / HANDOFF | NOT RUN | Implementation/validation pending |
 | A39 / HANDOFF | NOT RUN | Implementation/validation pending |
+
+## Preservation baseline
+
+- `src` Git tree: 070c99be932097c428b3be83a635bb9f749b3283.
+- Native extension Git blob: e34e40f0db6be26bdfc867c89e36b897c677acdf.
+- Native SHA256: ABE3EF91491C5C53EDA3BC16C63843545942079DEA80E80C8A139671FBEDF721.
+- Source master: 45fc36cc4d173fb1e46eac2dcd1be3338157c500.
+- origin/master: c2f889336e5c656763ecac76ed54c960b36a666f.
+- upstream/master: 69570b424a3b552b4d56ebca062cc412ad105521.
+- Rechecked initial worktree: clean; HEAD unchanged. At final compare asset/native tree objects and branch refs; no screenshot capture is needed.
+- M0 record-fix recheck executed: `git -C 'C:\Develop\game\WT\AutoNavy_WT' status --porcelain=v1 -uall` produced no output; `git -C 'C:\Develop\game\WT\AutoNavy_WT' rev-parse HEAD master origin/master upstream/master 'HEAD:src' 'HEAD:toolkit/way_search.cp311-win_amd64.pyd'` returned the recorded source/default refs and tree/blob identifiers above. `Get-FileHash toolkit/way_search.cp311-win_amd64.pyd -Algorithm SHA256` matched the recorded native hash in the v2 worktree. This confirms current M0 preservation, not a future final state.
