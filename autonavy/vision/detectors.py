@@ -185,27 +185,143 @@ def match_template_with_mask_fallback(context, registry, name, roi, threshold, *
     return masked
 
 
-def find_target_reticle(image, edge_map=None):
-    """Find the current WT selected-enemy reticle in a BGR ROI.
+def find_close_target_marker(image):
+    """Find the current close-range naval target marker from hostile HUD bands.
 
-    Use two Hough passes. The first preserves the conservative live detector.
-    If it produces no trustworthy candidate, a second lower-accumulator pass
-    recovers faint/partially occluded rings.
+    Current WT naval HUD has at least two selected-target presentations:
+      * distant target: a circular marker;
+      * close target: four corner brackets, with the hostile name/marker above
+        and the selected red range readout below.
 
-    Every candidate still needs red hostile-HUD context and a real circular
-    edge signature, so the relaxed pass does not simply accept arbitrary circles.
+    The bracket strokes themselves are intentionally not used as the primary
+    signal because their contrast depends strongly on sea/sky/ship background.
+    The red HUD bands are much more stable.  Their horizontal centers are nearly
+    co-linear and their vertical midpoint has a small, stable offset to the
+    aiming point.
+
     Returns (x, y, radius, confidence) in ROI-local coordinates, or None.
+    """
+    if image is None or image.ndim != 3 or image.shape[2] != 3:
+        return None
+
+    h, w = image.shape[:2]
+    if h < 100 or w < 100:
+        return None
+
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    red_low = cv2.inRange(hsv, (0, 60, 70), (15, 255, 255))
+    red_high = cv2.inRange(hsv, (165, 60, 70), (180, 255, 255))
+    red = cv2.bitwise_or(red_low, red_high)
+
+    # Collapse red HUD text into horizontal bands. Requiring at least three
+    # pixels on a row rejects most isolated antialiasing/minimap noise.
+    row_counts = np.count_nonzero(red, axis=1)
+    bands = []
+    start = None
+
+    for y, count in enumerate(row_counts):
+        if count >= 3 and start is None:
+            start = y
+
+        is_last = y == h - 1
+        if start is not None and (count < 3 or is_last):
+            end = y if count < 3 else y + 1
+            ys, xs = np.nonzero(red[start:end])
+
+            if xs.size:
+                left = int(xs.min())
+                right = int(xs.max()) + 1
+                bands.append({
+                    'y1': start,
+                    'y2': end,
+                    'yc': (start + end - 1) / 2.0,
+                    'x1': left,
+                    'x2': right,
+                    'xc': float(xs.mean()),
+                    'area': int(xs.size),
+                    'width': right - left,
+                    'height': end - start,
+                })
+            start = None
+
+    # In the supplied live 1280x720 OBS frame:
+    #   hostile name band center ~ y=259
+    #   selected red range band ~ y=429
+    #   actual aiming point       ~ y=360
+    # The +16 correction maps their midpoint to the current close-range marker.
+    strong = [
+        band for band in bands
+        if band['area'] >= 30
+        and band['width'] >= 20
+        and 4 <= band['height'] <= 24
+    ]
+
+    candidates = []
+    for upper in strong:
+        for lower in strong:
+            gap = lower['yc'] - upper['yc']
+            if not 110 <= gap <= 210:
+                continue
+
+            x_error = abs(lower['xc'] - upper['xc'])
+            if x_error > 60:
+                continue
+
+            cx = (upper['xc'] + lower['xc']) / 2.0
+            cy = (upper['yc'] + lower['yc']) / 2.0 + 16.0
+
+            if not (20 <= cx < w - 20 and 20 <= cy < h - 20):
+                continue
+
+            # Prefer vertically paired HUD bands near each other in X and near
+            # the active central battle region.  This prevents a remote minimap
+            # icon from winning over the selected target.
+            norm_distance = math.hypot(
+                (cx - w / 2.0) / max(w, 1),
+                (cy - h / 2.0) / max(h, 1),
+            )
+            score = (
+                (1.0 - x_error / 60.0)
+                + min(1.0, (upper['area'] + lower['area']) / 250.0)
+                + max(0.0, 1.0 - norm_distance * 2.0)
+            )
+            candidates.append((score, cx, cy))
+
+    if not candidates:
+        return None
+
+    score, cx, cy = max(candidates, key=lambda item: item[0])
+
+    # Score is a ranking metric in roughly [0, 3]. Map it to observation
+    # confidence without pretending it is a template-correlation probability.
+    confidence = min(1.0, max(0.0, score / 3.0))
+    return int(round(cx)), int(round(cy)), 12, confidence
+
+
+def find_target_reticle(image, edge_map=None):
+    """Find the selected WT naval target in either current HUD presentation.
+
+    Detection order:
+      1. close-range bracket HUD, inferred from paired hostile red bands;
+      2. distant circular marker, using only the conservative Hough pass.
+
+    The previous relaxed Hough fallback was intentionally removed: on close
+    targets the circle is not rendered at all, so relaxed circle search can lock
+    onto waves or unrelated circular HUD geometry.
     """
     if image is None or image.ndim != 3 or image.shape[2] != 3 or min(image.shape[:2]) < 64:
         return None
+
+    close_marker = find_close_target_marker(image)
+    if close_marker is not None:
+        return close_marker
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
 
     if edge_map is None:
         # Standalone helper fallback used by characterization/unit tests.
-        # Runtime passes FrameContext-cached edges to preserve the
-        # one-derivative-per-ROI-per-packet invariant.
+        # Runtime passes FrameContext-cached edges.
         edge_map = cv2.Canny(gray, 80, 160)
     else:
         edge_map = np.asarray(edge_map)
@@ -217,102 +333,88 @@ def find_target_reticle(image, edge_map=None):
     red_high = cv2.inRange(hsv, (165, 60, 70), (180, 255, 255))
     red = cv2.bitwise_or(red_low, red_high)
 
-    passes = (
-        # Existing conservative detector.
-        dict(param2=30, min_radius=16, max_radius=28,
-             min_support=80, min_near=20, min_ring=.18),
-        # Recovery pass for weaker/partially occluded current HUD rings.
-        dict(param2=22, min_radius=12, max_radius=30,
-             min_support=50, min_near=12, min_ring=.18),
+    circles = cv2.HoughCircles(
+        blurred,
+        cv2.HOUGH_GRADIENT,
+        dp=1.2,
+        minDist=32,
+        param1=100,
+        param2=30,
+        minRadius=16,
+        maxRadius=28,
     )
+    if circles is None:
+        return None
 
-    for options in passes:
-        circles = cv2.HoughCircles(
-            blurred,
-            cv2.HOUGH_GRADIENT,
-            dp=1.2,
-            minDist=32,
-            param1=100,
-            param2=options['param2'],
-            minRadius=options['min_radius'],
-            maxRadius=options['max_radius'],
-        )
-        if circles is None:
+    best = None
+    for cx, cy, raw_radius in circles[0]:
+        x = int(round(float(cx)))
+        y = int(round(float(cy)))
+        radius = int(round(float(raw_radius)))
+
+        pad = max(50, radius * 3)
+        left = max(0, x - pad)
+        top = max(0, y - pad)
+        right = min(image.shape[1], x + pad + 1)
+        bottom = min(image.shape[0], y + pad + 1)
+        support = int(np.count_nonzero(red[top:bottom, left:right]))
+
+        near_pad = max(25, int(round(radius * 1.8)))
+        left2 = max(0, x - near_pad)
+        top2 = max(0, y - near_pad)
+        right2 = min(image.shape[1], x + near_pad + 1)
+        bottom2 = min(image.shape[0], y + near_pad + 1)
+        near = int(np.count_nonzero(red[top2:bottom2, left2:right2]))
+
+        if support < 80 or near < 20:
             continue
 
-        best = None
-        for cx, cy, raw_radius in circles[0]:
-            x = int(round(float(cx)))
-            y = int(round(float(cy)))
-            radius = int(round(float(raw_radius)))
+        ring_pad = radius + 3
+        left3 = max(0, x - ring_pad)
+        top3 = max(0, y - ring_pad)
+        right3 = min(image.shape[1], x + ring_pad + 1)
+        bottom3 = min(image.shape[0], y + ring_pad + 1)
 
-            # Hostile UI support around the selected target.
-            pad = max(50, radius * 3)
-            left = max(0, x - pad)
-            top = max(0, y - pad)
-            right = min(image.shape[1], x + pad + 1)
-            bottom = min(image.shape[0], y + pad + 1)
-            support = int(np.count_nonzero(red[top:bottom, left:right]))
+        edge_patch = edge_map[top3:bottom3, left3:right3]
+        ring_mask = np.zeros(edge_patch.shape, dtype=np.uint8)
+        cv2.circle(
+            ring_mask,
+            (x-left3, y-top3),
+            radius,
+            255,
+            4,
+            lineType=cv2.LINE_8,
+        )
 
-            near_pad = max(25, int(round(radius * 1.8)))
-            left2 = max(0, x - near_pad)
-            top2 = max(0, y - near_pad)
-            right2 = min(image.shape[1], x + near_pad + 1)
-            bottom2 = min(image.shape[0], y + near_pad + 1)
-            near = int(np.count_nonzero(red[top2:bottom2, left2:right2]))
+        ring_pixels = int(np.count_nonzero(ring_mask))
+        if ring_pixels == 0:
+            continue
 
-            if support < options['min_support'] or near < options['min_near']:
-                continue
+        ring_coverage = (
+            int(np.count_nonzero(cv2.bitwise_and(edge_patch, ring_mask)))
+            / ring_pixels
+        )
+        if ring_coverage < .18:
+            continue
 
-            # Measure how much of the proposed circumference is backed by real
-            # image edges. This is what rejects red text/ship geometry that only
-            # happens to make HoughCircles return a nearby candidate.
-            ring_pad = radius + 3
-            left3 = max(0, x - ring_pad)
-            top3 = max(0, y - ring_pad)
-            right3 = min(image.shape[1], x + ring_pad + 1)
-            bottom3 = min(image.shape[0], y + ring_pad + 1)
+        radius_fit = max(0.0, 1.0 - abs(radius - 21) / 12.0)
+        metric = (
+            ring_coverage * 2.0
+            + min(1.0, near / 250.0) * .7
+            + min(1.0, support / 700.0) * .3
+            + radius_fit * .25
+        )
+        candidate = (metric, x, y, radius)
+        if best is None or candidate[0] > best[0]:
+            best = candidate
 
-            edge_patch = edge_map[top3:bottom3, left3:right3]
-            ring_mask = np.zeros(edge_patch.shape, dtype=np.uint8)
-            cv2.circle(
-                ring_mask,
-                (x-left3, y-top3),
-                radius,
-                255,
-                4,
-                lineType=cv2.LINE_8,
-            )
-            ring_pixels = int(np.count_nonzero(ring_mask))
-            if ring_pixels == 0:
-                continue
+    if best is None:
+        return None
 
-            ring_coverage = (
-                int(np.count_nonzero(cv2.bitwise_and(edge_patch, ring_mask)))
-                / ring_pixels
-            )
-            if ring_coverage < options['min_ring']:
-                continue
+    metric, x, y, radius = best
+    confidence = min(1.0, metric / 1.8)
+    return x, y, radius, confidence
 
-            # Ranking favours a genuine circular edge first. Red context then
-            # disambiguates the target ring from neutral circular HUD/ship detail.
-            radius_fit = max(0.0, 1.0 - abs(radius - 21) / 12.0)
-            metric = (
-                ring_coverage * 2.0
-                + min(1.0, near / 250.0) * .7
-                + min(1.0, support / 700.0) * .3
-                + radius_fit * .25
-            )
-            candidate = (metric, x, y, radius)
-            if best is None or candidate[0] > best[0]:
-                best = candidate
-
-        if best is not None:
-            metric, x, y, radius = best
-            confidence = min(1.0, metric / 1.8)
-            return x, y, radius, confidence
-
-    return None
 
 
 def detect_target_reticle(context, roi, *, fallback_edges=None, fallback_rect=None):
@@ -381,6 +483,146 @@ def detect_target_reticle(context, roi, *, fallback_edges=None, fallback_rect=No
         desktop,
     )
 
+
+
+def find_shallow_water_warning(image):
+    """Find the current WT naval shallow-water warning in a 1280x720 BGR frame.
+
+    Current naval HUD renders a wide orange warning text band near the top-center
+    together with an orange shallow-water indicator below it.  The historical
+    crash1.png template is localized text and no longer matches current English
+    HUD builds.
+
+    Returns (box, confidence) in frame coordinates, or None.
+    """
+    if image is None or image.ndim != 3 or image.shape[2] != 3:
+        return None
+
+    h, w = image.shape[:2]
+    if w < 640 or h < 360:
+        return None
+
+    # Characterized from the current 1280x720 OBS profile. Expressed as ratios
+    # so the helper remains sane for equivalent scaled frames.
+    tx1 = int(round(w * 0.333))
+    tx2 = int(round(w * 0.667))
+    ty1 = int(round(h * 0.097))
+    ty2 = int(round(h * 0.264))
+
+    text_roi = image[ty1:ty2, tx1:tx2]
+    hsv = cv2.cvtColor(text_roi, cv2.COLOR_BGR2HSV)
+
+    # Current warning is gold/orange: live pixels cluster near H=20..22.
+    orange = cv2.inRange(
+        hsv,
+        np.array((15, 100, 110), dtype=np.uint8),
+        np.array((32, 255, 255), dtype=np.uint8),
+    )
+
+    # Join anti-aliased glyphs into one horizontal warning band.
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 3))
+    joined = cv2.morphologyEx(orange, cv2.MORPH_CLOSE, kernel)
+
+    count, labels, stats, centroids = cv2.connectedComponentsWithStats(
+        joined, 8
+    )
+
+    best = None
+    for index in range(1, count):
+        x, y, bw, bh, area = (int(v) for v in stats[index])
+
+        # Live warning is about 339x28 px at 1280x720. Keep broad margins for
+        # localization/font antialiasing while requiring a genuinely wide HUD
+        # text line.
+        min_width = int(round(text_roi.shape[1] * 0.50))
+        max_height = int(round(text_roi.shape[0] * 0.45))
+        if bw < min_width or not 12 <= bh <= max_height or area < 1000:
+            continue
+
+        gx1, gy1 = tx1 + x, ty1 + y
+        gx2, gy2 = gx1 + bw, gy1 + bh
+        cx = (gx1 + gx2) // 2
+
+        # The shallow-water hazard icon/range appears directly below the warning.
+        # Requiring this orange context prevents unrelated orange notifications
+        # from triggering recovery.
+        icon_half_w = max(30, int(round(w * 0.047)))
+        ix1 = max(0, cx - icon_half_w)
+        ix2 = min(w, cx + icon_half_w)
+        iy1 = int(round(h * 0.235))
+        iy2 = int(round(h * 0.365))
+
+        icon_roi = image[iy1:iy2, ix1:ix2]
+        icon_hsv = cv2.cvtColor(icon_roi, cv2.COLOR_BGR2HSV)
+        icon_orange = cv2.inRange(
+            icon_hsv,
+            np.array((15, 100, 110), dtype=np.uint8),
+            np.array((32, 255, 255), dtype=np.uint8),
+        )
+        icon_pixels = int(np.count_nonzero(icon_orange))
+        if icon_pixels < 80:
+            continue
+
+        width_score = min(1.0, bw / max(1.0, text_roi.shape[1] * 0.75))
+        area_score = min(1.0, area / 4000.0)
+        icon_score = min(1.0, icon_pixels / 300.0)
+        confidence = min(
+            1.0,
+            0.45 * width_score + 0.35 * area_score + 0.20 * icon_score,
+        )
+
+        candidate = (confidence, (gx1, gy1, gx2, gy2))
+        if best is None or candidate[0] > best[0]:
+            best = candidate
+
+    if best is None:
+        return None
+
+    confidence, box = best
+    return box, confidence
+
+
+def detect_shallow_water_warning(context, roi):
+    """Return a MatchObservation for the current shallow-water HUD warning."""
+    packet = context.packet
+    try:
+        rect = context._rect(roi)
+        image = context.roi(rect)
+    except ValueError as exc:
+        return MatchObservation(*identity(packet), reason=str(exc))
+
+    found = find_shallow_water_warning(image)
+    if found is None:
+        return MatchObservation(*identity(packet), True, False, 0.0)
+
+    local_box, confidence = found
+    l, t, r, b = local_box
+    box = (
+        l + rect[0],
+        t + rect[1],
+        r + rect[0],
+        b + rect[1],
+    )
+
+    desktop = None
+    if packet.geometry is not None:
+        center = ((box[0] + box[2]) // 2, (box[1] + box[3]) // 2)
+        try:
+            desktop = packet.geometry.frame_to_desktop(center)
+        except ValueError:
+            return MatchObservation(
+                *identity(packet),
+                reason='Shallow-water warning is outside packet game content',
+            )
+
+    return MatchObservation(
+        *identity(packet),
+        True,
+        True,
+        confidence,
+        box,
+        desktop,
+    )
 
 
 def angle_from_mask(mask):
@@ -533,10 +775,20 @@ class VisionPipeline:
         if 'fire' in selected:
             matches['fire'] = match_template(ctx,self.registry,'fire',full,v.template_threshold,settings=v)
         collision_roi = ctx.profile_roi((self.settings.geometry.width//3,0,self.settings.geometry.width//3*2,self.settings.geometry.height))
-        for name, threshold in (('crash_warning',v.collision_threshold),('crashed',.3)):
-            if name not in selected: continue
-            matches[name] = match_template(ctx,self.registry,name,collision_roi,threshold,settings=v,
-                                          mask=((0,43,46),(10,255,255),1))
+        if 'crash_warning' in selected:
+            modern_warning = detect_shallow_water_warning(ctx, full)
+            if modern_warning.matched:
+                matches['crash_warning'] = modern_warning
+            else:
+                # Legacy localized-template fallback.
+                matches['crash_warning'] = match_template(
+                    ctx,self.registry,'crash_warning',collision_roi,
+                    v.collision_threshold,settings=v,
+                    mask=((0,43,46),(10,255,255),1))
+        if 'crashed' in selected:
+            matches['crashed'] = match_template(
+                ctx,self.registry,'crashed',collision_roi,.3,settings=v,
+                mask=((0,43,46),(10,255,255),1))
         if 'ammo' in selected and self._ammo_registry is not None and self._ammo_identity == (packet.source_generation,packet.geometry_id):
             matches['ammo'] = match_template(ctx,self._ammo_registry,'ammo',ctx.profile_roi(v.ammo_roi),.9,settings=v)
         else:
