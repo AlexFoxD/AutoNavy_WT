@@ -90,6 +90,299 @@ def match_template(context, registry, name, roi, threshold, *, settings=VisionSe
     return MatchObservation(*identity(p), True, location is not None, score, box, desktop)
 
 
+def _match_precomputed_edges(context, registry, name, roi, threshold, background_edges, background_rect,
+                             *, settings=VisionSettings()):
+    """Match a template against a crop of an already-computed edge map.
+
+    This is used only as a geometry fallback for battle markers.  It deliberately
+    bypasses context.edges() for the small ROI, so no second Canny derivative is
+    created for aim/lock after the masked attempt.
+    """
+    p = context.packet
+    edge = registry.edges(
+        name,
+        profile_id=p.geometry.profile_id if p.geometry else 'legacy-1280x720',
+        settings=settings,
+    )
+    try:
+        rect = context._rect(roi)
+        base = context._rect(background_rect)
+    except ValueError as exc:
+        return MatchObservation(*identity(p), reason=str(exc))
+
+    left, top, right, bottom = rect
+    base_left, base_top, base_right, base_bottom = base
+    if left < base_left or top < base_top or right > base_right or bottom > base_bottom:
+        return MatchObservation(*identity(p), reason='Fallback ROI is outside cached edge map')
+
+    background = background_edges[
+        top-base_top:bottom-base_top,
+        left-base_left:right-base_left,
+    ]
+    score, location, reason = match_edges(background, edge, threshold)
+    if reason:
+        return MatchObservation(*identity(p), reason=reason)
+
+    box = None
+    desktop = None
+    if location is not None:
+        x, y = location[0] + left, location[1] + top
+        box = (x, y, x + edge.shape[1], y + edge.shape[0])
+        if p.geometry is not None:
+            try:
+                desktop = p.geometry.frame_to_desktop(
+                    ((box[0]+box[2])//2, (box[1]+box[3])//2)
+                )
+            except ValueError:
+                return MatchObservation(
+                    *identity(p),
+                    reason='Match is outside packet game content',
+                )
+
+    return MatchObservation(
+        *identity(p),
+        True,
+        location is not None,
+        score,
+        box,
+        desktop,
+    )
+
+
+def match_template_with_mask_fallback(context, registry, name, roi, threshold, *,
+                                      settings=VisionSettings(), mask,
+                                      fallback_edges, fallback_rect):
+    """Prefer the legacy color-masked detector, then reuse cached plain edges.
+
+    The acceptance threshold is unchanged.  Only the preprocessing representation
+    changes on fallback.  Crucially, this still makes exactly one call through
+    match_template() per logical detector and does not run Canny again for the
+    aim/lock ROI.
+    """
+    masked = match_template(
+        context, registry, name, roi, threshold, settings=settings, mask=mask
+    )
+    if masked.matched:
+        return masked
+
+    plain = _match_precomputed_edges(
+        context,
+        registry,
+        name,
+        roi,
+        threshold,
+        fallback_edges,
+        fallback_rect,
+        settings=settings,
+    )
+    if plain.matched:
+        return plain
+
+    if plain.score is None:
+        return masked
+    if masked.score is None or plain.score > masked.score:
+        return plain
+    return masked
+
+
+def find_target_reticle(image, edge_map=None):
+    """Find the current WT selected-enemy reticle in a BGR ROI.
+
+    Use two Hough passes. The first preserves the conservative live detector.
+    If it produces no trustworthy candidate, a second lower-accumulator pass
+    recovers faint/partially occluded rings.
+
+    Every candidate still needs red hostile-HUD context and a real circular
+    edge signature, so the relaxed pass does not simply accept arbitrary circles.
+    Returns (x, y, radius, confidence) in ROI-local coordinates, or None.
+    """
+    if image is None or image.ndim != 3 or image.shape[2] != 3 or min(image.shape[:2]) < 64:
+        return None
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+
+    if edge_map is None:
+        # Standalone helper fallback used by characterization/unit tests.
+        # Runtime passes FrameContext-cached edges to preserve the
+        # one-derivative-per-ROI-per-packet invariant.
+        edge_map = cv2.Canny(gray, 80, 160)
+    else:
+        edge_map = np.asarray(edge_map)
+        if edge_map.ndim != 2 or edge_map.shape != gray.shape or edge_map.dtype != np.uint8:
+            raise ValueError('Reticle edge map must match ROI as single-channel uint8')
+
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    red_low = cv2.inRange(hsv, (0, 60, 70), (15, 255, 255))
+    red_high = cv2.inRange(hsv, (165, 60, 70), (180, 255, 255))
+    red = cv2.bitwise_or(red_low, red_high)
+
+    passes = (
+        # Existing conservative detector.
+        dict(param2=30, min_radius=16, max_radius=28,
+             min_support=80, min_near=20, min_ring=.18),
+        # Recovery pass for weaker/partially occluded current HUD rings.
+        dict(param2=22, min_radius=12, max_radius=30,
+             min_support=50, min_near=12, min_ring=.18),
+    )
+
+    for options in passes:
+        circles = cv2.HoughCircles(
+            blurred,
+            cv2.HOUGH_GRADIENT,
+            dp=1.2,
+            minDist=32,
+            param1=100,
+            param2=options['param2'],
+            minRadius=options['min_radius'],
+            maxRadius=options['max_radius'],
+        )
+        if circles is None:
+            continue
+
+        best = None
+        for cx, cy, raw_radius in circles[0]:
+            x = int(round(float(cx)))
+            y = int(round(float(cy)))
+            radius = int(round(float(raw_radius)))
+
+            # Hostile UI support around the selected target.
+            pad = max(50, radius * 3)
+            left = max(0, x - pad)
+            top = max(0, y - pad)
+            right = min(image.shape[1], x + pad + 1)
+            bottom = min(image.shape[0], y + pad + 1)
+            support = int(np.count_nonzero(red[top:bottom, left:right]))
+
+            near_pad = max(25, int(round(radius * 1.8)))
+            left2 = max(0, x - near_pad)
+            top2 = max(0, y - near_pad)
+            right2 = min(image.shape[1], x + near_pad + 1)
+            bottom2 = min(image.shape[0], y + near_pad + 1)
+            near = int(np.count_nonzero(red[top2:bottom2, left2:right2]))
+
+            if support < options['min_support'] or near < options['min_near']:
+                continue
+
+            # Measure how much of the proposed circumference is backed by real
+            # image edges. This is what rejects red text/ship geometry that only
+            # happens to make HoughCircles return a nearby candidate.
+            ring_pad = radius + 3
+            left3 = max(0, x - ring_pad)
+            top3 = max(0, y - ring_pad)
+            right3 = min(image.shape[1], x + ring_pad + 1)
+            bottom3 = min(image.shape[0], y + ring_pad + 1)
+
+            edge_patch = edge_map[top3:bottom3, left3:right3]
+            ring_mask = np.zeros(edge_patch.shape, dtype=np.uint8)
+            cv2.circle(
+                ring_mask,
+                (x-left3, y-top3),
+                radius,
+                255,
+                4,
+                lineType=cv2.LINE_8,
+            )
+            ring_pixels = int(np.count_nonzero(ring_mask))
+            if ring_pixels == 0:
+                continue
+
+            ring_coverage = (
+                int(np.count_nonzero(cv2.bitwise_and(edge_patch, ring_mask)))
+                / ring_pixels
+            )
+            if ring_coverage < options['min_ring']:
+                continue
+
+            # Ranking favours a genuine circular edge first. Red context then
+            # disambiguates the target ring from neutral circular HUD/ship detail.
+            radius_fit = max(0.0, 1.0 - abs(radius - 21) / 12.0)
+            metric = (
+                ring_coverage * 2.0
+                + min(1.0, near / 250.0) * .7
+                + min(1.0, support / 700.0) * .3
+                + radius_fit * .25
+            )
+            candidate = (metric, x, y, radius)
+            if best is None or candidate[0] > best[0]:
+                best = candidate
+
+        if best is not None:
+            metric, x, y, radius = best
+            confidence = min(1.0, metric / 1.8)
+            return x, y, radius, confidence
+
+    return None
+
+
+def detect_target_reticle(context, roi, *, fallback_edges=None, fallback_rect=None):
+    """Return a MatchObservation for the current selected hostile reticle.
+
+    Runtime should pass cached plain edges plus their frame rect.  The helper can
+    still operate without them for isolated/legacy callers.
+    """
+    packet = context.packet
+    try:
+        rect = context._rect(roi)
+        image = context.roi(rect)
+    except ValueError as exc:
+        return MatchObservation(*identity(packet), reason=str(exc))
+
+    edge_roi = None
+    if fallback_edges is not None and fallback_rect is not None:
+        try:
+            base = context._rect(fallback_rect)
+        except ValueError as exc:
+            return MatchObservation(*identity(packet), reason=str(exc))
+
+        left, top, right, bottom = rect
+        base_left, base_top, base_right, base_bottom = base
+        if left < base_left or top < base_top or right > base_right or bottom > base_bottom:
+            return MatchObservation(
+                *identity(packet),
+                reason='Reticle ROI is outside cached edge map',
+            )
+
+        edge_roi = fallback_edges[
+            top-base_top:bottom-base_top,
+            left-base_left:right-base_left,
+        ]
+
+    try:
+        found = find_target_reticle(image, edge_map=edge_roi)
+    except ValueError as exc:
+        return MatchObservation(*identity(packet), reason=str(exc))
+
+    if found is None:
+        return MatchObservation(*identity(packet), True, False, 0.0)
+
+    x, y, radius, confidence = found
+    cx = x + rect[0]
+    cy = y + rect[1]
+    pad = radius + 2
+    box = (cx-pad, cy-pad, cx+pad+1, cy+pad+1)
+
+    desktop = None
+    if packet.geometry is not None:
+        try:
+            desktop = packet.geometry.frame_to_desktop((cx, cy))
+        except ValueError:
+            return MatchObservation(
+                *identity(packet),
+                reason='Reticle center is outside packet game content',
+            )
+
+    return MatchObservation(
+        *identity(packet),
+        True,
+        True,
+        confidence,
+        box,
+        desktop,
+    )
+
+
+
 def angle_from_mask(mask):
     """Preserve the legacy triangle/line estimator without modifying source pixels."""
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -204,12 +497,39 @@ class VisionPipeline:
         for name, template in variants.items():
             if name not in selected: continue
             matches[name] = match_template(ctx,self.registry,template,full,.8 if name == 'start_battle_end' else .6,settings=v)
+        # Full-frame plain edges are already cached by the selected full-frame
+        # UI/battle templates. Reusing them here preserves the one-Canny-per-ROI
+        # runtime invariant even when the color-masked aim/lock detector fails.
+        fallback_edges = ctx.edges(full,v) if 'aim' in selected or 'lock' in selected else None
         if 'aim' in selected:
-            matches['aim'] = match_template(ctx,self.registry,'aim',ctx.profile_roi(v.fire_roi),v.aim_threshold,settings=v,
-                                           mask=(v.fire_hsv_lower,v.fire_hsv_upper,1))
+            matches['aim'] = match_template_with_mask_fallback(
+                ctx,self.registry,'aim',ctx.profile_roi(v.fire_roi),v.aim_threshold,
+                settings=v,mask=(v.fire_hsv_lower,v.fire_hsv_upper,1),
+                fallback_edges=fallback_edges,fallback_rect=full)
+            if not matches['aim'].matched:
+                # Current naval HUD target ring frequently sits above the old
+                # fire_roi top boundary and no longer matches cir.png exactly.
+                # Search a broader central battle area for the hostile reticle.
+                l,t,r,b = v.fire_roi
+                reticle_roi = ctx.profile_roi((
+                    max(0,l-150),
+                    max(0,t-130),
+                    min(self.settings.geometry.width,r+150),
+                    min(self.settings.geometry.height,b+10),
+                ))
+                reticle = detect_target_reticle(
+                    ctx,
+                    reticle_roi,
+                    fallback_edges=fallback_edges,
+                    fallback_rect=full,
+                )
+                if reticle.matched:
+                    matches['aim'] = reticle
         if 'lock' in selected:
-            matches['lock'] = match_template(ctx,self.registry,'lock',ctx.profile_roi((890,380,960,420)),v.aim_threshold,
-                                            settings=v,mask=((0,0,0),(180,255,46),1))
+            matches['lock'] = match_template_with_mask_fallback(
+                ctx,self.registry,'lock',ctx.profile_roi((890,380,960,420)),v.aim_threshold,
+                settings=v,mask=((0,0,0),(180,255,46),1),
+                fallback_edges=fallback_edges,fallback_rect=full)
         if 'fire' in selected:
             matches['fire'] = match_template(ctx,self.registry,'fire',full,v.template_threshold,settings=v)
         collision_roi = ctx.profile_roi((self.settings.geometry.width//3,0,self.settings.geometry.width//3*2,self.settings.geometry.height))

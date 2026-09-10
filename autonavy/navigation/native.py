@@ -70,6 +70,41 @@ def prepare_map(image):
     return cv2.bitwise_not(cv2.dilate(binary,np.ones((5,5),np.uint8)))
 
 
+def _normalize_route_grid(grid,origin,goal):
+    """Normalize live map polarity while preserving NativePathfinder's zero=blocked contract.
+
+    War Thunder tactical-map rendering is not completely stable across map
+    generations/modes.  Legacy prepare_map() can therefore produce a grid where
+    the navigable water class is zero instead of non-zero.
+
+    The ship origin is known to be navigable, and a capture-zone destination is
+    expected to be on the same navigable class for a usable route.  We only
+    reverse the binary interpretation when *both* points are all-zero.  If only
+    one endpoint is zero, the request remains unreachable rather than guessing
+    and potentially routing through terrain.
+    """
+    import numpy as np
+    if grid.ndim!=3 or grid.shape[2]!=3: raise ValueError('Expected BGR grid')
+    height,width=grid.shape[:2]
+    ox,oy=origin; gx,gy=goal
+    if not (0<=ox<width and 0<=oy<height and 0<=gx<width and 0<=gy<height):
+        raise ValueError('Route endpoint outside grid')
+
+    zero=np.all(grid==0,axis=2)
+    origin_zero=bool(zero[oy,ox])
+    goal_zero=bool(zero[gy,gx])
+
+    if origin_zero!=goal_zero:
+        return None
+
+    # NativePathfinder's stable public contract is zero=blocked/non-zero=free.
+    # Keep that contract untouched and normalize only the live planning grid.
+    passable=zero if origin_zero else ~zero
+    normalized=np.zeros_like(grid,dtype=np.uint8)
+    normalized[passable]=255
+    return normalized
+
+
 def plan_encoded(data,origin,destination,adapter=None):
     import cv2
     import numpy as np
@@ -82,8 +117,14 @@ def plan_encoded(data,origin,destination,adapter=None):
     def pixel(position):
         if len(position)!=2 or any(not math.isfinite(v) or not 0<=v<=1 for v in position):
             raise ValueError('Position must be normalized')
-        # Convert through actual image dimensions; rectangular maps keep their aspect.
+        # War Thunder map_obj coordinates use the same top-left normalized
+        # x/y orientation as map.img.
         x,y=min(w-1,int(position[0]*w)),min(h-1,int(position[1]*h))
         return min(gw-1,int(x*gw/w)),min(gh-1,int(y*gh/h))
-    route=(adapter or NativePathfinder()).find(grid,pixel(origin),pixel(destination))
+
+    start=pixel(origin); goal=pixel(destination)
+    normalized=_normalize_route_grid(grid,start,goal)
+    if normalized is None: return None
+
+    route=(adapter or NativePathfinder()).find(normalized,start,goal)
     return None if route is None else tuple((x/gw,y/gh) for x,y in route)

@@ -12,6 +12,20 @@ MENU = frozenset({'start','join','join_game','confirm','confirm1','confirm2','co
     'confirm2_queue','improvement','improvement_','crew_cancel','rtlg_no','research','research1','wtlogo'})
 BATTLE = frozenset({'aim','lock','fire','ammo','degree','crash_warning','crashed'})
 
+# Live OBS characterization: selected-target reticle tracking is stable within
+# roughly a few dozen pixels of frame center. The historical ±2 px fire gate
+# was too strict for the current WT HUD and prevented the firing branch.
+FIRE_ALIGNMENT_PX = 30
+
+
+def fire_aligned(dx, dy, tolerance=FIRE_ALIGNMENT_PX):
+    """Return whether the selected target is close enough to frame center to fire."""
+    if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in (dx, dy, tolerance)):
+        return False
+    if tolerance < 0:
+        return False
+    return abs(dx) <= tolerance and abs(dy) <= tolerance
+
 # Detector groups are intentionally aligned with the branches in tick().
 # Keeping this policy here avoids running every full-frame UI template on every
 # frame while preserving the same matching algorithms and thresholds.
@@ -108,10 +122,38 @@ class BattlePolicy:
         # Conservative compatibility fallback for an unexpected/legacy stage.
         return PURCHASE | END | MENU
 
-    def _matched(self, name):
+    def _observation(self, name):
         observations = self.app.last_observations
-        observation = observations.matches.get(name) if observations else None
+        return observations.matches.get(name) if observations else None
+
+    def _matched(self, name):
+        observation = self._observation(name)
         return observation if observation and observation.available and observation.matched else None
+
+    def _purchase_dialog(self, *, strict=False):
+        """Return whether current observations are sufficient purchase-dialog evidence.
+
+        Menu screens retain the legacy fail-closed behavior: any matched purchase
+        detector is enough to stop automation.  Battle HUDs are much noisier, so a
+        single weak template hit must not pause an otherwise valid battle.
+
+        Strict mode requires either two independent matched purchase indicators or
+        one very strong match.  This keeps the non-spending safety property while
+        rejecting the observed in-battle purchase_confirm false positive (~0.62).
+        """
+        matched = tuple(
+            observation
+            for name in PURCHASE
+            if (observation := self._matched(name)) is not None
+        )
+        if not matched:
+            return False
+        if not strict:
+            return True
+        if len(matched) >= 2:
+            return True
+        score = matched[0].score
+        return score is not None and math.isfinite(score) and score >= .90
 
     def _intent(self, owner, action, resource, value=1, hold_s=0):
         a = self.app; p = a.last_frame; now = a._clock_ns()
@@ -174,7 +216,10 @@ class BattlePolicy:
 
     def toggle_pause(self):
         if self.app.state != RuntimeState.PAUSED: self.pause(); return
-        if any(self._matched(name) for name in PURCHASE): return
+        # A lone weak purchase_confirm false positive must not trap a manually
+        # paused/resumed session. Real purchase dialogs still fail closed on
+        # multiple indicators or one very high-confidence indicator.
+        if self._purchase_dialog(strict=True): return
         self.pause_reason=None; self._reset()
         self._state(RuntimeState.WAITING,'hangar',self.app.settings.runtime.menu_timeout_s)
 
@@ -224,7 +269,10 @@ class BattlePolicy:
             elif self.stage not in {'hangar','paused'}:
                 self._state(RuntimeState.WAITING,'hangar',r.menu_timeout_s)
             return
-        if any(self._matched(name) for name in PURCHASE) or (self._matched('start_battle_end') and self._matched('cart')):
+        # Outside battle keep the original fail-closed purchase guard. During
+        # battle require corroboration because purchase_confirm alone has been
+        # observed matching ordinary naval HUD pixels.
+        if self._purchase_dialog(strict=battle) or (self._matched('start_battle_end') and self._matched('cart')):
             if a.state!=RuntimeState.PAUSED: self.pause('Purchase dialog requires manual handling')
             return
         if a.state==RuntimeState.PAUSED: return
@@ -305,7 +353,7 @@ class BattlePolicy:
             dt=self._control_dt('aim',now)
             x,y=aim.frame_center; center_x,center_y=a.last_frame.geometry.content_center
             dx,dy=x-center_x,y-center_y
-            if abs(dx)<=2 and abs(dy)<=2:
+            if fire_aligned(dx,dy):
                 if ammo:
                     self.emit('fire','move','pointer',(self.rng.randint(-10,10),self.rng.randint(0,10)))
                     self.fire_due=now+500_000_000

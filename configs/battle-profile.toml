@@ -1,3 +1,7 @@
+[capture]
+device_index = 4
+obs_api = "dshow"
+
 [runtime]
 spawn_delay_s = 0.1
 battle_settle_s = 0.1
