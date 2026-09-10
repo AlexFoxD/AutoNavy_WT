@@ -217,7 +217,8 @@ def test_application_consumes_metadata_invalidation_before_blocked_object_poll_f
         assert app.run() == 0
         failed, recovered = snapshots
         assert not failed.valid and failed.player is None and failed.metadata is None
-        assert failed.received_at_ns == 3_000_000_000 and failed.error.startswith('metadata:')
+        assert failed.received_at_ns == 3_000_000_000
+	assert failed.error == 'metadata unavailable'
         assert recovered.valid and recovered.generation > failed.generation
         assert recovered.received_at_ns == 3_000_000_001
     finally:

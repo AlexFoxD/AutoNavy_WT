@@ -12,10 +12,11 @@ from PIL import Image
 
 from autonavy.config import TelemetrySettings
 
-
 META = {'valid': True, 'map_min': [-500, -500], 'map_max': [500, 500], 'grid_steps': [100, 100]}
 PLAYER = {'icon': 'Player', 'x': .2, 'y': .3, 'dx': 0, 'dy': -1}
 SHIP = {'icon': 'Ship', 'type': 'ground_model', 'color[]': [250, 12, 0], 'x': .5, 'y': .7}
+BOAT = {'icon': 'Boat', 'type': 'ground_model', 'color[]': [240, 12, 0], 'x': .6, 'y': .8}
+FRIENDLY_BOAT = {'icon': 'Boat', 'type': 'ground_model', 'color[]': [23, 77, 255], 'x': .4, 'y': .6}
 
 
 def api():
@@ -23,12 +24,10 @@ def api():
     from autonavy import telemetry
     return telemetry
 
-
 def png():
     output = io.BytesIO()
     Image.new('RGB', (2, 2), (23, 77, 255)).save(output, format='PNG')
     return output.getvalue()
-
 
 class Response:
     def __init__(self, data, status=200):
@@ -39,7 +38,6 @@ class Response:
         for start in range(0, len(self.data), chunk_size):
             yield self.data[start:start + chunk_size]
     def close(self): self.closed = True
-
 
 class FakeSession:
     def __init__(self):
@@ -66,7 +64,6 @@ class FakeSession:
         return value if isinstance(value, Response) else Response(value)
     def close(self): self.closed = True
 
-
 def until(predicate):
     deadline = time.monotonic() + 3
     while time.monotonic() < deadline:
@@ -74,7 +71,6 @@ def until(predicate):
         if value: return value
         time.sleep(.002)
     raise AssertionError('worker did not publish expected result')
-
 
 @pytest.fixture
 def running():
@@ -97,22 +93,21 @@ def running():
         session.objects.put([PLAYER])
         service.close()
 
-
-def test_snapshot_is_immutable_and_classifier_requires_documented_ship_color(running):
-    objects = [dict(PLAYER), SHIP, dict(SHIP, icon='unknown'), dict(SHIP, **{'color[]': [255, 0, 0]}),
+def test_snapshot_is_immutable_and_classifier_requires_documented_vessel_color(running):
+    objects = [dict(PLAYER), SHIP, BOAT, FRIENDLY_BOAT,
+               dict(SHIP, icon='unknown'), dict(SHIP, **{'color[]': [255, 0, 0]}),
                {'icon': 'capture_zone', 'color[]': [23, 77, 255], 'x': .1, 'y': .1},
                {'icon': 'capture_zone', 'color[]': [255, 255, 255], 'x': .9, 'y': .8}]
     service, _, _ = running(objects)
     snapshot = service.snapshot()
     assert snapshot.valid and snapshot.generation == 1
     assert snapshot.player.position == (.2, .3)
-    assert snapshot.enemies[0].position == (.5, .7) and len(snapshot.enemies) == 1
+    assert tuple(enemy.position for enemy in snapshot.enemies) == ((.5, .7), (.6, .8))
     assert snapshot.zones == ((.9, .8),)
     assert snapshot.metadata.scale == 1000
     objects[0]['x'] = .99
     assert snapshot.player.position == (.2, .3)
     with pytest.raises(FrozenInstanceError): snapshot.player.dx = 2
-
 
 @pytest.mark.parametrize('bad', [TimeoutError('timeout'), Response([], 503), b'not json', {},
                                     [dict(PLAYER, x=float('nan'))], [dict(PLAYER, dy=float('inf'))],
@@ -130,14 +125,12 @@ def test_failed_poll_never_refreshes_success_and_recovery_changes_generation(run
     recovered = until(lambda: (s := service.snapshot()).valid and s)
     assert recovered.received_at_ns == now[0] and recovered.generation > before.generation
 
-
 def test_missing_player_clears_old_player_with_empty_zones(running):
     service, session, now = running()
     now[0] += 1
     session.objects.put([SHIP])
     missing = until(lambda: (s := service.snapshot()).received_at_ns == now[0] and s)
     assert not missing.valid and missing.player is None and missing.enemies == () and missing.zones == ()
-
 
 def test_consumption_expiry_and_stale_recovery_invalidate_retained_snapshot(running):
     service, session, now = running()
@@ -150,8 +143,7 @@ def test_consumption_expiry_and_stale_recovery_invalidate_retained_snapshot(runn
     recovered = until(lambda: (s := service.snapshot()).valid and s)
     assert recovered.generation > retained.generation
 
-
-@pytest.mark.parametrize('metadata', [dict(META, valid=False), dict(META, valid=1),
+@pytest.mark.parametrize('metadata', [dict(META, valid=1),
                                       dict(META, map_min=[0]), dict(META, grid_steps=[0, 1]),
                                       dict(META, map_max=[float('inf'), 10])])
 def test_invalid_metadata_cannot_authorize_objects(running, metadata):
@@ -161,6 +153,27 @@ def test_invalid_metadata_cannot_authorize_objects(running, metadata):
     session.objects.put([dict(PLAYER)])
     until(lambda: len([c for c in session.calls if c[0].endswith('map_info.json')]) >= 2)
     assert not service.snapshot().valid and service.snapshot().metadata is None
+
+
+def test_hangar_valid_false_is_normal_poll_state_without_fault(caplog):
+    module = api()
+    session = FakeSession()
+    session.metadata = {'valid': False}
+    session.objects.put([])
+    now = [1_000_000_000]
+    service = module.TelemetryService(TelemetrySettings(), clock_ns=lambda: now[0])
+
+    assert service._poll(session) is True
+
+    snapshot = service.snapshot()
+    assert not snapshot.valid
+    assert snapshot.player is None
+    assert snapshot.enemies == ()
+    assert snapshot.zones == ()
+    assert snapshot.metadata is None
+    assert snapshot.error == 'metadata unavailable'
+    assert service._next_metadata_ns == 0
+    assert not [record for record in caplog.records if record.name == 'autonavy.telemetry']
 
 
 def test_metadata_image_cache_is_bounded_separate_and_map_change_invalidates(running):
@@ -180,14 +193,12 @@ def test_metadata_image_cache_is_bounded_separate_and_map_change_invalidates(run
     assert changed.generation > before.generation and service.map_image() is None
     assert image.data == png()
 
-
 def test_stream_limit_rejects_oversized_body_and_closes_response(running):
     service, session, _ = running()
     response = Response(b' ' * (api().MAX_JSON_BYTES + 1))
     session.objects.put(response)
     failed = until(lambda: (s := service.snapshot()).error and s)
     assert not failed.valid and response.closed
-
 
 def test_stop_is_signal_only_join_is_bounded_and_late_result_is_not_published(running):
     service, session, now = running()
@@ -210,7 +221,6 @@ def test_stop_is_signal_only_join_is_bounded_and_late_result_is_not_published(ru
     assert not service.snapshot().valid and service.snapshot().received_at_ns == before.received_at_ns
     assert len({thread for _, thread in session.calls}) == 1
 
-
 def test_backoff_is_stop_aware_and_fault_reporting_is_rate_limited(caplog):
     module = api()
     session = FakeSession()
@@ -223,7 +233,6 @@ def test_backoff_is_stop_aware_and_fault_reporting_is_rate_limited(caplog):
     service.close()
     assert time.monotonic() - start < .3 and session.closed
     assert len([r for r in caplog.records if r.name == 'autonavy.telemetry']) <= 2
-
 
 def test_legacy_facades_consume_snapshot_without_io(running, monkeypatch):
     service, _, now = running()
@@ -240,7 +249,6 @@ def test_legacy_facades_consume_snapshot_without_io(running, monkeypatch):
     assert not facade.connected and facade.player is None and facade.enemy == []
     assert get_point(source=service, onlyplayer=True) == ([], None)
 
-
 def test_slow_success_after_ttl_gap_changes_generation_even_if_poll_started_fresh(running):
     service, session, now = running()
     before = service.snapshot()
@@ -256,7 +264,6 @@ def test_slow_success_after_ttl_gap_changes_generation_even_if_poll_started_fres
     recovered = until(lambda: (s := service.snapshot()).valid and s.received_at_ns == now[0] and s)
     assert recovered.generation > before.generation
 
-
 def test_finite_metadata_endpoints_cannot_overflow_derived_scale(running):
     service, session, now = running()
     now[0] += 31_000_000_000
@@ -264,7 +271,6 @@ def test_finite_metadata_endpoints_cannot_overflow_derived_scale(running):
     session.objects.put([dict(PLAYER)])
     until(lambda: service.snapshot().received_at_ns == now[0])
     assert not service.snapshot().valid and service.snapshot().metadata is None
-
 
 def test_stop_during_session_factory_closes_without_http_and_cannot_restart():
     module = api()
@@ -289,7 +295,6 @@ def test_stop_during_session_factory_closes_without_http_and_cannot_restart():
         service.close()
     assert session.calls == [] and factories == [True] and not service.snapshot().valid
 
-
 def test_session_cleanup_failure_remains_visible_on_repeated_close():
     module = api()
     session = FakeSession()
@@ -304,7 +309,6 @@ def test_session_cleanup_failure_remains_visible_on_repeated_close():
     session.objects.put([dict(PLAYER)])
     for _ in range(2):
         with pytest.raises(RuntimeError, match='transport close failed'): service.close()
-
 
 def test_repeated_start_owns_one_transport_and_prestart_stop_constructs_none():
     module = api()
@@ -328,13 +332,11 @@ def test_repeated_start_owns_one_transport_and_prestart_stop_constructs_none():
     never_started.close()
     assert len(factories) == 1
 
-
 def test_zero_player_direction_is_unavailable(running):
     service, session, _ = running()
     session.objects.put([dict(PLAYER, dx=0, dy=0)])
     failed = until(lambda: (s := service.snapshot()).error and s)
     assert not failed.valid
-
 
 def test_truncated_image_is_not_cached_after_header_verification(running):
     service, session, now = running()
@@ -347,8 +349,7 @@ def test_truncated_image_is_not_cached_after_header_verification(running):
     until(lambda: len([c for c in session.calls if 'map_obj' in c[0]]) >= 3)
     assert service.map_image() is None
 
-
-@pytest.mark.parametrize('metadata', [dict(META, valid=False), Response({}, 503), TimeoutError('metadata timeout')])
+@pytest.mark.parametrize('metadata', [Response({}, 503), TimeoutError('metadata timeout')])
 def test_invalid_metadata_immediately_invalidates_snapshot_while_objects_block(running, metadata):
     service, session, now = running()
     before = service.snapshot()

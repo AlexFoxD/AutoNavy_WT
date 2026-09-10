@@ -12,11 +12,24 @@ import math
 import threading
 import time
 from autonavy.config import TelemetrySettings
-
 LOG = logging.getLogger(__name__)
 MAX_JSON_BYTES = 1_048_576
 MAX_IMAGE_BYTES = 8_388_608
 MAX_IMAGE_PIXELS = 16_777_216
+
+HOSTILE_VESSEL_COLORS = frozenset({
+    (250, 12, 0),
+    (240, 12, 0),
+})
+
+VESSEL_ICONS = frozenset({
+    'Ship',
+    'Boat',
+})
+
+
+class MapUnavailable(ValueError):
+    """War Thunder reports map_info valid=false outside an active battle."""
 
 
 @dataclass(frozen=True)
@@ -37,7 +50,6 @@ class MapMetadata:
     map_max: tuple[float, float]
     grid_steps: tuple[float, float]
     received_at_ns: int
-
     @property
     def key(self):
         return self.map_min, self.map_max, self.grid_steps
@@ -54,7 +66,6 @@ class MapImage:
     generation: int
     received_at_ns: int
 
-
 @dataclass(frozen=True)
 class TelemetrySnapshot:
     generation: int = 0
@@ -67,7 +78,6 @@ class TelemetrySnapshot:
     error: str | None = None
     object_ttl_ns: int = 1_000_000_000
     metadata_ttl_ns: int = 30_000_000_000
-
     def at(self, now_ns: int) -> TelemetrySnapshot:
         """Recheck this retained value immediately before making a decision."""
         metadata = self.metadata
@@ -79,7 +89,6 @@ class TelemetrySnapshot:
                            error=self.error or ('stale objects' if not fresh else 'metadata unavailable'))
         return self
 
-
 def _number(value):
     if type(value) not in (int, float) or not math.isfinite(value):
         raise ValueError('Expected a finite numeric telemetry value')
@@ -90,7 +99,6 @@ def _pair(value):
     if not isinstance(value, (list, tuple)) or len(value) != 2:
         raise ValueError('Expected a two-element telemetry vector')
     return tuple(_number(v) for v in value)
-
 
 def _position(obj):
     point = _pair((obj['x'], obj['y']))
@@ -105,15 +113,15 @@ def _color(obj):
         raise ValueError('Expected an RGB telemetry color')
     return tuple(value)
 
-
 def _metadata(data, received_at_ns):
+    if isinstance(data, dict) and data.get('valid') is False:
+        raise MapUnavailable('Map metadata is unavailable')
     if not isinstance(data, dict) or data.get('valid') is not True:
         raise ValueError('Map metadata is not valid')
     result = MapMetadata(_pair(data['map_min']), _pair(data['map_max']), _pair(data['grid_steps']), received_at_ns)
     if any(b <= a or not math.isfinite(b - a) for a, b in zip(result.map_min, result.map_max)) or any(v <= 0 for v in result.grid_steps):
         raise ValueError('Map dimensions and grid steps must be positive')
     return result
-
 
 def _objects(data):
     if not isinstance(data, list) or len(data) > 10_000:
@@ -130,15 +138,14 @@ def _objects(data):
             player = Player(_position(obj), _number(obj['dx']), _number(obj['dy']))
             if player.dx == 0 and player.dy == 0:
                 raise ValueError('Player direction is unavailable')
-        elif icon == 'Ship':
-            # Hue alone is ambiguous; preserve the two documented hostile Ship colors.
-            if _color(obj) in ((250, 12, 0), (240, 12, 0)):
+        elif icon in VESSEL_ICONS:
+            # Naval telemetry has been observed using both Ship and Boat.
+            if _color(obj) in HOSTILE_VESSEL_COLORS:
                 enemies.append(Enemy(_position(obj)))
         elif icon == 'capture_zone':
             if _color(obj) != (23, 77, 255):
                 zones.append(_position(obj))
     return player, tuple(enemies), tuple(zones)
-
 
 def _session_factory():
     import requests
@@ -154,7 +161,6 @@ class OfflineTelemetry:
     def close(self): pass
     def snapshot(self): return TelemetrySnapshot(error='offline telemetry')
     def map_image(self): return None
-
 
 class TelemetryService:
     def __init__(self, settings: TelemetrySettings, *, session_factory=None, clock_ns=time.monotonic_ns,
@@ -177,7 +183,6 @@ class TelemetryService:
         self._next_metadata_ns = 0
         self._next_image_ns = 0
         self._recovery = False
-
     def start(self):
         with self._lock:
             if self._closed:
@@ -189,7 +194,6 @@ class TelemetryService:
 
     def request_stop(self):
         self._stop.set()
-
     def close(self):
         self.request_stop()
         with self._lock:
@@ -201,14 +205,12 @@ class TelemetryService:
                 raise RuntimeError('Telemetry worker exceeded its bounded join allowance')
         if self._close_error is not None:
             raise RuntimeError(self._close_error)
-
     def snapshot(self):
         with self._lock:
             value = self._snapshot
         if self._stop.is_set():
             value = replace(value, valid=False, error='telemetry stopped')
         return value.at(self._clock())
-
     def map_image(self):
         with self._lock:
             image, metadata, generation = self._image, self._metadata, self._snapshot.generation
@@ -221,7 +223,6 @@ class TelemetryService:
         if not (0 <= now - image.received_at_ns < ttl and 0 <= now - metadata.received_at_ns < ttl):
             return None
         return image
-
     def _read(self, session, path, limit):
         if self._stop.is_set():
             raise RuntimeError('telemetry stopped')
@@ -241,7 +242,6 @@ class TelemetryService:
             return bytes(data)
         finally:
             response.close()
-
     def _json(self, session, path):
         return json.loads(self._read(session, path, MAX_JSON_BYTES))
 
@@ -251,7 +251,6 @@ class TelemetryService:
             from autonavy.diagnostics import exception_text
             LOG.warning('Telemetry %s failed: %s', component, exception_text(exc).decode('utf-8', errors='replace'))
             self._last_fault_ns = now
-
     def _poll(self, session):
         now = self._clock()
         old = self._snapshot
@@ -259,6 +258,8 @@ class TelemetryService:
         if stale or self._recovery:
             self._next_metadata_ns = 0
         metadata_error = None
+        poll_success = True
+        map_unavailable = False
         if now >= self._next_metadata_ns:
             try:
                 data = self._json(session, '/map_info.json')
@@ -272,7 +273,16 @@ class TelemetryService:
                         self._snapshot = replace(self._snapshot, generation=self._snapshot.generation + 1,
                                                  valid=False, player=None, enemies=(), zones=(), metadata=metadata)
                 self._next_metadata_ns = metadata.received_at_ns + old.metadata_ttl_ns
+            except MapUnavailable:
+                map_unavailable = True
+                with self._lock:
+                    self._metadata = None
+                    self._image = None
+                    self._snapshot = replace(self._snapshot, valid=False, player=None,
+                                             enemies=(), zones=(), metadata=None, error=None)
+                self._next_metadata_ns = 0
             except Exception as exc:
+                poll_success = False
                 metadata_error = f'metadata: {type(exc).__name__}: {str(exc)[:240]}'
                 with self._lock:
                     self._metadata = None
@@ -299,7 +309,7 @@ class TelemetryService:
                     self._next_image_ns = 0
                 self._snapshot = TelemetrySnapshot(generation, player, enemies, zones, self._metadata, received,
                     player is not None and self._metadata is not None,
-                    metadata_error or (None if player is not None else 'Player unavailable'),
+                    metadata_error or (None if map_unavailable or player is not None else 'Player unavailable'),
                     old.object_ttl_ns, old.metadata_ttl_ns)
                 self._recovery = player is None or self._metadata is None
         except Exception as exc:
@@ -313,8 +323,7 @@ class TelemetryService:
             return False
         if self._metadata is not None and self._clock() >= self._next_image_ns and not self._stop.is_set():
             self._refresh_image(session)
-        return self._snapshot.valid
-
+        return poll_success
     def _refresh_image(self, session):
         self._next_image_ns = self._clock() + int(self.settings.metadata_ttl_s * 1e9)
         try:
@@ -332,7 +341,6 @@ class TelemetryService:
                     self._image = MapImage(data, self._metadata.key, self._snapshot.generation, self._clock())
         except Exception as exc:
             self._fault('map image', exc)
-
     def _run(self):
         session = None
         backoff = self.settings.retry_backoff_s
