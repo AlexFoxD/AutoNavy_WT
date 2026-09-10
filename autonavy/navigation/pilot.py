@@ -5,7 +5,6 @@ from autonavy.navigation.control import Controllers
 from autonavy.navigation.planner import PlanningService,PlanRequest
 from autonavy.navigation.route import RouteCursor
 
-
 class Navigation:
     def __init__(self,settings,*,planner=None,join_timeout_s=2,rng=None):
         self.settings=settings
@@ -16,13 +15,14 @@ class Navigation:
         self.cursor=None; self.destination=None; self.identity=None
         self._epoch=0; self._request_key=None; self._last_time=None; self._arrived=False
         self._waypoint=None
+        self._failed_destinations=set()
         self.last_error=None
-
     def reset(self):
         self.planner.reset(); self.controllers.reset()
         self.cursor=None; self.destination=None; self.identity=None
         self._epoch+=1; self._request_key=None; self._last_time=None; self._arrived=False
         self._waypoint=None
+        self._failed_destinations.clear()
         self.last_error=None
 
     def close(self):
@@ -31,22 +31,18 @@ class Navigation:
 
     def request_stop(self):
         if hasattr(self.planner,'request_stop'): self.planner.request_stop()
-
     def _invalidate(self,app):
         app.input.cancel('navigation')
         self.reset()
-
     def _replan(self,app):
         app.input.cancel('navigation'); self.planner.reset(); self.controllers.reset()
         self.cursor=None; self._request_key=None; self._epoch+=1; self._last_time=None; self._waypoint=None
-
     def _context(self,app,snapshot,image):
         if (not snapshot.valid or snapshot.player is None or snapshot.metadata is None or image is None
                 or image.key!=snapshot.metadata.key or image.generation!=snapshot.generation): return None
         packet=app.last_frame
         if packet is None: return None
         return snapshot.generation,image.key,image.generation,packet.source_generation,packet.geometry_id
-
     def tick(self,app,observations,snapshot):
         now=app._clock_ns(); snapshot=snapshot.at(now)
         image=app.telemetry.map_image()
@@ -71,15 +67,31 @@ class Navigation:
             self._request_key=(context,self.destination,self._epoch)
             self.planner.submit(PlanRequest(self._request_key,image.data,position,self.destination))
         result=self.planner.poll()
-        if result is not None and result.key==self._request_key:
-            self.last_error=result.error
-            self.cursor=None if result.points is None else RouteCursor(result.points)
-            self.controllers.reset(); self._last_time=None
         # Fetch again: a result must never be stamped with a newer session/map.
         current=app.telemetry.snapshot().at(app._clock_ns())
         if self._context(app,current,app.telemetry.map_image())!=context or self.destination not in current.zones:
             self._invalidate(app)
             return
+        if result is not None and result.key==self._request_key:
+            if result.points is None:
+                # PlanningService has already exhausted its bounded retries for
+                # this destination. Try each other live capture zone at most once
+                # before surfacing a terminal navigation error.
+                self._failed_destinations.add(self.destination)
+                candidates=tuple(zone for zone in current.zones if zone not in self._failed_destinations)
+                self.cursor=None; self.controllers.reset(); self._last_time=None
+                if candidates:
+                    self._replan(app)
+                    self.destination=self.rng.choice(candidates)
+                    self.last_error=None
+                    return
+                self.last_error=result.error or 'No reachable route'
+                app.input.cancel('navigation')
+                return
+            self.last_error=result.error
+            self.cursor=RouteCursor(result.points)
+            self._failed_destinations.clear()
+            self.controllers.reset(); self._last_time=None
         if self.cursor is None: return
         self.cursor=self.cursor.advance(current.player.position,self.settings.arrival_distance)
         if self.cursor.done:
